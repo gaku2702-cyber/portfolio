@@ -4,25 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JFX200 面付シミュレーター（体験版）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* ===== Styles.html 準拠（ワインレッドテーマ） ===== */
+    /* ===== ポートフォリオサイト準拠（ネイビーテーマ） ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --wine:        #7B1D2B;
-      --wine-dark:   #4E1019;
-      --wine-light:  #C4556A;
-      --wine-pale:   #F9ECED;
-      --text-main:   #1A1A2E;
-      --text-sub:    #4A3540;
-      --text-muted:  #7A6070;
-      --border:      #D8C0C4;
-      --border-light:#ECD8DB;
-      --bg-page:     #EEEAEB;
+      --navy:        #1B3264;
+      --navy-dark:   #0F2347;
+      --navy-light:  #2A4580;
+      --navy-pale:   #E8EDF5;
+      --text-main:   #232323;
+      --text-sub:    #6B7280;
+      --text-muted:  #9CA3AF;
+      --border:      #E2E4E9;
+      --border-light:#E2E4E9;
+      --bg-page:     #F3F4F6;
       --col-pad:     16px;
     }
-    body { font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Meiryo', sans-serif; background: var(--bg-page); color: var(--text-main); font-size: 13px; line-height: 1.55; }
+    body { font-family: 'Noto Sans JP', 'Inter', 'Helvetica Neue', Arial, sans-serif; background: var(--bg-page); color: var(--text-main); font-size: 13px; line-height: 1.55; }
     .container { max-width: 1280px; margin: 10px auto; background: #fff; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); overflow: hidden; }
-    .header-meta { display: flex; align-items: center; background: var(--wine); color: #fff; padding: 0 16px; height: 44px; gap: 12px; flex-shrink: 0; }
+    .header-meta { display: flex; align-items: center; background: var(--navy); color: #fff; padding: 0 16px; height: 44px; gap: 12px; flex-shrink: 0; }
     h1 { font-size: 15px; font-weight: 700; color: #fff; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .header-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; flex-shrink: 0; }
     .btn-quote-link { display: inline-block; padding: 5px 14px; background: rgba(255,255,255,0.18); color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); border-radius: 3px; font-size: 12px; font-weight: 700; white-space: nowrap; transition: background 0.15s; }
@@ -30,52 +32,54 @@
     .grid { display: flex; flex-direction: row; align-items: stretch; min-height: calc(100vh - 44px); }
     .col-input { flex: 0 0 340px; width: 340px; min-width: 280px; padding: var(--col-pad); border-right: 1px solid var(--border-light); background: #FAFAFA; overflow-y: auto; }
     .col-output { flex: 1; min-width: 0; padding: var(--col-pad); background: #fff; overflow-y: auto; }
-    h2 { font-size: 12px; font-weight: 700; color: #fff; background: var(--wine); padding: 8px var(--col-pad); margin: 12px calc(-1 * var(--col-pad)) 12px calc(-1 * var(--col-pad)); letter-spacing: 0.03em; border: none; }
+    h2 { font-size: 12px; font-weight: 700; color: #fff; background: var(--navy); padding: 8px var(--col-pad); margin: 12px calc(-1 * var(--col-pad)) 12px calc(-1 * var(--col-pad)); letter-spacing: 0.03em; border: none; }
     .col-input > h2:first-child, .col-output > h2:first-child { margin-top: calc(-1 * var(--col-pad)); }
     .form-group { margin-bottom: 10px; }
     .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
     .form-row > div { flex: 1; min-width: 0; }
     label { display: block; margin-bottom: 3px; font-size: 11px; color: var(--text-sub); font-weight: 600; }
     select, input[type="text"], input[type="number"] { width: 100%; padding: 7px 10px; border: 1px solid #C8C0C2; border-radius: 3px; font-size: 13px; background: #fff; color: var(--text-main); min-height: 34px; transition: border-color 0.12s, box-shadow 0.12s; }
-    select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%237B1D2B' d='M5 6L0 0h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px; }
-    select:focus, input:focus { outline: none; border-color: var(--wine); box-shadow: 0 0 0 2px rgba(123,29,43,0.14); }
+    select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%231B3264' d='M5 6L0 0h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px; }
+    select:focus, input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(27,50,100,0.08); }
     input::placeholder { color: #B0A0A3; }
     button { cursor: pointer; font-weight: 700; border: none; border-radius: 3px; font-size: 13px; transition: background 0.12s, opacity 0.12s; }
     button:active { opacity: 0.85; }
     button:disabled { opacity: 0.55; cursor: not-allowed; }
-    .btn-calc { width: 100%; padding: 11px; background: var(--wine); color: #fff; font-size: 14px; margin-top: 12px; min-height: 42px; }
-    .btn-calc:hover { background: var(--wine-dark); }
-    .btn-dl { width: 100%; padding: 10px; background: #555; color: #fff; font-size: 13px; margin-top: 10px; display: none; min-height: 40px; }
-    .btn-dl:hover { background: #333; }
-    .btn-secondary { width: 100%; padding: 8px 14px; background: #fff; color: var(--wine); border: 1px solid var(--wine); font-size: 12px; margin-top: 8px; min-height: 34px; }
-    .btn-secondary:hover { background: var(--wine-pale); }
+    .btn-calc { width: 100%; padding: 11px; background: var(--navy); color: #fff; font-size: 14px; margin-top: 12px; min-height: 42px; }
+    .btn-calc:hover { background: var(--navy-dark); }
+    .btn-dl { width: 100%; padding: 10px; background: var(--text-sub); color: #fff; font-size: 13px; margin-top: 10px; display: none; min-height: 40px; }
+    .btn-dl:hover { background: var(--text-main); }
+    .btn-secondary { width: 100%; padding: 8px 14px; background: #fff; color: var(--navy); border: 1px solid var(--navy); font-size: 12px; margin-top: 8px; min-height: 34px; }
+    .btn-secondary:hover { background: var(--navy-pale); }
     .btn-remove { padding: 5px 10px; background: #CC3344; color: #fff; font-size: 11px; min-height: 30px; }
     .btn-remove:hover { background: #AA2233; }
-    .btn-add-gang { padding: 7px 14px; background: #fff; color: var(--wine); border: 1px solid var(--wine); font-size: 12px; margin-top: 6px; min-height: 32px; }
-    .btn-add-gang:hover { background: var(--wine-pale); }
-    .result-box { padding: 12px 14px; background: var(--wine-pale); border-left: 4px solid var(--wine); border-radius: 2px; font-size: 13px; line-height: 1.65; margin-bottom: 14px; }
+    .btn-add-gang { padding: 7px 14px; background: #fff; color: var(--navy); border: 1px solid var(--navy); font-size: 12px; margin-top: 6px; min-height: 32px; }
+    .btn-add-gang:hover { background: var(--navy-pale); }
+    .result-box { padding: 12px 14px; background: var(--navy-pale); border-left: 4px solid var(--navy); border-radius: 2px; font-size: 13px; line-height: 1.65; margin-bottom: 14px; }
     .result-box.error { color: #721C24; background: #F8D7DA; border-left-color: #CC2233; }
     .gang-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 6px; background: #fff; }
     .gang-table th, .gang-table td { border: 1px solid var(--border-light); padding: 5px 4px; text-align: center; }
-    .gang-table th { background: var(--wine); color: #fff; font-size: 11px; font-weight: 700; }
-    .gang-table tr:hover td { background: var(--wine-pale); }
+    .gang-table th { background: var(--navy); color: #fff; font-size: 11px; font-weight: 700; }
+    .gang-table tr:hover td { background: var(--navy-pale); }
     .gang-table input { min-height: 30px; padding: 4px 5px; font-size: 12px; }
     .gang-table input.gang-label { text-align: left; }
-    .preview-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px var(--col-pad); background: var(--wine); color: #fff; margin: 12px calc(-1 * var(--col-pad)) 0 calc(-1 * var(--col-pad)); flex-wrap: wrap; }
+    .preview-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px var(--col-pad); background: var(--navy); color: #fff; margin: 12px calc(-1 * var(--col-pad)) 0 calc(-1 * var(--col-pad)); flex-wrap: wrap; }
     .preview-toolbar-title { font-size: 12px; font-weight: 700; color: #fff; flex: 1; min-width: 180px; letter-spacing: 0.03em; }
     .btn-refresh-preview { padding: 5px 14px; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.45); font-size: 12px; min-height: 30px; white-space: nowrap; }
     .btn-refresh-preview:hover { background: rgba(255,255,255,0.35); }
-    .preview-tabs { display: none; flex-wrap: wrap; gap: 4px; padding: 8px var(--col-pad); background: var(--wine-pale); border-bottom: 1px solid var(--border); margin: 0 calc(-1 * var(--col-pad)); }
-    .preview-tab { padding: 5px 12px; border: 1px solid var(--wine); background: #fff; color: var(--wine); border-radius: 3px 3px 0 0; font-size: 11px; font-weight: 700; cursor: pointer; min-height: 30px; }
-    .preview-tab:hover { background: var(--wine-pale); }
-    .preview-tab.active { background: var(--wine); color: #fff; }
+    .preview-tabs { display: none; flex-wrap: wrap; gap: 4px; padding: 8px var(--col-pad); background: var(--navy-pale); border-bottom: 1px solid var(--border); margin: 0 calc(-1 * var(--col-pad)); }
+    .preview-tab { padding: 5px 12px; border: 1px solid var(--navy); background: #fff; color: var(--navy); border-radius: 3px 3px 0 0; font-size: 11px; font-weight: 700; cursor: pointer; min-height: 30px; }
+    .preview-tab:hover { background: var(--navy-pale); }
+    .preview-tab.active { background: var(--navy); color: #fff; }
     .preview-tab .tab-rec { font-size: 9px; color: #FFC107; }
     .preview-tab.active .tab-rec { color: #FFE082; }
-    #canvas-container { background: #2A1820; padding: 10px; display: block; overflow-x: auto; max-width: 100%; min-height: 100px; margin: 0 calc(-1 * var(--col-pad)); }
-    svg { background: #1E1010; display: block; margin: 0 auto; }
+    #canvas-container { background: var(--navy-dark); padding: 16px; display: flex; align-items: center; justify-content: center; overflow: auto; max-width: 100%; min-height: 220px; margin: 0 calc(-1 * var(--col-pad)); }
+    .preview-rotated { display: flex; align-items: center; justify-content: center; width: 100%; padding: 8px 0; }
+    .preview-rotated svg { transform: rotate(-90deg); transform-origin: center center; flex-shrink: 0; }
+    svg { background: #fff; display: block; margin: 0 auto; border-radius: 2px; }
     .hint-text { font-size: 10px; color: var(--text-muted); margin: 3px 0 0; line-height: 1.4; }
-    .demo-notice { background: #FFF8E1; border: 1px solid #FFD54F; border-radius: 3px; padding: 8px 12px; font-size: 11px; color: #5D4037; margin-bottom: 14px; line-height: 1.5; }
-    .demo-notice strong { color: #7B1D2B; }
+    .demo-notice { background: var(--navy-pale); border: 1px solid var(--border); border-radius: 3px; padding: 8px 12px; font-size: 11px; color: var(--text-sub); margin-bottom: 14px; line-height: 1.5; }
+    .demo-notice strong { color: var(--navy); }
     @media (max-width: 760px) {
       .grid { flex-direction: column; min-height: unset; }
       .col-input { flex: unset; width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border-light); }
@@ -256,9 +260,9 @@ const AppState = {
 })();
 
 const FORM_DEFAULTS = { impositionMode: 'single', orderQty: 30, gap: 3, tombowType: 'normal', fixtureW: 1100, fixtureH: 700, fixturePartW: 50, fixturePartH: 50 };
-const THEME_ENJI = '#8B2942';
-const THEME_ENJI_DARK = '#6d2034';
-const GANG_COLORS = ['#8B2942','#28a745','#c0392b','#e67e22','#8e44ad','#16a085','#d35400','#2c3e50'];
+const THEME_ENJI = '#1B3264';
+const THEME_ENJI_DARK = '#0F2347';
+const GANG_COLORS = ['#1B3264','#28a745','#2A4580','#e67e22','#16a085','#6B7280','#d35400','#8e44ad'];
 const SHEET_GAP_DEFAULT = 15;
 const SHEET_GAP_MIN = 5;
 const FIXTURE_MAX_W = 1100;
@@ -273,9 +277,10 @@ const FIXTURE_MARGIN_RB_OVER_GAP = 5;
 const FIXTURE_GAP_DEFAULT = 20;
 const FIXTURE_GAP_MIN = 15;
 const FIXTURE_GAP_STEP = 5;
-const PREVIEW_GREEN_BED = '#d4edda';
-const PREVIEW_GREEN_MARGIN = '#81c784';
-const PREVIEW_GREEN_UNUSED = '#a5d6a7';
+const PREVIEW_GREEN_BED = '#E8EDF5';
+const PREVIEW_GREEN_MARGIN = '#93A8C9';
+const PREVIEW_GREEN_UNUSED = '#C5D0E0';
+const PREVIEW_GRID_LINE = '#B8C5DA';
 
 function showResultError(msg) {
   clearPreviewState();
@@ -542,20 +547,28 @@ function buildProductionResultHtml(ev, mode, lines, partW, partH, orderQty, isRe
       let rotPart = (ev.linePartRotated && ev.linePartRotated[si]) ? '・仕上90度回転 ' : '';
       detailHtml += '・' + escapeHtml(lines[si].label) + ': 1原反 <strong>' + (ev.onSheetByLine[si] || 0) + '</strong> 個/枚' + rotPart + '・注文 ' + lines[si].qty + ' 個<br>';
     }
-    return '<strong>ギャンギング面付（ベッド直置き）</strong>' + recBadge + sheetNote + '<br>' + rotSheetNote + detailHtml + '・1ベッド: <strong>' + ev.sheetsOnBed + ' 原反</strong>（間隔' + ev.bedGap.sheetGap + 'mm）<br>' + '・印刷回数（ベッド通数）: <strong>' + ev.printCount + ' 通</strong>' + (bedOverflow ? ' (※ベッド超過・参考作図)' : '') + '<br><span style="font-size:11px;color:#555;">下のタブで品目ごとの面付パターンを切替 / 緑=未使用 / 白=原反 / 黄枠=原反 / 色=仕上がり</span>';
+    return '<strong>ギャンギング面付（ベッド直置き）</strong>' + recBadge + sheetNote + '<br>' + rotSheetNote + detailHtml + '・1ベッド: <strong>' + ev.sheetsOnBed + ' 原反</strong>（間隔' + ev.bedGap.sheetGap + 'mm）<br>' + '・印刷回数（ベッド通数）: <strong>' + ev.printCount + ' 通</strong>' + (bedOverflow ? ' (※ベッド超過・参考作図)' : '') + '<br><span style="font-size:11px;color:#555;">下のタブで品目ごとの面付パターンを切替 / 薄青=未使用 / 白=原反 / 黄枠=原反 / 色=仕上がり</span>';
   }
   let rotPartHtml = pack.isPartRotated ? '・仕上がり: <strong>90度回転</strong>して配置<br>' : '';
-  return '<strong>単品面付（ベッド直置き）</strong>' + recBadge + sheetNote + '<br>' + rotSheetNote + rotPartHtml + '・1ベッド: <strong>' + ev.sheetsOnBed + ' 原反</strong>（間隔' + ev.bedGap.sheetGap + 'mm）<br>' + '・1原反あたり: <strong>' + pack.count + ' 個</strong>（' + pack.cols + '×' + pack.rows + '）<br>' + '・納品 ' + orderQty + ' 個 → 印刷回数: <strong>' + ev.printCount + ' 通</strong>' + (bedOverflow ? ' (※ベッド超過・参考作図)' : '') + '<br><span style="font-size:11px;color:#555;">緑=未使用 / 白=原反 / 黄枠=原反外形 / 色=仕上がり</span>';
+  return '<strong>単品面付（ベッド直置き）</strong>' + recBadge + sheetNote + '<br>' + rotSheetNote + rotPartHtml + '・1ベッド: <strong>' + ev.sheetsOnBed + ' 原反</strong>（間隔' + ev.bedGap.sheetGap + 'mm）<br>' + '・1原反あたり: <strong>' + pack.count + ' 個</strong>（' + pack.cols + '×' + pack.rows + '）<br>' + '・納品 ' + orderQty + ' 個 → 印刷回数: <strong>' + ev.printCount + ' 通</strong>' + (bedOverflow ? ' (※ベッド超過・参考作図)' : '') + '<br><span style="font-size:11px;color:#555;">薄青=未使用 / 白=原反 / 黄枠=原反外形 / 色=仕上がり</span>';
 }
 function syncLogStateFromVariant(variant) {
   let ev = variant.ev;
   LAST_PRINT_COUNT = ev.printCount; LAST_LOG_MODE = variant.mode;
 }
+function mountPreviewHtml(svgHtml, rotate90) {
+  let el = document.getElementById('canvas-container');
+  if (rotate90) {
+    el.innerHTML = '<div class="preview-rotated">' + svgHtml + '</div>';
+  } else {
+    el.innerHTML = svgHtml;
+  }
+}
 function applyPreviewVariant(variant) {
   syncLogStateFromVariant(variant);
   document.getElementById('result').className = 'result-box';
   document.getElementById('result').innerHTML = variant.resultHtml;
-  document.getElementById('canvas-container').innerHTML = variant.svg;
+  mountPreviewHtml(variant.svg, variant.mode !== 'fixture');
   CURRENT_SVG_CONTENT = variant.svg;
   document.getElementById('btn-download').style.display = 'block';
 }
@@ -610,13 +623,14 @@ function appendSheetPreviewSvg(svg, sheetX, sheetY, sheet, pack, mode) {
 }
 function buildBedSvgShell_(bedW, bedH, footerText, closeTag) {
   let containerWidth = document.getElementById('canvas-container').clientWidth || 600;
-  let viewScale = (containerWidth - 20) / bedW;
+  /* 90度回転表示のため、回転後の横幅（= 元の bedH）がコンテナに収まるようスケール */
+  let viewScale = (containerWidth - 48) / bedH;
   let svg = '<svg width="' + (bedW * viewScale) + '" height="' + (bedH * viewScale) + '" viewBox="0 0 ' + bedW + ' ' + bedH + '" xmlns="http://www.w3.org/2000/svg">';
   svg += '<rect x="0" y="0" width="' + bedW + '" height="' + bedH + '" fill="' + PREVIEW_GREEN_BED + '" stroke="' + THEME_ENJI + '" stroke-width="6" />';
   svg += '<text x="12" y="36" font-size="28" fill="' + THEME_ENJI + '" font-family="Arial,sans-serif" font-weight="bold">ベッド ' + bedW + '×' + bedH + ' mm</text>';
-  for (let gx = 500; gx < bedW; gx += 500) svg += '<line x1="' + gx + '" y1="0" x2="' + gx + '" y2="' + bedH + '" stroke="#a5d6a7" stroke-width="1" stroke-dasharray="8,8" />';
-  for (let gy = 500; gy < bedH; gy += 500) svg += '<line x1="0" y1="' + gy + '" x2="' + bedW + '" y2="' + gy + '" stroke="#a5d6a7" stroke-width="1" stroke-dasharray="8,8" />';
-  svg += '<text x="12" y="' + (bedH - 12) + '" font-size="18" fill="#1b5e20" font-family="Arial,sans-serif">' + footerText + '</text>';
+  for (let gx = 500; gx < bedW; gx += 500) svg += '<line x1="' + gx + '" y1="0" x2="' + gx + '" y2="' + bedH + '" stroke="' + PREVIEW_GRID_LINE + '" stroke-width="1" stroke-dasharray="8,8" />';
+  for (let gy = 500; gy < bedH; gy += 500) svg += '<line x1="0" y1="' + gy + '" x2="' + bedW + '" y2="' + gy + '" stroke="' + PREVIEW_GRID_LINE + '" stroke-width="1" stroke-dasharray="8,8" />';
+  svg += '<text x="12" y="' + (bedH - 12) + '" font-size="18" fill="' + THEME_ENJI + '" font-family="Arial,sans-serif">' + footerText + '</text>';
   if (closeTag !== false) svg += '</svg>';
   return svg;
 }
@@ -624,11 +638,11 @@ function renderDefaultBedPreview() {
   if (!MASTER_DATA || !MASTER_DATA.machine) return;
   let bedW = Number(MASTER_DATA.machine['最大作図幅_mm']), bedH = Number(MASTER_DATA.machine['最大作図高_mm']);
   if (!bedW || !bedH) return;
-  document.getElementById('canvas-container').innerHTML = buildBedSvgShell_(bedW, bedH, '入力変更または「更新」で原反・仕上がりを表示（緑=ベッド / 白=原反 / 色=仕上がり）');
+  mountPreviewHtml(buildBedSvgShell_(bedW, bedH, '入力変更または「更新」で原反・仕上がりを表示（薄青=ベッド / 白=原反 / 色=仕上がり）'), true);
 }
 function renderProductionSvg(ev, mode, lines, mConfig) {
   let bedW = Number(mConfig['最大作図幅_mm']), bedH = Number(mConfig['最大作図高_mm']);
-  let svg = buildBedSvgShell_(bedW, bedH, '緑=未使用 / 白=原反 / 黄枠=原反外形 / 色=仕上がり', false);
+  let svg = buildBedSvgShell_(bedW, bedH, '薄青=未使用 / 白=原反 / 黄枠=原反外形 / 色=仕上がり', false);
   ev.bedGap.positions.forEach(function(pos) { svg = appendSheetPreviewSvg(svg, pos.x, pos.y, ev.sheet, ev.pack, mode); });
   svg += '</svg>';
   return svg;
