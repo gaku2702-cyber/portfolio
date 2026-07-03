@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JFX200 面付シミュレーター（体験版）</title>
+  <style>
+    /* ===== Styles.html 準拠（ワインレッドテーマ） ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --wine:        #7B1D2B;
+      --wine-dark:   #4E1019;
+      --wine-light:  #C4556A;
+      --wine-pale:   #F9ECED;
+      --text-main:   #1A1A2E;
+      --text-sub:    #4A3540;
+      --text-muted:  #7A6070;
+      --border:      #D8C0C4;
+      --border-light:#ECD8DB;
+      --bg-page:     #EEEAEB;
+      --col-pad:     16px;
+    }
+    body { font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Meiryo', sans-serif; background: var(--bg-page); color: var(--text-main); font-size: 13px; line-height: 1.55; }
+    .container { max-width: 1280px; margin: 10px auto; background: #fff; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); overflow: hidden; }
+    .header-meta { display: flex; align-items: center; background: var(--wine); color: #fff; padding: 0 16px; height: 44px; gap: 12px; flex-shrink: 0; }
+    h1 { font-size: 15px; font-weight: 700; color: #fff; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; flex-shrink: 0; }
+    .btn-quote-link { display: inline-block; padding: 5px 14px; background: rgba(255,255,255,0.18); color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); border-radius: 3px; font-size: 12px; font-weight: 700; white-space: nowrap; transition: background 0.15s; }
+    .btn-quote-link:hover { background: rgba(255,255,255,0.32); }
+    .grid { display: flex; flex-direction: row; align-items: stretch; min-height: calc(100vh - 44px); }
+    .col-input { flex: 0 0 340px; width: 340px; min-width: 280px; padding: var(--col-pad); border-right: 1px solid var(--border-light); background: #FAFAFA; overflow-y: auto; }
+    .col-output { flex: 1; min-width: 0; padding: var(--col-pad); background: #fff; overflow-y: auto; }
+    h2 { font-size: 12px; font-weight: 700; color: #fff; background: var(--wine); padding: 8px var(--col-pad); margin: 12px calc(-1 * var(--col-pad)) 12px calc(-1 * var(--col-pad)); letter-spacing: 0.03em; border: none; }
+    .col-input > h2:first-child, .col-output > h2:first-child { margin-top: calc(-1 * var(--col-pad)); }
+    .form-group { margin-bottom: 10px; }
+    .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    .form-row > div { flex: 1; min-width: 0; }
+    label { display: block; margin-bottom: 3px; font-size: 11px; color: var(--text-sub); font-weight: 600; }
+    select, input[type="text"], input[type="number"] { width: 100%; padding: 7px 10px; border: 1px solid #C8C0C2; border-radius: 3px; font-size: 13px; background: #fff; color: var(--text-main); min-height: 34px; transition: border-color 0.12s, box-shadow 0.12s; }
+    select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%237B1D2B' d='M5 6L0 0h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px; }
+    select:focus, input:focus { outline: none; border-color: var(--wine); box-shadow: 0 0 0 2px rgba(123,29,43,0.14); }
+    input::placeholder { color: #B0A0A3; }
+    button { cursor: pointer; font-weight: 700; border: none; border-radius: 3px; font-size: 13px; transition: background 0.12s, opacity 0.12s; }
+    button:active { opacity: 0.85; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-calc { width: 100%; padding: 11px; background: var(--wine); color: #fff; font-size: 14px; margin-top: 12px; min-height: 42px; }
+    .btn-calc:hover { background: var(--wine-dark); }
+    .btn-dl { width: 100%; padding: 10px; background: #555; color: #fff; font-size: 13px; margin-top: 10px; display: none; min-height: 40px; }
+    .btn-dl:hover { background: #333; }
+    .btn-secondary { width: 100%; padding: 8px 14px; background: #fff; color: var(--wine); border: 1px solid var(--wine); font-size: 12px; margin-top: 8px; min-height: 34px; }
+    .btn-secondary:hover { background: var(--wine-pale); }
+    .btn-remove { padding: 5px 10px; background: #CC3344; color: #fff; font-size: 11px; min-height: 30px; }
+    .btn-remove:hover { background: #AA2233; }
+    .btn-add-gang { padding: 7px 14px; background: #fff; color: var(--wine); border: 1px solid var(--wine); font-size: 12px; margin-top: 6px; min-height: 32px; }
+    .btn-add-gang:hover { background: var(--wine-pale); }
+    .result-box { padding: 12px 14px; background: var(--wine-pale); border-left: 4px solid var(--wine); border-radius: 2px; font-size: 13px; line-height: 1.65; margin-bottom: 14px; }
+    .result-box.error { color: #721C24; background: #F8D7DA; border-left-color: #CC2233; }
+    .gang-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 6px; background: #fff; }
+    .gang-table th, .gang-table td { border: 1px solid var(--border-light); padding: 5px 4px; text-align: center; }
+    .gang-table th { background: var(--wine); color: #fff; font-size: 11px; font-weight: 700; }
+    .gang-table tr:hover td { background: var(--wine-pale); }
+    .gang-table input { min-height: 30px; padding: 4px 5px; font-size: 12px; }
+    .gang-table input.gang-label { text-align: left; }
+    .preview-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px var(--col-pad); background: var(--wine); color: #fff; margin: 12px calc(-1 * var(--col-pad)) 0 calc(-1 * var(--col-pad)); flex-wrap: wrap; }
+    .preview-toolbar-title { font-size: 12px; font-weight: 700; color: #fff; flex: 1; min-width: 180px; letter-spacing: 0.03em; }
+    .btn-refresh-preview { padding: 5px 14px; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.45); font-size: 12px; min-height: 30px; white-space: nowrap; }
+    .btn-refresh-preview:hover { background: rgba(255,255,255,0.35); }
+    .preview-tabs { display: none; flex-wrap: wrap; gap: 4px; padding: 8px var(--col-pad); background: var(--wine-pale); border-bottom: 1px solid var(--border); margin: 0 calc(-1 * var(--col-pad)); }
+    .preview-tab { padding: 5px 12px; border: 1px solid var(--wine); background: #fff; color: var(--wine); border-radius: 3px 3px 0 0; font-size: 11px; font-weight: 700; cursor: pointer; min-height: 30px; }
+    .preview-tab:hover { background: var(--wine-pale); }
+    .preview-tab.active { background: var(--wine); color: #fff; }
+    .preview-tab .tab-rec { font-size: 9px; color: #FFC107; }
+    .preview-tab.active .tab-rec { color: #FFE082; }
+    #canvas-container { background: #2A1820; padding: 10px; display: block; overflow-x: auto; max-width: 100%; min-height: 100px; margin: 0 calc(-1 * var(--col-pad)); }
+    svg { background: #1E1010; display: block; margin: 0 auto; }
+    .hint-text { font-size: 10px; color: var(--text-muted); margin: 3px 0 0; line-height: 1.4; }
+    .demo-notice { background: #FFF8E1; border: 1px solid #FFD54F; border-radius: 3px; padding: 8px 12px; font-size: 11px; color: #5D4037; margin-bottom: 14px; line-height: 1.5; }
+    .demo-notice strong { color: #7B1D2B; }
+    @media (max-width: 760px) {
+      .grid { flex-direction: column; min-height: unset; }
+      .col-input { flex: unset; width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border-light); }
+      .col-output { width: 100%; }
+      h1 { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ヘッダー -->
+  <div class="header-meta">
+    <h1 id="app-title">JFX200 面付シミュレーター（体験版）</h1>
+    <div class="header-actions">
+      <a href="index.html" class="btn-quote-link">← ポートフォリオへ</a>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- ===== 左カラム：入力フォーム ===== -->
+    <div class="col-input">
+
+      <h2>用紙（原反）設定</h2>
+
+      <div class="form-group">
+        <label>面付モード</label>
+        <select id="imposition-mode" onchange="setImpositionMode()">
+          <option value="single">単品面付</option>
+          <option value="gang">ギャンギング（複数品目混載）</option>
+          <option value="fixture">治具設計</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="sheet-preset-row">
+        <label>原反サイズ</label>
+        <select id="sheet-preset" onchange="handleSheetChange()"></select>
+      </div>
+      <div id="custom-sheet-inputs" class="form-row" style="display:none;">
+        <div><label>原反 横 (mm)</label><input type="number" id="sheet-w" onchange="calculateImposition()"></div>
+        <div><label>原反 縦 (mm)</label><input type="number" id="sheet-h" onchange="calculateImposition()"></div>
+      </div>
+
+      <!-- 単品 仕上がり -->
+      <div id="single-part-section">
+        <h2>単品 仕上がりサイズ</h2>
+        <div class="form-group">
+          <label>仕上がりプリセット</label>
+          <select id="part-preset" onchange="handlePartChange()"></select>
+        </div>
+        <div id="custom-part-inputs" class="form-row">
+          <div><label>横 (mm)</label><input type="number" id="part-w" min="1" onchange="calculateImposition()"></div>
+          <div><label>縦 (mm)</label><input type="number" id="part-h" min="1" onchange="calculateImposition()"></div>
+        </div>
+        <div class="form-group">
+          <label>注文数量（個）</label>
+          <input type="number" id="order-qty" min="1" value="30" onchange="calculateImposition()">
+        </div>
+      </div>
+
+      <!-- ギャンギング 品目 -->
+      <div id="gang-part-section" style="display:none;">
+        <h2>ギャンギング 品目一覧</h2>
+        <table class="gang-table">
+          <thead>
+            <tr>
+              <th>品名</th>
+              <th>横(mm)</th>
+              <th>縦(mm)</th>
+              <th>数量</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="gang-rows"></tbody>
+        </table>
+        <button type="button" class="btn-add-gang" onclick="addGangRow('','','','')">＋ 品目を追加</button>
+      </div>
+
+      <!-- 治具設計 -->
+      <div id="fixture-part-section" style="display:none;">
+        <h2>治具サイズ</h2>
+        <div class="form-row">
+          <div><label>治具 横 (mm)</label><input type="number" id="fixture-w" min="1" value="1100" onchange="calculateImposition()"></div>
+          <div><label>治具 縦 (mm)</label><input type="number" id="fixture-h" min="1" value="700" onchange="calculateImposition()"></div>
+        </div>
+        <h2>治具 仕上がりサイズ</h2>
+        <div class="form-group">
+          <label>プリセット</label>
+          <select id="fixture-part-preset" onchange="handleFixturePartChange()"></select>
+        </div>
+        <div class="form-row">
+          <div><label>横 (mm)</label><input type="number" id="fixture-part-w" min="1" value="50" onchange="calculateImposition()"></div>
+          <div><label>縦 (mm)</label><input type="number" id="fixture-part-h" min="1" value="50" onchange="calculateImposition()"></div>
+        </div>
+        <div id="fixture-registry-result" style="display:none;"></div>
+        <input type="checkbox" id="fixture-design-needed" style="display:none;">
+      </div>
+
+      <!-- 共通設定 -->
+      <div id="part-gap-row" class="form-group">
+        <label>ドブ / パーツ間隔 (mm)</label>
+        <input type="number" id="gap" min="0" value="3" onchange="calculateImposition()">
+      </div>
+      <div class="form-group">
+        <label>トンボ種別</label>
+        <select id="tombow-type" onchange="calculateImposition()">
+          <option value="normal">通常トンボ（余白 20mm）</option>
+          <option value="panel">パネルカット（余白 10mm）</option>
+          <option value="none">トンボなし（余白 0mm）</option>
+        </select>
+      </div>
+
+      <!-- 非表示の design-no（一部関数が参照） -->
+      <input type="hidden" id="design-no" value="DEMO">
+      <input type="hidden" id="remarks" value="">
+
+      <!-- 操作ボタン -->
+      <button class="btn-calc" onclick="calculateImposition()">▶  更新（面付計算）</button>
+      <button id="btn-download" class="btn-dl" onclick="downloadSVG()">⬇  SVG ダウンロード</button>
+      <button class="btn-secondary" onclick="resetFormDemo()">リセット</button>
+
+    </div>
+
+    <!-- ===== 右カラム：出力 ===== -->
+    <div class="col-output">
+
+      <div class="demo-notice">
+        <strong>体験版デモ</strong>　— 機械: JFX200（最大作図 1300×2500mm）、トンボ余白・ドブ間隔を変更して最適面付を試せます。<br>
+        SVGダウンロードも可能です。実際のシステムは Google Sheets / GAS と連携し、ログ保存・見積連動・治具 DB 検索などを行っています。
+      </div>
+
+      <div class="preview-toolbar">
+        <span class="preview-toolbar-title">面付プレビュー — JFX200（1300×2500mm）</span>
+        <button class="btn-refresh-preview" onclick="calculateImposition()">更新</button>
+      </div>
+
+      <div id="preview-tabs" class="preview-tabs"></div>
+
+      <div style="padding-top: 14px;">
+        <div id="result" class="result-box">面付モードと原反・仕上がりサイズを入力して「更新」で計算してください。</div>
+      </div>
+
+      <div id="canvas-container"></div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   ClientConfig.html — アプリ状態・定数
+   ================================================================ */
+const AppState = {
+  masterData: null, currentSvgContent: '', lastPrintCount: null,
+  lastGangPartSummary: '', lastFixtureSummary: '', lastPrintAreaMm2: null,
+  lastTimeAreaMm2: null, lastPrintMinutes: null, lastDeliveryDate: '',
+  lastLogRemarksDetail: '', lastLogMode: 'single',
+  previewVariants: [], previewActiveIndex: 0
+};
+(function bindAppStateLegacyAliases_() {
+  const pairs = [
+    ['MASTER_DATA','masterData'],['CURRENT_SVG_CONTENT','currentSvgContent'],
+    ['LAST_PRINT_COUNT','lastPrintCount'],['LAST_GANG_PART_SUMMARY','lastGangPartSummary'],
+    ['LAST_FIXTURE_SUMMARY','lastFixtureSummary'],['LAST_PRINT_AREA_MM2','lastPrintAreaMm2'],
+    ['LAST_TIME_AREA_MM2','lastTimeAreaMm2'],['LAST_PRINT_MINUTES','lastPrintMinutes'],
+    ['LAST_DELIVERY_DATE','lastDeliveryDate'],['LAST_LOG_REMARKS_DETAIL','lastLogRemarksDetail'],
+    ['LAST_LOG_MODE','lastLogMode'],['PREVIEW_VARIANTS','previewVariants'],
+    ['PREVIEW_ACTIVE_INDEX','previewActiveIndex']
+  ];
+  pairs.forEach(function(p) {
+    Object.defineProperty(window, p[0], {
+      get: function() { return AppState[p[1]]; },
+      set: function(v) { AppState[p[1]] = v; },
+      configurable: true
+    });
+  });
+})();
+
+const FORM_DEFAULTS = { impositionMode: 'single', orderQty: 30, gap: 3, tombowType: 'normal', fixtureW: 1100, fixtureH: 700, fixturePartW: 50, fixturePartH: 50 };
+const THEME_ENJI = '#8B2942';
+const THEME_ENJI_DARK = '#6d2034';
+const GANG_COLORS = ['#8B2942','#28a745','#c0392b','#e67e22','#8e44ad','#16a085','#d35400','#2c3e50'];
+const SHEET_GAP_DEFAULT = 15;
+const SHEET_GAP_MIN = 5;
+const FIXTURE_MAX_W = 1100;
+const FIXTURE_MAX_H = 700;
+const FIXTURE_COUNT_BASELINE = 100;
+const FIXTURE_TARGET_MAX = 100;
+const FIXTURE_RECOMMEND_MAX = 50;
+const FIXTURE_CREATE_MIN = 5;
+const FIXTURE_DESIGN_NOT_ALLOWED_MIN = 100;
+const FIXTURE_MARGIN_RB_MIN = 30;
+const FIXTURE_MARGIN_RB_OVER_GAP = 5;
+const FIXTURE_GAP_DEFAULT = 20;
+const FIXTURE_GAP_MIN = 15;
+const FIXTURE_GAP_STEP = 5;
+const PREVIEW_GREEN_BED = '#d4edda';
+const PREVIEW_GREEN_MARGIN = '#81c784';
+const PREVIEW_GREEN_UNUSED = '#a5d6a7';
+
+function showResultError(msg) {
+  clearPreviewState();
+  const el = document.getElementById('result');
+  el.className = 'result-box error';
+  el.innerHTML = msg;
+}
+function clearPreviewState() {
+  AppState.previewVariants = []; AppState.previewActiveIndex = 0;
+  AppState.currentSvgContent = ''; AppState.lastPrintCount = null;
+  AppState.lastPrintAreaMm2 = null; AppState.lastTimeAreaMm2 = null;
+  AppState.lastPrintMinutes = null; AppState.lastDeliveryDate = '';
+  document.getElementById('preview-tabs').style.display = 'none';
+  document.getElementById('preview-tabs').innerHTML = '';
+  renderDefaultBedPreview();
+  document.getElementById('btn-download').style.display = 'none';
+}
+
+/* ================================================================
+   ClientPacking.html — 配置計算アルゴリズム
+   ================================================================ */
+function validatePartFitsMachine(partW, partH, bedW, bedH, isRollPaper, rollWidth) {
+  let pMax = Math.max(partW, partH), pMin = Math.min(partW, partH);
+  if (isRollPaper) {
+    if (pMin > rollWidth) return false;
+    if (pMax <= rollWidth) return (partW <= bedW && partH <= bedH) || (partH <= bedW && partW <= bedH);
+    return pMax <= bedW && pMin <= rollWidth;
+  }
+  return (partW <= bedW && partH <= bedH) || (partH <= bedW && partW <= bedH);
+}
+function findBestGangSheetPack(lines, pw, ph, gap) {
+  let counts = lines.map(function() { return 0; }), pieces = [], improved = true;
+  while (improved) {
+    improved = false;
+    for (let i = 0; i < lines.length; i++) {
+      if (counts[i] >= lines[i].qty) continue;
+      let trial = pieces.concat([{ w: lines[i].w, h: lines[i].h, label: lines[i].label, lineIdx: lines[i].lineIdx }]);
+      let tp = packGangOnSheet(trial, pw, ph, gap);
+      if (tp.ok) { pieces = trial; counts[i]++; improved = true; }
+    }
+  }
+  return { pack: packGangOnSheet(pieces, pw, ph, gap), onSheetCounts: counts };
+}
+function tryPlaceInGangRow(p, xRight, rowTop, rowHeight, pw, gap) {
+  let opts = [{ w: p.w, h: p.h, rotated: false }, { w: p.h, h: p.w, rotated: true }];
+  for (let i = 0; i < opts.length; i++) {
+    let ow = opts[i].w, oh = opts[i].h;
+    if (oh > rowHeight) continue;
+    let spacing = (xRight < pw) ? gap : 0;
+    let newX = xRight - ow - spacing;
+    if (newX < 0) continue;
+    let newY = rowTop - oh;
+    if (newY < 0) continue;
+    return { x: newX, y: newY, w: ow, h: oh, rotated: opts[i].rotated, label: p.label, lineIdx: p.lineIdx };
+  }
+  return null;
+}
+function packGangOnSheet(pieces, pw, ph, gap) {
+  let unplaced = pieces.slice().sort(function(a, b) { return (b.w * b.h) - (a.w * a.h); });
+  let placements = [], rowTop = ph, safety = 0;
+  while (unplaced.length > 0 && safety < 5000) {
+    safety++;
+    let xRight = pw, rowHeight = 0, placedIdx = [];
+    for (let i = 0; i < unplaced.length; i++) {
+      if (rowHeight === 0) {
+        let first = tryPlaceInGangRow(unplaced[i], pw, rowTop, ph, pw, gap);
+        if (!first) continue;
+        rowHeight = first.h; placements.push(first); xRight = first.x - gap; placedIdx.push(i); continue;
+      }
+      let placed = tryPlaceInGangRow(unplaced[i], xRight, rowTop, rowHeight, pw, gap);
+      if (placed) { placements.push(placed); xRight = placed.x - gap; rowHeight = Math.max(rowHeight, placed.h); placedIdx.push(i); }
+    }
+    if (placedIdx.length === 0) return { ok: false, placements: placements, unplaced: unplaced };
+    placedIdx.sort(function(a, b) { return b - a; });
+    for (let i = 0; i < placedIdx.length; i++) unplaced.splice(placedIdx[i], 1);
+    rowTop -= rowHeight + gap;
+    if (rowTop < 0 && unplaced.length > 0) return { ok: false, placements: placements, unplaced: unplaced };
+  }
+  return { ok: unplaced.length === 0, placements: placements, unplaced: unplaced };
+}
+function getTomboMargin(tombowType, mConfig) {
+  if (tombowType === 'none') return Number(mConfig['マージン_トンボ無し']);
+  if (tombowType === 'panel') return Number(mConfig['マージン_パネルカット']);
+  return Number(mConfig['マージン_通常トンボ']);
+}
+function resolveFixtureMarginRbFromGap_(gap) {
+  return Math.max(FIXTURE_MARGIN_RB_MIN, Math.max(0, Number(gap) || 0) + FIXTURE_MARGIN_RB_OVER_GAP);
+}
+function pickFixtureGapByCountBaseline_(partW, partH, fixtureW, fixtureH) {
+  let candidates = [];
+  for (let g = FIXTURE_GAP_DEFAULT; g >= FIXTURE_GAP_MIN; g -= FIXTURE_GAP_STEP) {
+    let marginRb = resolveFixtureMarginRbFromGap_(g);
+    let pack = packFixtureGrid(partW, partH, fixtureW, fixtureH, g, marginRb);
+    if (pack.count > 0) candidates.push({ gap: g, pack: pack, marginRb: marginRb });
+  }
+  if (!candidates.length) return null;
+  let valid = candidates.filter(function(c) { return c.pack.count < FIXTURE_DESIGN_NOT_ALLOWED_MIN; });
+  let pool = valid.length ? valid : candidates;
+  pool.sort(function(a, b) { return b.pack.count - a.pack.count; });
+  return pool[0];
+}
+function packFixtureGrid(partW, partH, fixtureW, fixtureH, gap, marginRb) {
+  marginRb = Number(marginRb);
+  if (isNaN(marginRb)) marginRb = resolveFixtureMarginRbFromGap_(gap);
+  let pw = Math.max(0, fixtureW - marginRb), ph = Math.max(0, fixtureH - marginRb);
+  let pack = packSingleGrid(partW, partH, pw, ph, gap);
+  pack.fixtureMarginRb = marginRb; pack.printableW = pw; pack.printableH = ph;
+  return pack;
+}
+function packSingleGrid(partW, partH, printableW, printableH, gap) {
+  let colsA = Math.floor((printableW + gap) / (partW + gap)), rowsA = Math.floor((printableH + gap) / (partH + gap));
+  let totalA = (colsA > 0 && rowsA > 0) ? colsA * rowsA : 0;
+  let colsB = Math.floor((printableW + gap) / (partH + gap)), rowsB = Math.floor((printableH + gap) / (partW + gap));
+  let totalB = (colsB > 0 && rowsB > 0) ? colsB * rowsB : 0;
+  let placements = [], actualPartW = partW, actualPartH = partH, cols = colsA, rows = rowsA, isPartRotated = false;
+  if (totalB > totalA) { cols = colsB; rows = rowsB; actualPartW = partH; actualPartH = partW; isPartRotated = true; }
+  let count = (cols > 0 && rows > 0) ? cols * rows : 0;
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      placements.push({ x: printableW - actualPartW - c * (actualPartW + gap), y: printableH - actualPartH - r * (actualPartH + gap), w: actualPartW, h: actualPartH, label: '', lineIdx: 0 });
+  return { count: count, placements: placements, isPartRotated: isPartRotated, cols: cols, rows: rows };
+}
+function layoutSheetsOnBed(drawSheetW, drawSheetH, bedW, bedH, sheetGap) {
+  let positions = [], y = bedH - drawSheetH;
+  while (y >= 0) {
+    let x = bedW - drawSheetW, added = 0;
+    while (x >= 0) { positions.push({ x: x, y: y }); added++; x -= drawSheetW + sheetGap; }
+    if (added === 0) break;
+    y -= drawSheetH + sheetGap;
+  }
+  return positions;
+}
+function findBestSheetGap(drawSheetW, drawSheetH, bedW, bedH) {
+  let best = { sheetGap: SHEET_GAP_DEFAULT, positions: [] };
+  for (let g = SHEET_GAP_DEFAULT; g >= SHEET_GAP_MIN; g--) {
+    let pos = layoutSheetsOnBed(drawSheetW, drawSheetH, bedW, bedH, g);
+    if (pos.length > best.positions.length || (pos.length === best.positions.length && pos.length > 0 && g < best.sheetGap))
+      best = { sheetGap: g, positions: pos };
+  }
+  return best;
+}
+
+/* ================================================================
+   ClientEvaluate.html — 面付評価
+   ================================================================ */
+function buildSheetStateForDrawSize(preset, drawW, drawH, isSheetRotatedOnBed, margin, bedW, bedH) {
+  if (drawW <= 0 || drawH <= 0 || drawW > bedW || drawH > bedH) return null;
+  let printableW = drawW - margin * 2, printableH = drawH - margin * 2;
+  if (printableW <= 0 || printableH <= 0) return null;
+  let isRoll = preset.id === 'roll';
+  let rollWidth = Math.min(preset.w, preset.h);
+  let bedNote = isRoll ? ' (※ロール紙：幅' + drawH + 'mm)' : (isSheetRotatedOnBed ? ' (※原反90度回転して設置)' : '');
+  return { preset, isRoll, rollWidth, rollLengthDefault: Math.max(preset.w, preset.h), drawSheetW: drawW, drawSheetH: drawH, fixedSheetW: drawW, fixedSheetH: drawH, isSheetRotatedOnBed, bedNote, marginX: margin, marginY: margin, printableW, printableH };
+}
+function getSheetOrientationCandidates(preset, margin, bedW, bedH) {
+  let list = [];
+  if (preset.id === 'roll') {
+    let rw = Math.min(preset.w, preset.h), rl = Math.max(preset.w, preset.h);
+    let rollA = buildSheetStateForDrawSize(preset, rl, rw, preset.w !== rl, margin, bedW, bedH);
+    let rollB = buildSheetStateForDrawSize(preset, rw, rl, preset.w === rl, margin, bedW, bedH);
+    if (rollA) list.push(rollA);
+    if (rollB) list.push(rollB);
+  } else {
+    let normal = buildSheetStateForDrawSize(preset, preset.w, preset.h, false, margin, bedW, bedH);
+    let rotated = buildSheetStateForDrawSize(preset, preset.h, preset.w, true, margin, bedW, bedH);
+    if (normal) list.push(normal);
+    if (rotated) list.push(rotated);
+  }
+  let seen = {};
+  return list.filter(function(s) {
+    let key = s.fixedSheetW + 'x' + s.fixedSheetH;
+    if (seen[key]) return false; seen[key] = true; return true;
+  });
+}
+function scoreEvaluation(ev, mode) {
+  if (mode === 'gang') return ev.sheetsOnBed * 1000000 - ev.printCount * 1000;
+  return ev.sheetsOnBed * 1000000 + ev.partsPerBed * 1000 - ev.printCount;
+}
+function evaluateProductionWithSheet(sheet, mode, lines, partW, partH, orderQty, gap, bedW, bedH) {
+  let pack = { count: 0, placements: [], isPartRotated: false, cols: 0, rows: 0 };
+  let onSheetByLine = [], linePartRotated = [];
+  if (mode === 'gang') {
+    let linePacks = [];
+    for (let gi = 0; gi < lines.length; gi++) {
+      let lp = packSingleGrid(lines[gi].w, lines[gi].h, sheet.printableW, sheet.printableH, gap);
+      if (lp.count === 0) return null;
+      linePacks.push(lp); onSheetByLine.push(lp.count); linePartRotated.push(lp.isPartRotated);
+    }
+    let pp = linePacks[0];
+    pack = { count: pp.count, placements: pp.placements, isPartRotated: pp.isPartRotated, cols: pp.cols, rows: pp.rows, linePacks };
+  } else {
+    pack = packSingleGrid(partW, partH, sheet.printableW, sheet.printableH, gap);
+    if (pack.count === 0) return null;
+  }
+  let bedGap = findBestSheetGap(sheet.fixedSheetW, sheet.fixedSheetH, bedW, bedH);
+  let sheetsOnBed = bedGap.positions.length;
+  if (sheetsOnBed === 0) return null;
+  let partsPerBed = (mode === 'gang' ? 0 : pack.count) * sheetsOnBed;
+  let printCount = 1;
+  if (mode === 'gang') {
+    for (let si = 0; si < lines.length; si++) {
+      if (onSheetByLine[si] > 0) printCount = Math.max(printCount, Math.ceil(lines[si].qty / (onSheetByLine[si] * sheetsOnBed)));
+    }
+  } else {
+    partsPerBed = pack.count * sheetsOnBed; printCount = Math.ceil(orderQty / partsPerBed);
+  }
+  return { sheet, pack, onSheetByLine, linePartRotated, bedGap, sheetsOnBed, partsPerBed, printCount };
+}
+function evaluateAllProductionVariants(preset, mode, lines, partW, partH, orderQty, gap, margin, bedW, bedH) {
+  let candidates = getSheetOrientationCandidates(preset, margin, bedW, bedH), variants = [];
+  candidates.forEach(function(sheet) {
+    let ev = evaluateProductionWithSheet(sheet, mode, lines, partW, partH, orderQty, gap, bedW, bedH);
+    if (!ev) return;
+    variants.push({ ev, sheet, score: scoreEvaluation(ev, mode) });
+  });
+  variants.sort(function(a, b) { return b.score - a.score; });
+  return variants;
+}
+
+/* ================================================================
+   ClientPreview.html — SVG描画・結果表示
+   ================================================================ */
+function buildVariantTabLabel(ev, sheet, mode, isRecommended) {
+  let rot = sheet.isSheetRotatedOnBed ? '↻' : '';
+  let label = sheet.fixedSheetW + '×' + sheet.fixedSheetH + rot + ' / ' + ev.sheetsOnBed + '原反';
+  if (mode !== 'gang') label += ' / ' + ev.printCount + '通';
+  return label;
+}
+function clonePackForGangLine(lp, line, lineIdx) {
+  return { count: lp.count, placements: (lp.placements || []).map(function(pl) { return { x: pl.x, y: pl.y, w: pl.w, h: pl.h, label: line.label, lineIdx }; }), isPartRotated: lp.isPartRotated, cols: lp.cols, rows: lp.rows };
+}
+function buildGangLineTabLabel(line, lineIdx, ev) {
+  let onSheet = (ev.onSheetByLine && ev.onSheetByLine[lineIdx]) || 0;
+  let rot = (ev.linePartRotated && ev.linePartRotated[lineIdx]) ? ' ↻' : '';
+  return line.label + ' ' + line.w + '×' + line.h + ' / ' + onSheet + '個/枚' + rot;
+}
+function buildGangLinePreviewEv(ev, linePack, line, lineIdx) {
+  return { sheet: ev.sheet, pack: linePack, onSheetByLine: ev.onSheetByLine, linePartRotated: ev.linePartRotated, bedGap: ev.bedGap, sheetsOnBed: ev.sheetsOnBed, partsPerBed: linePack.count * ev.sheetsOnBed, printCount: ev.printCount };
+}
+function showGangLinePreviewTabs(bestItem, lines, partW, partH, orderQty) {
+  let ev = bestItem.ev, linePacks = ev.pack && ev.pack.linePacks;
+  if (!linePacks || linePacks.length !== lines.length) {
+    showProductionVariants([bestItem], 'gang', lines, partW, partH, orderQty); return;
+  }
+  PREVIEW_VARIANTS = lines.map(function(line, idx) {
+    let linePack = clonePackForGangLine(linePacks[idx], line, idx);
+    let lineEv = buildGangLinePreviewEv(ev, linePack, line, idx);
+    return { tabLabel: buildGangLineTabLabel(line, idx, ev), resultHtml: buildProductionResultHtml(ev, 'gang', lines, partW, partH, orderQty, idx === 0), svg: renderProductionSvg(lineEv, 'gang', lines, MASTER_DATA.machine), ev, gangLineIndex: idx, sheet: ev.sheet, mode: 'gang', lines, partW, partH, orderQty };
+  });
+  PREVIEW_ACTIVE_INDEX = 0; applyPreviewVariant(PREVIEW_VARIANTS[0]); renderPreviewTabs();
+}
+function buildSimpleQuoteHtml_(partsAreaMm2) { return ''; }
+function buildProductionResultHtml(ev, mode, lines, partW, partH, orderQty, isRecommended) {
+  let sheet = ev.sheet, pack = ev.pack;
+  let bedW = Number(MASTER_DATA.machine['最大作図幅_mm']), bedH = Number(MASTER_DATA.machine['最大作図高_mm']);
+  let bedOverflow = (sheet.fixedSheetW > bedW || sheet.fixedSheetH > bedH);
+  let sheetLabel = (sheet.preset && sheet.preset.name) ? escapeHtml(sheet.preset.name) : '';
+  let rotSheetNote = sheet.isSheetRotatedOnBed ? '・原反: <strong>90度回転</strong>して設置<br>' : '';
+  let sheetNote = '<br>・使用原反: <strong>' + sheetLabel + '</strong>（' + sheet.fixedSheetW + '×' + sheet.fixedSheetH + 'mm）' + ' / ベッド ' + bedW + '×' + bedH + 'mm';
+  let recBadge = isRecommended ? '<span style="background:#ffc107;color:#333;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:6px;">推奨</span>' : '';
+  if (mode === 'gang') {
+    let detailHtml = '';
+    for (let si = 0; si < lines.length; si++) {
+      let rotPart = (ev.linePartRotated && ev.linePartRotated[si]) ? '・仕上90度回転 ' : '';
+      detailHtml += '・' + escapeHtml(lines[si].label) + ': 1原反 <strong>' + (ev.onSheetByLine[si] || 0) + '</strong> 個/枚' + rotPart + '・注文 ' + lines[si].qty + ' 個<br>';
+    }
+    return '<strong>ギャンギング面付（ベッド直置き）</strong>' + recBadge + sheetNote + '<br>' + rotSheetNote + detailHtml + '・1ベッド: <strong>' + ev.sheetsOnBed + ' 原反</strong>（間隔' + ev.bedGap.sheetGap + 'mm）<br>' + '・印刷回数（ベッド通数）: <strong>' + ev.printCount + ' 通</strong>' + (bedOverflow ? ' (※ベッド超過・参考作図)' : '') + '<br><span style="font-size:11px;color:#555;">下のタブで品目ごとの面付パターンを切替 / 緑=未使用 / 白=原反 / 黄枠=原反 / 色=仕上がり</span>';
+  }
+  let rotPartHtml = pack.isPartRotated ? '・仕上がり: <strong>90度回転</strong>して配置<br>' : '';
+  return '<strong>単品面付（ベッド直置き）</strong>' + recBadge + sheetNote + '<br>' + rotSheetNote + rotPartHtml + '・1ベッド: <strong>' + ev.sheetsOnBed + ' 原反</strong>（間隔' + ev.bedGap.sheetGap + 'mm）<br>' + '・1原反あたり: <strong>' + pack.count + ' 個</strong>（' + pack.cols + '×' + pack.rows + '）<br>' + '・納品 ' + orderQty + ' 個 → 印刷回数: <strong>' + ev.printCount + ' 通</strong>' + (bedOverflow ? ' (※ベッド超過・参考作図)' : '') + '<br><span style="font-size:11px;color:#555;">緑=未使用 / 白=原反 / 黄枠=原反外形 / 色=仕上がり</span>';
+}
+function syncLogStateFromVariant(variant) {
+  let ev = variant.ev;
+  LAST_PRINT_COUNT = ev.printCount; LAST_LOG_MODE = variant.mode;
+}
+function applyPreviewVariant(variant) {
+  syncLogStateFromVariant(variant);
+  document.getElementById('result').className = 'result-box';
+  document.getElementById('result').innerHTML = variant.resultHtml;
+  document.getElementById('canvas-container').innerHTML = variant.svg;
+  CURRENT_SVG_CONTENT = variant.svg;
+  document.getElementById('btn-download').style.display = 'block';
+}
+function renderPreviewTabs() {
+  let tabsEl = document.getElementById('preview-tabs');
+  if (PREVIEW_VARIANTS.length <= 1) { tabsEl.style.display = 'none'; tabsEl.innerHTML = ''; return; }
+  tabsEl.style.display = 'flex';
+  let html = '';
+  PREVIEW_VARIANTS.forEach(function(v, i) {
+    let cls = i === PREVIEW_ACTIVE_INDEX ? 'preview-tab active' : 'preview-tab';
+    let rec = (v.mode === 'fixture' && v.isRecommendedFixtureGap) ? ' <span class="tab-rec">★推奨</span>' : (i === 0 && v.mode !== 'fixture' ? ' <span class="tab-rec">★推奨</span>' : '');
+    html += '<button type="button" class="' + cls + '" onclick="switchPreviewTab(' + i + ')">' + v.tabLabel + rec + '</button>';
+  });
+  tabsEl.innerHTML = html;
+}
+function switchPreviewTab(index) {
+  if (index < 0 || index >= PREVIEW_VARIANTS.length) return;
+  PREVIEW_ACTIVE_INDEX = index; applyPreviewVariant(PREVIEW_VARIANTS[index]); renderPreviewTabs();
+}
+function showProductionVariants(rawVariants, mode, lines, partW, partH, orderQty) {
+  PREVIEW_VARIANTS = rawVariants.map(function(item, idx) {
+    return { tabLabel: buildVariantTabLabel(item.ev, item.sheet, mode, idx === 0), resultHtml: buildProductionResultHtml(item.ev, mode, lines, partW, partH, orderQty, idx === 0), svg: renderProductionSvg(item.ev, mode, lines, MASTER_DATA.machine), ev: item.ev, sheet: item.sheet, mode, lines, partW, partH, orderQty };
+  });
+  PREVIEW_ACTIVE_INDEX = 0; applyPreviewVariant(PREVIEW_VARIANTS[0]); renderPreviewTabs();
+}
+function appendUnusedPrintableRects(svg, px, py, pw, ph, placements) {
+  if (!placements || !placements.length) { svg += '<rect x="' + px + '" y="' + py + '" width="' + pw + '" height="' + ph + '" fill="' + PREVIEW_GREEN_UNUSED + '" fill-opacity="0.9" />'; return svg; }
+  let minX = pw, minY = ph;
+  placements.forEach(function(pl) { minX = Math.min(minX, pl.x); minY = Math.min(minY, pl.y); });
+  if (minX > 0) svg += '<rect x="' + px + '" y="' + py + '" width="' + minX + '" height="' + ph + '" fill="' + PREVIEW_GREEN_UNUSED + '" fill-opacity="0.9" />';
+  if (minY > 0) svg += '<rect x="' + (px + minX) + '" y="' + py + '" width="' + (pw - minX) + '" height="' + minY + '" fill="' + PREVIEW_GREEN_UNUSED + '" fill-opacity="0.9" />';
+  return svg;
+}
+function appendSheetPreviewSvg(svg, sheetX, sheetY, sheet, pack, mode) {
+  let mx = sheet.marginX, my = sheet.marginY, sw = sheet.fixedSheetW, sh = sheet.fixedSheetH;
+  let px = sheetX + mx, py = sheetY + my, pw = sheet.printableW, ph = sheet.printableH;
+  let placements = pack.placements || [];
+  svg += '<rect x="' + sheetX + '" y="' + sheetY + '" width="' + sw + '" height="' + sh + '" fill="#ffffff" stroke="#ffc107" stroke-width="4" />';
+  if (my > 0) { svg += '<rect x="' + sheetX + '" y="' + sheetY + '" width="' + sw + '" height="' + my + '" fill="' + PREVIEW_GREEN_MARGIN + '" fill-opacity="0.85" />'; svg += '<rect x="' + sheetX + '" y="' + (sheetY + sh - my) + '" width="' + sw + '" height="' + my + '" fill="' + PREVIEW_GREEN_MARGIN + '" fill-opacity="0.85" />'; }
+  if (mx > 0) { svg += '<rect x="' + sheetX + '" y="' + (sheetY + my) + '" width="' + mx + '" height="' + (sh - my * 2) + '" fill="' + PREVIEW_GREEN_MARGIN + '" fill-opacity="0.85" />'; svg += '<rect x="' + (sheetX + sw - mx) + '" y="' + (sheetY + my) + '" width="' + mx + '" height="' + (sh - my * 2) + '" fill="' + PREVIEW_GREEN_MARGIN + '" fill-opacity="0.85" />'; }
+  svg = appendUnusedPrintableRects(svg, px, py, pw, ph, placements);
+  svg += '<rect x="' + px + '" y="' + py + '" width="' + pw + '" height="' + ph + '" fill="none" stroke="#dc3545" stroke-width="2" stroke-dasharray="6,4" />';
+  placements.forEach(function(pl) {
+    let color = mode === 'gang' ? GANG_COLORS[(pl.lineIdx || 0) % GANG_COLORS.length] : THEME_ENJI;
+    let partX = px + pl.x, partY = py + pl.y;
+    svg += '<rect x="' + partX + '" y="' + partY + '" width="' + pl.w + '" height="' + pl.h + '" fill="' + color + '" fill-opacity="0.35" stroke="' + color + '" stroke-width="2" />';
+    svg += '<text x="' + (partX + pl.w / 2) + '" y="' + (partY + pl.h / 2 + 5) + '" text-anchor="middle" font-size="18" fill="' + color + '" font-family="Arial,sans-serif">' + pl.w + '×' + pl.h + '</text>';
+    if (mode === 'gang' && pl.label) svg += '<text x="' + (partX + pl.w / 2) + '" y="' + (partY + Math.min(14, pl.h / 2)) + '" text-anchor="middle" font-size="14" fill="' + color + '" font-family="Arial,sans-serif" font-weight="bold">' + pl.label + '</text>';
+  });
+  svg += '<text x="' + (sheetX + sw / 2) + '" y="' + (sheetY + sh - 8) + '" text-anchor="middle" font-size="22" fill="#333" font-family="Arial,sans-serif">原反 ' + sw + '×' + sh + '</text>';
+  return svg;
+}
+function buildBedSvgShell_(bedW, bedH, footerText, closeTag) {
+  let containerWidth = document.getElementById('canvas-container').clientWidth || 600;
+  let viewScale = (containerWidth - 20) / bedW;
+  let svg = '<svg width="' + (bedW * viewScale) + '" height="' + (bedH * viewScale) + '" viewBox="0 0 ' + bedW + ' ' + bedH + '" xmlns="http://www.w3.org/2000/svg">';
+  svg += '<rect x="0" y="0" width="' + bedW + '" height="' + bedH + '" fill="' + PREVIEW_GREEN_BED + '" stroke="' + THEME_ENJI + '" stroke-width="6" />';
+  svg += '<text x="12" y="36" font-size="28" fill="' + THEME_ENJI + '" font-family="Arial,sans-serif" font-weight="bold">ベッド ' + bedW + '×' + bedH + ' mm</text>';
+  for (let gx = 500; gx < bedW; gx += 500) svg += '<line x1="' + gx + '" y1="0" x2="' + gx + '" y2="' + bedH + '" stroke="#a5d6a7" stroke-width="1" stroke-dasharray="8,8" />';
+  for (let gy = 500; gy < bedH; gy += 500) svg += '<line x1="0" y1="' + gy + '" x2="' + bedW + '" y2="' + gy + '" stroke="#a5d6a7" stroke-width="1" stroke-dasharray="8,8" />';
+  svg += '<text x="12" y="' + (bedH - 12) + '" font-size="18" fill="#1b5e20" font-family="Arial,sans-serif">' + footerText + '</text>';
+  if (closeTag !== false) svg += '</svg>';
+  return svg;
+}
+function renderDefaultBedPreview() {
+  if (!MASTER_DATA || !MASTER_DATA.machine) return;
+  let bedW = Number(MASTER_DATA.machine['最大作図幅_mm']), bedH = Number(MASTER_DATA.machine['最大作図高_mm']);
+  if (!bedW || !bedH) return;
+  document.getElementById('canvas-container').innerHTML = buildBedSvgShell_(bedW, bedH, '入力変更または「更新」で原反・仕上がりを表示（緑=ベッド / 白=原反 / 色=仕上がり）');
+}
+function renderProductionSvg(ev, mode, lines, mConfig) {
+  let bedW = Number(mConfig['最大作図幅_mm']), bedH = Number(mConfig['最大作図高_mm']);
+  let svg = buildBedSvgShell_(bedW, bedH, '緑=未使用 / 白=原反 / 黄枠=原反外形 / 色=仕上がり', false);
+  ev.bedGap.positions.forEach(function(pos) { svg = appendSheetPreviewSvg(svg, pos.x, pos.y, ev.sheet, ev.pack, mode); });
+  svg += '</svg>';
+  return svg;
+}
+
+/* ================================================================
+   ClientGangCalc.html — ギャンギング計算
+   ================================================================ */
+function calculateGangImposition() {
+  if (!MASTER_DATA) return;
+  let mConfig = MASTER_DATA.machine;
+  let bedW = Number(mConfig['最大作図幅_mm']), bedH = Number(mConfig['最大作図高_mm']);
+  let gap = parseFloat(document.getElementById('gap').value) || 0;
+  let tombowType = document.getElementById('tombow-type').value;
+  let margin = getTomboMargin(tombowType, mConfig);
+  let lines = collectGangLines();
+  if (lines.length === 0) { showResultError('<strong>【入力エラー】</strong> ギャンギング行を入力してください。'); LAST_PRINT_COUNT = null; return; }
+  let isRoll = document.getElementById('sheet-preset').value === 'roll';
+  let rollWidth = Math.min(parseFloat(document.getElementById('sheet-w').value) || 0, parseFloat(document.getElementById('sheet-h').value) || 0);
+  for (let li = 0; li < lines.length; li++) {
+    if (!validatePartFitsMachine(lines[li].w, lines[li].h, bedW, bedH, isRoll, rollWidth)) { showResultError('1300mm×2500mm以上は印刷できません（' + lines[li].label + '）'); LAST_PRINT_COUNT = null; return; }
+  }
+  let preset = getSelectedSheetPreset();
+  if (!preset) { showResultError('<strong>【入力エラー】</strong> 原反サイズを選択してください。'); LAST_PRINT_COUNT = null; return; }
+  let variants = evaluateAllProductionVariants(preset, 'gang', lines, 0, 0, 0, gap, margin, bedW, bedH);
+  if (!variants.length) { showResultError('<strong>【ギャンギングエラー】</strong> 選択した原反（' + preset.name + '）ではベッドに配置できません。'); return; }
+  showGangLinePreviewTabs(variants[0], lines, 0, 0, 0);
+}
+
+/* ================================================================
+   ClientFixture.html — 治具設計計算
+   ================================================================ */
+function calculateFixtureImposition() {
+  if (!MASTER_DATA) return;
+  let fw = Math.min(parseFloat(document.getElementById('fixture-w').value) || 0, FIXTURE_MAX_W);
+  let fh = Math.min(parseFloat(document.getElementById('fixture-h').value) || 0, FIXTURE_MAX_H);
+  let partW = parseFloat(document.getElementById('fixture-part-w').value) || 0;
+  let partH = parseFloat(document.getElementById('fixture-part-h').value) || 0;
+  let canvasContainer = document.getElementById('canvas-container');
+  if (fw <= 0 || fh <= 0 || partW <= 0 || partH <= 0) { showResultError('治具・仕上がりサイズを入力してください。'); LAST_PRINT_COUNT = null; return; }
+  let gapCandidates = [];
+  for (let g = FIXTURE_GAP_DEFAULT; g >= FIXTURE_GAP_MIN; g -= FIXTURE_GAP_STEP) {
+    let marginRb = resolveFixtureMarginRbFromGap_(g);
+    let pack = packFixtureGrid(partW, partH, fw, fh, g, marginRb);
+    if (pack.count > 0) gapCandidates.push({ gap: g, pack, marginRb });
+  }
+  if (!gapCandidates.length) { showResultError('<strong>【治具エラー】</strong> 治具内に1個も配置できません。'); return; }
+  let baselinePick = pickFixtureGapByCountBaseline_(partW, partH, fw, fh);
+  let LAST_RECOMMENDED_FIXTURE_GAP = baselinePick ? baselinePick.gap : null;
+  gapCandidates.sort(function(a, b) {
+    if (LAST_RECOMMENDED_FIXTURE_GAP != null) {
+      if (a.gap === LAST_RECOMMENDED_FIXTURE_GAP && b.gap !== LAST_RECOMMENDED_FIXTURE_GAP) return -1;
+      if (b.gap === LAST_RECOMMENDED_FIXTURE_GAP && a.gap !== LAST_RECOMMENDED_FIXTURE_GAP) return 1;
+    }
+    return b.pack.count - a.pack.count;
+  });
+  let fixtureVariants = gapCandidates.map(function(c) {
+    let createMinNote = c.pack.count < FIXTURE_CREATE_MIN ? '<br><span style="color:#856404;font-weight:bold;">※治具作成は' + FIXTURE_CREATE_MIN + '個以上としてください。</span>' : '';
+    let notAllowedNote = c.pack.count >= FIXTURE_DESIGN_NOT_ALLOWED_MIN ? '<br><span style="color:#c0392b;font-weight:bold;">※配置数が' + FIXTURE_DESIGN_NOT_ALLOWED_MIN + '個以上です（設計不可）。治具サイズを小さくしてください。</span>' : '';
+    let isRecommendedGap = c.gap === LAST_RECOMMENDED_FIXTURE_GAP;
+    let recBadge = isRecommendedGap ? '<span style="background:#ffc107;color:#333;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:6px;">推奨ドブ' + c.gap + 'mm</span>' : '';
+    let resultHtml = '<strong>治具設計結果</strong>' + recBadge + '<br>' + '・治具: ' + fw + '×' + fh + 'mm（右下余白 ' + c.marginRb + 'mm）<br>' + '・仕上がり: ' + partW + '×' + partH + 'mm<br>' + '・配置数: <strong>' + c.pack.count + ' 個</strong>（' + c.pack.cols + '×' + c.pack.rows + '）<br>' + '・自動ドブ: <strong>' + c.gap + 'mm</strong>' + createMinNote + notAllowedNote;
+    let viewScale = (canvasContainer.clientWidth || 500) / fw;
+    let svg = '<svg width="' + (fw * viewScale) + '" height="' + (fh * viewScale) + '" viewBox="0 0 ' + fw + ' ' + fh + '" xmlns="http://www.w3.org/2000/svg">';
+    svg += '<rect x="0" y="0" width="' + fw + '" height="' + fh + '" fill="' + PREVIEW_GREEN_BED + '" stroke="' + THEME_ENJI + '" stroke-width="3" />';
+    svg += '<rect x="' + (fw - c.marginRb) + '" y="' + (fh - c.marginRb) + '" width="' + c.marginRb + '" height="' + c.marginRb + '" fill="#f8d7da" fill-opacity="0.55" stroke="#c0392b" stroke-width="1" stroke-dasharray="4,3" />';
+    svg += '<text x="' + (fw - c.marginRb / 2) + '" y="' + (fh - 4) + '" text-anchor="middle" font-size="10" fill="#c0392b">余白' + c.marginRb + '</text>';
+    svg = appendUnusedPrintableRects(svg, 0, 0, c.pack.printableW, c.pack.printableH, c.pack.placements);
+    c.pack.placements.forEach(function(pl) {
+      svg += '<rect x="' + pl.x + '" y="' + pl.y + '" width="' + pl.w + '" height="' + pl.h + '" fill="' + THEME_ENJI + '" fill-opacity="0.35" stroke="' + THEME_ENJI + '" stroke-width="2" />';
+      svg += '<text x="' + (pl.x + pl.w / 2) + '" y="' + (pl.y + pl.h / 2 + 5) + '" text-anchor="middle" font-size="16" fill="' + THEME_ENJI + '">' + pl.w + '×' + pl.h + '</text>';
+    });
+    svg += '<text x="' + (fw / 2) + '" y="24" text-anchor="middle" font-size="20" fill="#333">治具 ' + fw + '×' + fh + ' mm</text>';
+    svg += '</svg>';
+    return { tabLabel: 'ドブ' + c.gap + 'mm / ' + c.pack.count + '個', resultHtml, svg, ev: { printCount: 1, sheetsOnBed: 1, pack: c.pack }, sheet: null, mode: 'fixture', lines: [], partW, partH, orderQty: 1, fixtureGap: c.gap, fixtureCount: c.pack.count, fixtureMarginRb: c.marginRb, isRecommendedFixtureGap: isRecommendedGap };
+  });
+  PREVIEW_VARIANTS = fixtureVariants;
+  let defaultIdx = 0;
+  for (let vi = 0; vi < fixtureVariants.length; vi++) { if (fixtureVariants[vi].isRecommendedFixtureGap) { defaultIdx = vi; break; } }
+  PREVIEW_ACTIVE_INDEX = defaultIdx;
+  let first = fixtureVariants[defaultIdx];
+  LAST_PRINT_COUNT = 1; LAST_LOG_MODE = 'fixture';
+  document.getElementById('result').className = 'result-box';
+  applyPreviewVariant(first); renderPreviewTabs();
+}
+function onFixtureDesignNeededChange() {}
+
+/* ================================================================
+   ClientForm.html — フォーム操作・ギャンギング行 UI
+   ================================================================ */
+function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function escapeAttr(s) { return escapeHtml(s); }
+
+function buildSelectOptions() {
+  let sheetSelect = document.getElementById('sheet-preset');
+  sheetSelect.innerHTML = '';
+  MASTER_DATA.sheetPresets.forEach(function(p) {
+    let opt = document.createElement('option'); opt.value = p.id; opt.text = p.name; sheetSelect.appendChild(opt);
+  });
+  handleSheetChange(true);
+
+  let partSelect = document.getElementById('part-preset');
+  partSelect.innerHTML = '';
+  MASTER_DATA.partPresets.forEach(function(p) {
+    let opt = document.createElement('option'); opt.value = p.id; opt.text = p.name; partSelect.appendChild(opt);
+  });
+  handlePartChange(true);
+
+  let fp = document.getElementById('fixture-part-preset');
+  if (fp) {
+    fp.innerHTML = '';
+    MASTER_DATA.partPresets.forEach(function(p) {
+      let opt = document.createElement('option'); opt.value = p.id; opt.text = p.name; fp.appendChild(opt);
+    });
+  }
+}
+function handleSheetChange(skipCalc) {
+  if (!MASTER_DATA) return;
+  let id = document.getElementById('sheet-preset').value;
+  let preset = MASTER_DATA.sheetPresets.find(function(p) { return p.id === id; });
+  let customDiv = document.getElementById('custom-sheet-inputs');
+  if (id === 'custom' || id === 'roll') {
+    customDiv.style.display = 'flex';
+    if (id === 'roll' && preset) { document.getElementById('sheet-w').value = preset.w; document.getElementById('sheet-h').value = preset.h; }
+  } else if (preset) {
+    customDiv.style.display = 'none';
+    document.getElementById('sheet-w').value = preset.w;
+    document.getElementById('sheet-h').value = preset.h;
+  }
+  if (!skipCalc) calculateImposition();
+}
+function getSelectedSheetPreset() {
+  if (!MASTER_DATA) return null;
+  let id = document.getElementById('sheet-preset').value;
+  if (id === 'custom') {
+    let cw = parseFloat(document.getElementById('sheet-w').value) || 0;
+    let ch = parseFloat(document.getElementById('sheet-h').value) || 0;
+    if (cw <= 0 || ch <= 0) return null;
+    return { id: 'custom', name: 'カスタム (' + cw + '×' + ch + 'mm)', w: cw, h: ch };
+  }
+  let preset = MASTER_DATA.sheetPresets.find(function(p) { return p.id === id; });
+  if (!preset) return null;
+  return { id: preset.id, name: preset.name, w: Number(preset.w), h: Number(preset.h) };
+}
+function handlePartChange(skipCalc) {
+  if (!MASTER_DATA) return;
+  let id = document.getElementById('part-preset').value;
+  let preset = MASTER_DATA.partPresets.find(function(p) { return p.id === id; });
+  let customDiv = document.getElementById('custom-part-inputs');
+  if (id === 'custom') {
+    customDiv.style.display = 'flex';
+  } else if (preset) {
+    customDiv.style.display = 'flex';
+    document.getElementById('part-w').value = preset.w;
+    document.getElementById('part-h').value = preset.h;
+  }
+  if (!skipCalc) calculateImposition();
+}
+function handleFixturePartChange() {
+  if (!MASTER_DATA) return;
+  let id = document.getElementById('fixture-part-preset').value;
+  let preset = MASTER_DATA.partPresets.find(function(p) { return p.id === id; });
+  if (preset && id !== 'custom') { document.getElementById('fixture-part-w').value = preset.w; document.getElementById('fixture-part-h').value = preset.h; }
+  calculateImposition();
+}
+function setImpositionMode(skipCalc) {
+  let mode = document.getElementById('imposition-mode').value;
+  let isGang = mode === 'gang', isFixture = mode === 'fixture';
+  document.getElementById('single-part-section').style.display = (isGang || isFixture) ? 'none' : 'block';
+  document.getElementById('gang-part-section').style.display = isGang ? 'block' : 'none';
+  document.getElementById('fixture-part-section').style.display = isFixture ? 'block' : 'none';
+  document.getElementById('part-gap-row').style.display = isFixture ? 'none' : 'block';
+  let sheetPresetRow = document.getElementById('sheet-preset-row');
+  if (sheetPresetRow) sheetPresetRow.style.display = isFixture ? 'none' : 'block';
+  let customSheetInputs = document.getElementById('custom-sheet-inputs');
+  if (isFixture) { customSheetInputs.style.display = 'none'; }
+  if (!skipCalc) calculateImposition();
+}
+function initGangRows() {
+  let tbody = document.getElementById('gang-rows');
+  tbody.innerHTML = '';
+  addGangRow('A', 210, 297, 10);
+  addGangRow('B', 300, 200, 5);
+}
+function buildPartPresetSelectHtml(selectedId) {
+  let html = '<select class="gang-preset" onchange="onGangPresetChange(this)" style="font-size:11px;padding:3px;min-height:28px;"><option value="">手入力</option>';
+  if (MASTER_DATA) MASTER_DATA.partPresets.filter(function(p) { return p.id !== 'custom'; }).forEach(function(p) {
+    let sel = (selectedId === p.id) ? ' selected' : '';
+    html += '<option value="' + escapeAttr(p.id) + '"' + sel + '>' + escapeHtml(p.name) + '</option>';
+  });
+  html += '</select>';
+  return html;
+}
+function onGangPresetChange(sel) {
+  let row = sel.closest('tr'), id = sel.value;
+  if (!id || !MASTER_DATA) return;
+  let preset = MASTER_DATA.partPresets.find(function(p) { return p.id === id; });
+  if (preset) { row.querySelector('.gang-w').value = preset.w; row.querySelector('.gang-h').value = preset.h; calculateImposition(); }
+}
+function addGangRow(label, w, h, qty) {
+  let tbody = document.getElementById('gang-rows');
+  if (tbody.children.length >= 10) return;
+  let tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td><input type="text" class="gang-label" placeholder="品名" value="' + escapeAttr(label || '') + '" onchange="calculateImposition()" style="min-width:50px;"></td>' +
+    '<td><input type="number" class="gang-w" min="1" placeholder="横" value="' + (w !== undefined && w !== '' ? w : '') + '" onchange="calculateImposition()"></td>' +
+    '<td><input type="number" class="gang-h" min="1" placeholder="縦" value="' + (h !== undefined && h !== '' ? h : '') + '" onchange="calculateImposition()"></td>' +
+    '<td><input type="number" class="gang-qty" min="1" value="' + (qty !== undefined && qty !== '' ? qty : '1') + '" onchange="calculateImposition()"></td>' +
+    '<td><button type="button" class="btn-remove" onclick="removeGangRow(this)">削</button></td>';
+  tbody.appendChild(tr);
+}
+function removeGangRow(btn) {
+  let tbody = document.getElementById('gang-rows');
+  if (tbody.children.length <= 1) return;
+  btn.closest('tr').remove(); calculateImposition();
+}
+function collectGangLines() {
+  let lines = [], rows = document.querySelectorAll('#gang-rows tr');
+  for (let i = 0; i < rows.length; i++) {
+    let row = rows[i];
+    let label = row.querySelector('.gang-label').value.trim() || ('品目' + (lines.length + 1));
+    let w = parseFloat(row.querySelector('.gang-w').value) || 0;
+    let h = parseFloat(row.querySelector('.gang-h').value) || 0;
+    let qty = parseInt(row.querySelector('.gang-qty').value, 10) || 0;
+    if (w > 0 && h > 0 && qty > 0) lines.push({ label, w, h, qty, lineIdx: lines.length });
+  }
+  return lines;
+}
+
+/* ================================================================
+   ClientMain.html — 計算振り分け・SVG ダウンロード
+   ================================================================ */
+function calculateImposition() {
+  if (!MASTER_DATA) return;
+  let mode = document.getElementById('imposition-mode').value;
+  if (mode === 'gang') { calculateGangImposition(); return; }
+  if (mode === 'fixture') { calculateFixtureImposition(); return; }
+  LAST_GANG_PART_SUMMARY = ''; LAST_FIXTURE_SUMMARY = ''; LAST_LOG_REMARKS_DETAIL = '';
+  let mConfig = MASTER_DATA.machine;
+  let partW = parseFloat(document.getElementById('part-w').value) || 0;
+  let partH = parseFloat(document.getElementById('part-h').value) || 0;
+  let orderQty = parseInt(document.getElementById('order-qty').value, 10) || 1;
+  let gap = parseFloat(document.getElementById('gap').value) || 0;
+  let tombowType = document.getElementById('tombow-type').value;
+  let margin = getTomboMargin(tombowType, mConfig);
+  let bedW = Number(mConfig['最大作図幅_mm']), bedH = Number(mConfig['最大作図高_mm']);
+  let isRoll = document.getElementById('sheet-preset').value === 'roll';
+  let rollWidth = Math.min(parseFloat(document.getElementById('sheet-w').value) || 0, parseFloat(document.getElementById('sheet-h').value) || 0);
+  if (partW <= 0 || partH <= 0) { showResultError('仕上がりサイズを入力してください。'); LAST_PRINT_COUNT = null; return; }
+  let pMin = Math.min(partW, partH);
+  if (isRoll && pMin > rollWidth) { showResultError('ロール横（' + rollWidth + 'mm）を超える仕上がりは印刷できません'); LAST_PRINT_COUNT = null; return; }
+  if (!validatePartFitsMachine(partW, partH, bedW, bedH, isRoll, rollWidth)) { showResultError('最大作図（1300×2500mm）を超えています'); LAST_PRINT_COUNT = null; return; }
+  let preset = getSelectedSheetPreset();
+  if (!preset) { showResultError('<strong>【入力エラー】</strong> 原反サイズを選択してください。'); LAST_PRINT_COUNT = null; return; }
+  let variants = evaluateAllProductionVariants(preset, 'single', [], partW, partH, orderQty, gap, margin, bedW, bedH);
+  if (!variants.length) { showResultError('<strong>【面付エラー】</strong> 選択した原反（' + preset.name + '）に仕上がりが入りません。'); return; }
+  showProductionVariants(variants, 'single', [], partW, partH, orderQty);
+}
+function downloadSVG() {
+  if (!CURRENT_SVG_CONTENT) return;
+  let dlContent = CURRENT_SVG_CONTENT.replace(/width="[^"]+"/, 'width="' + MASTER_DATA.machine['最大作図幅_mm'] + 'mm"').replace(/height="[^"]+"/, 'height="' + MASTER_DATA.machine['最大作図高_mm'] + 'mm"');
+  let blob = new Blob([dlContent], { type: 'image/svg+xml;charset=utf-8' });
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement('a'); a.href = url; a.download = 'imposition-demo.svg';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+/* ================================================================
+   デモ専用 MASTER_DATA（機械 JFX200 / 原反プリセット）
+   ================================================================ */
+const DEMO_MASTER_DATA = {
+  machine: {
+    '最大作図幅_mm': 1300,
+    '最大作図高_mm': 2500,
+    'マージン_トンボ無し': 0,
+    'マージン_パネルカット': 10,
+    'マージン_通常トンボ': 20,
+  },
+  sheetPresets: [
+    { id: 'roll',          name: 'ロール紙（幅を下で変更可）', w: 600,  h: 2500 },
+    { id: 'cut_1300x2500', name: 'カット紙 1300×2500mm',      w: 1300, h: 2500 },
+    { id: 'cut_1300x1800', name: 'カット紙 1300×1800mm',      w: 1300, h: 1800 },
+    { id: 'cut_900x600',   name: 'カット紙 900×600mm',        w: 900,  h: 600  },
+    { id: 'cut_600x900',   name: 'カット紙 600×900mm',        w: 600,  h: 900  },
+    { id: 'custom',        name: 'カスタム（手入力）',          w: 0,    h: 0    },
+  ],
+  partPresets: [
+    { id: 'custom',   name: '手入力',               w: 0,    h: 0   },
+    { id: 'a4',       name: 'A4  297×210mm',        w: 297,  h: 210 },
+    { id: 'a3',       name: 'A3  420×297mm',        w: 420,  h: 297 },
+    { id: 'b4',       name: 'B4  364×257mm',        w: 364,  h: 257 },
+    { id: 'a2',       name: 'A2  594×420mm',        w: 594,  h: 420 },
+    { id: 'a1',       name: 'A1  841×594mm',        w: 841,  h: 594 },
+    { id: 'a0',       name: 'A0  1189×841mm',       w: 1189, h: 841 },
+    { id: '300x200',  name: '300×200mm（ポスター）', w: 300,  h: 200 },
+    { id: '500x700',  name: '500×700mm（のぼり）',   w: 500,  h: 700 },
+    { id: '900x1800', name: '900×1800mm（懸垂幕）',  w: 900,  h: 1800},
+  ],
+  quotePrintYenPerM2: null,
+  printTime: {}
+};
+
+/* ================================================================
+   デモ専用初期化・リセット
+   ================================================================ */
+function resetFormDemo() {
+  document.getElementById('imposition-mode').value = 'single';
+  document.getElementById('order-qty').value = 30;
+  document.getElementById('gap').value = 3;
+  document.getElementById('tombow-type').value = 'normal';
+  document.getElementById('fixture-w').value = 1100;
+  document.getElementById('fixture-h').value = 700;
+  document.getElementById('fixture-part-w').value = 50;
+  document.getElementById('fixture-part-h').value = 50;
+  if (MASTER_DATA && MASTER_DATA.sheetPresets.length) {
+    document.getElementById('sheet-preset').value = MASTER_DATA.sheetPresets[1].id;
+  }
+  if (MASTER_DATA && MASTER_DATA.partPresets.length) {
+    document.getElementById('part-preset').value = MASTER_DATA.partPresets[1].id;
+    let fp = document.getElementById('fixture-part-preset');
+    if (fp) fp.value = MASTER_DATA.partPresets[0].id;
+  }
+  initGangRows();
+  setImpositionMode(true);
+  handleSheetChange(true);
+  handlePartChange(true);
+  clearPreviewState();
+  document.getElementById('result').className = 'result-box';
+  document.getElementById('result').innerHTML = 'リセットしました。「更新」で再計算してください。';
+}
+
+window.addEventListener('load', function() {
+  MASTER_DATA = DEMO_MASTER_DATA;
+  buildSelectOptions();
+  initGangRows();
+  setImpositionMode(true);
+  handleSheetChange(true);
+  handlePartChange(true);
+  renderDefaultBedPreview();
+  // デフォルトで A4 を選択して即計算
+  document.getElementById('part-preset').value = 'a4';
+  handlePartChange(false);
+});
+</script>
+</body>
+</html>
