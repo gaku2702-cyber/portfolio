@@ -73,9 +73,9 @@
     .preview-tab.active { background: var(--navy); color: #fff; }
     .preview-tab .tab-rec { font-size: 9px; color: #FFC107; }
     .preview-tab.active .tab-rec { color: #FFE082; }
-    #canvas-container { background: var(--navy-dark); padding: 16px; display: flex; align-items: center; justify-content: center; overflow: auto; max-width: 100%; min-height: 220px; margin: 0 calc(-1 * var(--col-pad)); }
-    .preview-rotated { display: flex; align-items: center; justify-content: center; width: 100%; padding: 8px 0; }
-    .preview-rotated svg { transform: rotate(-90deg); transform-origin: center center; flex-shrink: 0; }
+    #canvas-container { background: var(--navy-dark); padding: 8px 16px; display: flex; align-items: center; justify-content: center; overflow: auto; max-width: 100%; margin: 0 calc(-1 * var(--col-pad)); }
+    .preview-rotated { position: relative; flex-shrink: 0; margin: 0 auto; overflow: visible; }
+    .preview-rotated svg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-90deg); transform-origin: center center; margin: 0; }
     svg { background: #fff; display: block; margin: 0 auto; border-radius: 2px; }
     .hint-text { font-size: 10px; color: var(--text-muted); margin: 3px 0 0; line-height: 1.4; }
     .demo-notice { background: var(--navy-pale); border: 1px solid var(--border); border-radius: 3px; padding: 8px 12px; font-size: 11px; color: var(--text-sub); margin-bottom: 14px; line-height: 1.5; }
@@ -560,9 +560,22 @@ function mountPreviewHtml(svgHtml, rotate90) {
   let el = document.getElementById('canvas-container');
   if (rotate90) {
     el.innerHTML = '<div class="preview-rotated">' + svgHtml + '</div>';
+    fitRotatedPreviewWrap_();
   } else {
     el.innerHTML = svgHtml;
   }
+}
+/** 90度回転後の見た目サイズにラッパーを合わせ、天地の余白を詰める */
+function fitRotatedPreviewWrap_() {
+  let wrap = document.querySelector('#canvas-container .preview-rotated');
+  if (!wrap) return;
+  let svg = wrap.querySelector('svg');
+  if (!svg) return;
+  let w = parseFloat(svg.getAttribute('width')) || svg.getBoundingClientRect().width;
+  let h = parseFloat(svg.getAttribute('height')) || svg.getBoundingClientRect().height;
+  if (!w || !h) return;
+  wrap.style.width = h + 'px';
+  wrap.style.height = w + 'px';
 }
 function applyPreviewVariant(variant) {
   syncLogStateFromVariant(variant);
@@ -930,6 +943,12 @@ const DEMO_MASTER_DATA = {
     { id: 'custom',        name: 'カスタム（手入力）',          w: 0,    h: 0    },
   ],
   partPresets: [
+    /* ── 仕上がりプリセットの追加方法 ──
+       1行追加するだけ。形式:
+       { id: '英数字ID', name: 'プルダウン表示名', w: 横mm, h: 縦mm },
+       id は英数字のみ・重複不可。custom は手入力用なので残す。
+       例: { id: 'namecard', name: '名刺 91×55mm', w: 91, h: 55 },
+    */
     { id: 'custom',   name: '手入力',               w: 0,    h: 0   },
     { id: 'a4',       name: 'A4  297×210mm',        w: 297,  h: 210 },
     { id: 'a3',       name: 'A3  420×297mm',        w: 420,  h: 297 },
@@ -940,6 +959,7 @@ const DEMO_MASTER_DATA = {
     { id: '300x200',  name: '300×200mm（ポスター）', w: 300,  h: 200 },
     { id: '500x700',  name: '500×700mm（のぼり）',   w: 500,  h: 700 },
     { id: '900x1800', name: '900×1800mm（懸垂幕）',  w: 900,  h: 1800},
+    /* ↓ ここに追加 ↓ */
   ],
   quotePrintYenPerM2: null,
   printTime: {}
