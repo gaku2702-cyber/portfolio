@@ -10,95 +10,90 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --navy: #1B3264; --navy-dark: #0F2347; --navy-pale: #E8EDF5;
-      --text-main: #232323; --text-sub: #6B7280; --text-muted: #9CA3AF;
+      --text-main: #232323; --text-sub: #6B7280;
       --border: #E2E4E9; --bg-page: #F3F4F6; --col-pad: 16px;
     }
     body { font-family: 'Noto Sans JP', 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); font-size: 13px; line-height: 1.55; }
     .container { max-width: 1280px; margin: 10px auto; background: #fff; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); overflow: hidden; }
-    .header-meta { display: flex; align-items: center; background: var(--navy); color: #fff; padding: 0 16px; height: 44px; gap: 12px; }
-    h1 { font-size: 15px; font-weight: 700; color: #fff; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .btn-link { display: inline-block; padding: 5px 14px; background: rgba(255,255,255,0.18); color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); border-radius: 3px; font-size: 12px; font-weight: 700; white-space: nowrap; }
-    .btn-link:hover { background: rgba(255,255,255,0.32); }
+    .header-meta { display: flex; align-items: center; background: var(--navy); color: #fff; padding: 0 12px; height: 44px; gap: 8px; }
+    h1 { font-size: 14px; font-weight: 700; color: #fff; flex: 1; line-height: 1.3; }
+    .btn-link { display: inline-block; padding: 5px 10px; background: rgba(255,255,255,0.18); color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); border-radius: 3px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
     .grid { display: flex; flex-direction: row; align-items: stretch; min-height: calc(100vh - 44px); }
-    .col-input { flex: 0 0 340px; width: 340px; min-width: 280px; padding: var(--col-pad); border-right: 1px solid var(--border); background: #FAFAFA; overflow-y: auto; }
+    .col-input { flex: 0 0 340px; width: 340px; min-width: 0; padding: var(--col-pad); border-right: 1px solid var(--border); background: #FAFAFA; overflow-y: auto; }
     .col-output { flex: 1; min-width: 0; padding: var(--col-pad); background: #fff; display: flex; flex-direction: column; }
     h2 { font-size: 12px; font-weight: 700; color: #fff; background: var(--navy); padding: 8px var(--col-pad); margin: 12px calc(-1 * var(--col-pad)) 12px; letter-spacing: 0.03em; }
     .col-input > h2:first-child { margin-top: calc(-1 * var(--col-pad)); }
     label { display: block; margin-bottom: 3px; font-size: 11px; color: var(--text-sub); font-weight: 600; }
     input[type="range"] { width: 100%; margin: 4px 0 10px; accent-color: var(--navy); }
-    select, input[type="file"], input[type="text"] { width: 100%; padding: 7px 10px; border: 1px solid #C8C0C2; border-radius: 3px; font-size: 13px; background: #fff; min-height: 34px; }
+    select, input[type="file"] { width: 100%; padding: 7px 10px; border: 1px solid #C8C0C2; border-radius: 3px; font-size: 13px; background: #fff; min-height: 34px; }
     select:focus, input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(27,50,100,0.08); }
-    button { cursor: pointer; font-weight: 700; border: none; border-radius: 3px; font-size: 12px; transition: background 0.12s; }
+    button { cursor: pointer; font-weight: 700; border: none; border-radius: 3px; font-size: 12px; }
     .btn-primary { width: 100%; padding: 10px; background: var(--navy); color: #fff; font-size: 13px; margin-top: 8px; min-height: 40px; }
-    .btn-primary:hover { background: var(--navy-dark); }
     .btn-secondary { padding: 7px 12px; background: #fff; color: var(--navy); border: 1px solid var(--navy); min-height: 34px; }
-    .btn-secondary:hover { background: var(--navy-pale); }
     .btn-row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-    .drop-zone { border: 2px dashed #B0B8C8; border-radius: 4px; background: #EAEAEA; color: #555; text-align: center; padding: 18px 12px; font-size: 12px; font-weight: 600; line-height: 1.5; margin-bottom: 10px; transition: background 0.2s, border-color 0.2s; }
+    .drop-zone { border: 2px dashed #B0B8C8; border-radius: 4px; background: #EAEAEA; color: #555; text-align: center; padding: 18px 12px; font-size: 12px; font-weight: 600; line-height: 1.5; margin-bottom: 10px; cursor: pointer; touch-action: manipulation; }
     .drop-zone.ready { background: #D4EDDA; border-color: #28A745; color: #155724; }
     .drop-zone.loading { background: #FFF3CD; border-color: #FFC107; color: #856404; }
     .count-box { padding: 10px 12px; background: var(--navy-pale); border-left: 4px solid var(--navy); font-size: 13px; font-weight: 700; margin: 10px 0; }
     .demo-notice { background: var(--navy-pale); border: 1px solid var(--border); border-radius: 3px; padding: 8px 12px; font-size: 11px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.55; }
     .demo-notice strong { color: var(--navy); }
-    .preview-wrap { flex: 1; display: flex; align-items: center; justify-content: center; background: var(--navy-dark); border-radius: 3px; overflow: auto; min-height: 420px; padding: 12px; }
-    #previewCanvas { max-width: 100%; max-height: calc(100vh - 200px); background: #222; border-radius: 2px; }
-    .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11px; color: var(--text-sub); margin-bottom: 10px; }
+    .preview-wrap { flex: 1; display: flex; align-items: center; justify-content: center; background: var(--navy-dark); border-radius: 3px; overflow: auto; min-height: 280px; padding: 8px; -webkit-overflow-scrolling: touch; }
+    #previewCanvas { max-width: 100%; height: auto; background: #222; border-radius: 2px; }
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--text-sub); margin-bottom: 10px; }
     .legend span { display: inline-flex; align-items: center; gap: 6px; }
     .swatch { width: 14px; height: 14px; border-radius: 2px; display: inline-block; }
     .status-bar { padding: 8px 16px; background: #F8F9FB; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-sub); }
     .status-bar.error { color: #CC2233; }
     .status-bar.ok { color: #155724; }
-    .loading-overlay { position: fixed; inset: 0; background: rgba(15,35,71,0.55); display: flex; align-items: center; justify-content: center; z-index: 100; color: #fff; font-size: 14px; font-weight: 600; }
-    .loading-overlay.hidden { display: none; }
+    .file-input-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
     @media (max-width: 760px) {
       .grid { flex-direction: column; min-height: unset; }
       .col-input { flex: unset; width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+      .preview-wrap { min-height: 240px; }
     }
   </style>
 </head>
 <body>
-<div id="cvLoading" class="loading-overlay">OpenCV を読み込み中…</div>
-
 <div class="container">
   <div class="header-meta">
-    <h1>超高解像度対応・写真切り出しツール（体験版）</h1>
-    <a href="index.html" class="btn-link">← ポートフォリオへ</a>
+    <h1>写真切り出しツール（体験版）</h1>
+    <a href="index.html" class="btn-link">← 戻る</a>
   </div>
 
   <div class="grid">
     <div class="col-input">
       <h2>1. スキャン画像</h2>
       <div class="demo-notice">
-        <strong>体験版について：</strong> 認識プレビューと枚数調整までをブラウザで再現しています。1200dpi のフル解像度切り出し・保存はデスクトップ版（Python）の機能です。
+        <strong>体験版：</strong> 認識プレビューと調整をブラウザで再現。1200dpi 切り出し保存はデスクトップ版（Python）の機能です。スマホではタップして画像を選択できます。
       </div>
-      <div id="dropZone" class="drop-zone">サンプル画像を読み込み中…<br>または画像をドロップ / 選択</div>
-      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/tiff,image/webp">
+      <div id="dropZone" class="drop-zone loading">タップまたは選択で画像を読込</div>
+      <input type="file" id="fileInput" class="file-input-hidden" accept="image/jpeg,image/png,image/webp,image/*">
 
       <div class="count-box" id="countInfo">検出された写真の枚数: -- 枚</div>
 
       <h2>2. 認識・切り出し微調整</h2>
-      <label for="sliderThresh">認識感度（枚数が合わない時に調整）</label>
+      <label for="sliderThresh">認識感度</label>
       <input type="range" id="sliderThresh" min="10" max="150" value="40">
-      <label for="sliderInset">黒縁カット幅（内側に削るピクセル量）</label>
+      <label for="sliderInset">黒縁カット幅</label>
       <input type="range" id="sliderInset" min="0" max="30" value="5">
 
       <h2>3. 写真ごとの向き（90度刻み）</h2>
       <label for="photoSelect">対象の写真番号</label>
       <select id="photoSelect"></select>
       <div class="btn-row">
-        <button type="button" class="btn-secondary" id="btnRotLeft">左に90° ↺</button>
-        <button type="button" class="btn-secondary" id="btnRotRight">右に90° ↻</button>
+        <button type="button" class="btn-secondary" id="btnRotLeft">左90° ↺</button>
+        <button type="button" class="btn-secondary" id="btnRotRight">右90° ↻</button>
       </div>
 
-      <button type="button" class="btn-primary" id="btnSample">サンプル画像を再読込</button>
-      <button type="button" class="btn-secondary" style="width:100%;margin-top:8px" id="btnReset">設定をリセット</button>
+      <button type="button" class="btn-primary" id="btnSample">サンプル再読込</button>
+      <button type="button" class="btn-secondary" style="width:100%;margin-top:8px" id="btnReset">リセット</button>
     </div>
 
     <div class="col-output">
       <div class="legend">
         <span><i class="swatch" style="background:#FF0000"></i>赤枠：検出</span>
-        <span><i class="swatch" style="background:#00FF00"></i>緑枠：カット範囲</span>
-        <span><i class="swatch" style="background:#000;border-radius:50%"></i>数字：向き調整</span>
+        <span><i class="swatch" style="background:#00FF00"></i>緑枠：カット</span>
+        <span><i class="swatch" style="background:#000;border-radius:50%"></i>番号</span>
       </div>
       <div class="preview-wrap">
         <canvas id="previewCanvas"></canvas>
@@ -106,27 +101,23 @@
     </div>
   </div>
 
-  <div class="status-bar" id="statusBar">ステータス: OpenCV を読み込んでいます…</div>
+  <div class="status-bar" id="statusBar">ステータス: 準備完了</div>
 </div>
 
-<script async src="https://docs.opencv.org/4.9.0/opencv.js"></script>
 <script>
 (function () {
   'use strict';
 
   const SAMPLE = 'assets/demo/sample-scan.jpg';
-  const MAX_PREVIEW = 2000;
+  const MAX_PREVIEW = window.innerWidth < 768 ? 1200 : 2000;
 
-  let cvReady = false;
-  let srcMat = null;
-  let previewMat = null;
-  let scaleFactor = 1;
+  let previewW = 0, previewH = 0, scaleFactor = 1;
+  let previewPixels = null;
   let detectedBoxes = [];
   let rotationAngles = {};
-  let fileName = '';
+  let analyzeTimer = null;
 
   const els = {
-    loading: document.getElementById('cvLoading'),
     dropZone: document.getElementById('dropZone'),
     fileInput: document.getElementById('fileInput'),
     countInfo: document.getElementById('countInfo'),
@@ -140,155 +131,161 @@
     canvas: document.getElementById('previewCanvas'),
     statusBar: document.getElementById('statusBar'),
   };
+  const ctx = els.canvas.getContext('2d', { willReadFrequently: true });
 
   function setStatus(text, kind) {
     els.statusBar.textContent = 'ステータス: ' + text;
     els.statusBar.className = 'status-bar' + (kind ? ' ' + kind : '');
   }
 
-  function waitForCv() {
-    if (typeof cv !== 'undefined' && cv.Mat) {
-      cvReady = true;
-      els.loading.classList.add('hidden');
-      setStatus('サンプル画像を読み込んでいます…');
-      loadFromUrl(SAMPLE);
-      return;
+  function toGray(r, g, b) {
+    return (r * 0.299 + g * 0.587 + b * 0.114) | 0;
+  }
+
+  function boxBlurGray(gray, w, h) {
+    const out = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        let sum = 0, n = 0;
+        for (let dy = -2; dy <= 2; dy++) {
+          for (let dx = -2; dx <= 2; dx++) {
+            const ny = y + dy, nx = x + dx;
+            if (ny >= 0 && ny < h && nx >= 0 && nx < w) {
+              sum += gray[ny * w + nx];
+              n++;
+            }
+          }
+        }
+        out[y * w + x] = (sum / n) | 0;
+      }
     }
-    setTimeout(waitForCv, 120);
+    return out;
   }
 
-  function freeMats() {
-    if (srcMat) { srcMat.delete(); srcMat = null; }
-    if (previewMat) { previewMat.delete(); previewMat = null; }
-  }
-
-  function buildPreviewMat(src) {
-    const h = src.rows, w = src.cols;
-    const maxSize = MAX_PREVIEW;
-    if (Math.max(h, w) > maxSize) {
-      scaleFactor = maxSize / Math.max(h, w);
-      const newW = Math.round(w * scaleFactor);
-      const newH = Math.round(h * scaleFactor);
-      const dst = new cv.Mat();
-      cv.resize(src, dst, new cv.Size(newW, newH), 0, 0, cv.INTER_AREA);
-      return dst;
+  function findBoxes(gray, w, h, threshVal) {
+    const blurred = boxBlurGray(gray, w, h);
+    const cutoff = 256 - threshVal;
+    const mask = new Uint8Array(w * h);
+    for (let i = 0; i < blurred.length; i++) {
+      mask[i] = blurred[i] < cutoff ? 255 : 0;
     }
-    scaleFactor = 1;
-    return src.clone();
-  }
 
-  function matToCanvas(mat, canvas) {
-    cv.imshow(canvas, mat);
-  }
+    const labels = new Int32Array(w * h);
+    let current = 0;
+    const areas = [];
+    const bounds = [];
 
-  function drawBadge(ctx, cx, cy, text, angleDeg, radius) {
-    const size = radius * 2;
-    const off = document.createElement('canvas');
-    off.width = size; off.height = size;
-    const octx = off.getContext('2d');
-    octx.fillStyle = '#000';
-    octx.beginPath();
-    octx.arc(radius, radius, radius - 4, 0, Math.PI * 2);
-    octx.fill();
-    octx.fillStyle = '#fff';
-    octx.font = 'bold 28px Inter, sans-serif';
-    octx.textAlign = 'center';
-    octx.textBaseline = 'middle';
-    octx.fillText(text, radius, radius);
+    function flood(sx, sy, label) {
+      const stack = [[sx, sy]];
+      let minX = sx, maxX = sx, minY = sy, maxY = sy, area = 0;
+      while (stack.length) {
+        const [x, y] = stack.pop();
+        const idx = y * w + x;
+        if (x < 0 || x >= w || y < 0 || y >= h) continue;
+        if (labels[idx] !== 0 || mask[idx] !== 255) continue;
+        labels[idx] = label;
+        area++;
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+        stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+      }
+      return { area, minX, maxX, minY, maxY };
+    }
 
-    const rot = document.createElement('canvas');
-    rot.width = size; rot.height = size;
-    const rctx = rot.getContext('2d');
-    rctx.translate(radius, radius);
-    rctx.rotate((angleDeg * Math.PI) / 180);
-    rctx.drawImage(off, -radius, -radius);
-
-    ctx.drawImage(rot, cx - radius, cy - radius);
-  }
-
-  function analyzeAndPreview() {
-    if (!cvReady || !previewMat) return;
-
-    const threshVal = Number(els.sliderThresh.value);
-    const insetScaled = Math.max(0, Math.round(Number(els.sliderInset.value) * scaleFactor));
-
-    const gray = new cv.Mat();
-    const blurred = new cv.Mat();
-    const thresh = new cv.Mat();
-    const contours = new cv.MatVector();
-    const hierarchy = new cv.Mat();
-
-    cv.cvtColor(previewMat, gray, cv.COLOR_BGR2GRAY);
-    cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
-    cv.threshold(blurred, thresh, threshVal, 255, cv.THRESH_BINARY);
-
-    cv.findContours(thresh, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
-    const minArea = previewMat.rows * previewMat.cols * 0.005;
-    const raw = [];
-    for (let i = 0; i < contours.size(); i++) {
-      const cnt = contours.get(i);
-      const area = cv.contourArea(cnt);
-      if (area > minArea) {
-        raw.push(cv.minAreaRect(cnt));
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = y * w + x;
+        if (mask[idx] === 255 && labels[idx] === 0) {
+          current++;
+          const b = flood(x, y, current);
+          areas.push(b.area);
+          bounds.push(b);
+        }
       }
     }
 
-    const blockH = previewMat.rows * 0.1;
-    raw.sort(function (a, b) {
+    const minArea = w * h * 0.005;
+    const boxes = [];
+    for (let i = 0; i < bounds.length; i++) {
+      if (areas[i] <= minArea) continue;
+      const b = bounds[i];
+      const bw = b.maxX - b.minX + 1;
+      const bh = b.maxY - b.minY + 1;
+      boxes.push({
+        center: { x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 },
+        width: bw,
+        height: bh,
+        angle: 0,
+      });
+    }
+
+    const blockH = h * 0.1;
+    boxes.sort(function (a, b) {
       const ay = Math.floor(a.center.y / blockH);
       const by = Math.floor(b.center.y / blockH);
       if (ay !== by) return ay - by;
       return a.center.x - b.center.x;
     });
-    detectedBoxes = raw;
+    return boxes;
+  }
 
-    const preview = previewMat.clone();
-    const colorRed = new cv.Scalar(255, 0, 0, 255);
-    const colorGreen = new cv.Scalar(0, 255, 0, 255);
+  function drawRectOutline(x, y, w, h, color, lineW) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineW;
+    ctx.strokeRect(x + lineW / 2, y + lineW / 2, w - lineW, h - lineW);
+  }
 
-    function drawRotatedRect(mat, rect, color, thickness) {
-      const pts = cv.RotatedRect.points(rect);
-      const flat = [];
-      for (let p = 0; p < 4; p++) flat.push(pts[p].x, pts[p].y);
-      const cntMat = cv.matFromArray(4, 1, cv.CV_32SC2, flat);
-      const cntVec = new cv.MatVector();
-      cntVec.push_back(cntMat);
-      cv.drawContours(mat, cntVec, 0, color, thickness);
-      cntMat.delete();
-      cntVec.delete();
+  function drawBadge(cx, cy, text, angleDeg, radius) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate((angleDeg * Math.PI) / 180);
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(0, 0, radius - 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold ' + Math.max(14, radius * 0.75) + 'px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+  }
+
+  function analyzeAndPreview() {
+    if (!previewPixels) return;
+
+    const threshVal = Number(els.sliderThresh.value);
+    const inset = Math.max(0, Math.round(Number(els.sliderInset.value) * scaleFactor));
+
+    const gray = new Uint8Array(previewW * previewH);
+    for (let i = 0, p = 0; i < previewPixels.length; i += 4, p++) {
+      gray[p] = toGray(previewPixels[i], previewPixels[i + 1], previewPixels[i + 2]);
     }
 
-    for (let idx = 0; idx < detectedBoxes.length; idx++) {
-      const rect = detectedBoxes[idx];
-      drawRotatedRect(preview, rect, colorRed, 2);
+    detectedBoxes = findBoxes(gray, previewW, previewH, threshVal);
 
-      let w = rect.size.width, h = rect.size.height;
-      if (w > insetScaled * 2 && h > insetScaled * 2) {
-        const insetRect = new cv.RotatedRect(
-          rect.center,
-          new cv.Size(w - insetScaled * 2, h - insetScaled * 2),
-          rect.angle
-        );
-        drawRotatedRect(preview, insetRect, colorGreen, 3);
+    ctx.putImageData(new ImageData(new Uint8ClampedArray(previewPixels), previewW, previewH), 0, 0);
+
+    for (let idx = 0; idx < detectedBoxes.length; idx++) {
+      const box = detectedBoxes[idx];
+      const x = box.center.x - box.width / 2;
+      const y = box.center.y - box.height / 2;
+      drawRectOutline(x, y, box.width, box.height, '#FF0000', 2);
+      if (box.width > inset * 2 && box.height > inset * 2) {
+        drawRectOutline(x + inset, y + inset, box.width - inset * 2, box.height - inset * 2, '#00FF00', 3);
       }
-    }
-
-    matToCanvas(preview, els.canvas);
-    preview.delete();
-
-    const ctx = els.canvas.getContext('2d');
-    for (let idx = 0; idx < detectedBoxes.length; idx++) {
-      const rect = detectedBoxes[idx];
-      const angle = rotationAngles[idx] || 0;
-      drawBadge(ctx, rect.center.x, rect.center.y, String(idx + 1), angle, 35);
+      drawBadge(box.center.x, box.center.y, String(idx + 1), rotationAngles[idx] || 0, 28);
     }
 
     els.countInfo.textContent = '検出された写真の枚数: ' + detectedBoxes.length + ' 枚';
     updatePhotoSelect(detectedBoxes.length);
+  }
 
-    gray.delete(); blurred.delete(); thresh.delete();
-    contours.delete(); hierarchy.delete();
+  function scheduleAnalyze() {
+    clearTimeout(analyzeTimer);
+    analyzeTimer = setTimeout(analyzeAndPreview, 80);
   }
 
   function updatePhotoSelect(count) {
@@ -305,61 +302,58 @@
     }
   }
 
-  function loadImageFromFile(file) {
-    if (!file || !file.type.startsWith('image/')) {
-      setStatus('画像ファイルを選択してください。', 'error');
-      return;
-    }
-    fileName = file.name;
+  function loadFromImage(img, label) {
     els.dropZone.className = 'drop-zone loading';
     els.dropZone.textContent = '画像読み込み中…';
     setStatus('画像を最適化しています…');
 
+    requestAnimationFrame(function () {
+      const iw = img.naturalWidth || img.width;
+      const ih = img.naturalHeight || img.height;
+      scaleFactor = 1;
+      previewW = iw;
+      previewH = ih;
+      if (Math.max(iw, ih) > MAX_PREVIEW) {
+        scaleFactor = MAX_PREVIEW / Math.max(iw, ih);
+        previewW = Math.round(iw * scaleFactor);
+        previewH = Math.round(ih * scaleFactor);
+      }
+
+      els.canvas.width = previewW;
+      els.canvas.height = previewH;
+      ctx.drawImage(img, 0, 0, previewW, previewH);
+      previewPixels = ctx.getImageData(0, 0, previewW, previewH).data.slice();
+      rotationAngles = {};
+
+      els.dropZone.className = 'drop-zone ready';
+      els.dropZone.textContent = label;
+      setStatus('読み込み完了（解析 ' + (scaleFactor * 100).toFixed(0) + '%）', 'ok');
+      analyzeAndPreview();
+    });
+  }
+
+  function loadFromUrl(url) {
+    const img = new Image();
+    img.onload = function () {
+      loadFromImage(img, 'サンプル: sample-scan.jpg\n（タップで差替可）');
+    };
+    img.onerror = function () { setStatus('サンプル画像の読み込みに失敗しました。', 'error'); };
+    img.src = url;
+  }
+
+  function loadFromFile(file) {
+    if (!file || !file.type.startsWith('image/')) {
+      setStatus('画像ファイルを選択してください。', 'error');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = function (e) {
       const img = new Image();
-      img.onload = function () {
-        freeMats();
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        canvas.getContext('2d').drawImage(img, 0, 0);
-        srcMat = cv.imread(canvas);
-        previewMat = buildPreviewMat(srcMat);
-        rotationAngles = {};
-        els.dropZone.className = 'drop-zone ready';
-        els.dropZone.textContent = '選択中: ' + fileName;
-        setStatus('画像を読み込みました (解析用縮小率: ' + (scaleFactor * 100).toFixed(1) + '%)', 'ok');
-        analyzeAndPreview();
-      };
+      img.onload = function () { loadFromImage(img, '選択中: ' + file.name); };
       img.onerror = function () { setStatus('画像の読み込みに失敗しました。', 'error'); };
       img.src = e.target.result;
     };
     reader.readAsDataURL(file);
-  }
-
-  function loadFromUrl(url) {
-    els.dropZone.className = 'drop-zone loading';
-    els.dropZone.textContent = '画像読み込み中…';
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function () {
-      freeMats();
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      srcMat = cv.imread(canvas);
-      previewMat = buildPreviewMat(srcMat);
-      rotationAngles = {};
-      fileName = url.split('/').pop();
-      els.dropZone.className = 'drop-zone ready';
-      els.dropZone.textContent = 'サンプル: ' + fileName + '\n（ドロップまたは選択で差替可）';
-      setStatus('サンプル画像を読み込みました', 'ok');
-      analyzeAndPreview();
-    };
-    img.onerror = function () { setStatus('サンプル画像の読み込みに失敗しました。', 'error'); };
-    img.src = url;
   }
 
   function rotateSelected(delta) {
@@ -367,40 +361,27 @@
     if (!sel) return;
     const idx = Number(sel) - 1;
     rotationAngles[idx] = ((rotationAngles[idx] || 0) + delta + 360) % 360;
-    setStatus('写真 ' + sel + ' を ' + delta + '度 回転調整しました。');
+    setStatus('写真 ' + sel + ' を ' + delta + '度 回転しました。');
     analyzeAndPreview();
   }
 
-  function resetApp() {
+  els.dropZone.addEventListener('click', function () { els.fileInput.click(); });
+  els.fileInput.addEventListener('change', function () {
+    if (els.fileInput.files[0]) loadFromFile(els.fileInput.files[0]);
+  });
+  els.sliderThresh.addEventListener('input', scheduleAnalyze);
+  els.sliderInset.addEventListener('input', scheduleAnalyze);
+  els.btnRotLeft.addEventListener('click', function () { rotateSelected(-90); });
+  els.btnRotRight.addEventListener('click', function () { rotateSelected(90); });
+  els.btnSample.addEventListener('click', function () { loadFromUrl(SAMPLE); });
+  els.btnReset.addEventListener('click', function () {
     rotationAngles = {};
     els.sliderThresh.value = 40;
     els.sliderInset.value = 5;
     loadFromUrl(SAMPLE);
-    setStatus('設定をリセットしました。');
-  }
-
-  els.fileInput.addEventListener('change', function () {
-    if (els.fileInput.files[0]) loadImageFromFile(els.fileInput.files[0]);
   });
 
-  els.sliderThresh.addEventListener('input', analyzeAndPreview);
-  els.sliderInset.addEventListener('input', analyzeAndPreview);
-  els.btnRotLeft.addEventListener('click', function () { rotateSelected(-90); });
-  els.btnRotRight.addEventListener('click', function () { rotateSelected(90); });
-  els.btnSample.addEventListener('click', function () { loadFromUrl(SAMPLE); });
-  els.btnReset.addEventListener('click', resetApp);
-
-  ['dragenter', 'dragover'].forEach(function (ev) {
-    els.dropZone.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); });
-    document.body.addEventListener(ev, function (e) { e.preventDefault(); });
-  });
-  els.dropZone.addEventListener('drop', function (e) {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) loadImageFromFile(file);
-  });
-
-  waitForCv();
+  loadFromUrl(SAMPLE);
 })();
 </script>
 </body>
