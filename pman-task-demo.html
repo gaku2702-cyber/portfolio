@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PMAN 部署別タスク管理（体験版）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #1B3264; --navy-dark: #0F2347; --navy-pale: #E8EDF5;
+      --text-main: #232323; --text-sub: #6B7280;
+      --border: #E2E4E9; --bg-page: #F3F4F6;
+      --mgr-header: #1565C0; --op-header: #2E7D32;
+    }
+    body { font-family: 'Noto Sans JP', 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); font-size: 13px; line-height: 1.55; }
+    .container { max-width: 720px; margin: 10px auto; background: #fff; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); overflow: hidden; min-height: calc(100vh - 20px); }
+    .header-meta { display: flex; align-items: center; background: var(--navy); color: #fff; padding: 0 12px; height: 44px; gap: 8px; }
+    h1 { font-size: 14px; font-weight: 700; color: #fff; flex: 1; line-height: 1.3; }
+    .btn-link { display: inline-block; padding: 5px 10px; background: rgba(255,255,255,0.18); color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); border-radius: 3px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+    .demo-notice { background: var(--navy-pale); border-bottom: 1px solid var(--border); padding: 8px 12px; font-size: 11px; color: var(--text-sub); line-height: 1.55; }
+    .demo-notice strong { color: var(--navy); }
+    .tab-bar { display: flex; border-bottom: 2px solid var(--border); background: #FAFAFA; }
+    .tab-btn { flex: 1; padding: 10px 8px; border: none; background: transparent; font-size: 12px; font-weight: 700; color: var(--text-sub); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .tab-btn.active { color: var(--navy); border-bottom-color: var(--navy); background: #fff; }
+    .panel { display: none; padding-bottom: 16px; }
+    .panel.active { display: block; }
+    .panel-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; color: #fff; font-size: 14px; font-weight: 700; }
+    .panel-header.mgr { background: var(--mgr-header); }
+    .panel-header.op { background: var(--op-header); }
+    .section { padding: 10px 12px; border-bottom: 1px solid #EEEEEE; }
+    .section-title { font-size: 11px; font-weight: 700; color: #37474F; margin-bottom: 8px; letter-spacing: 0.02em; }
+    label { display: block; font-size: 11px; color: #546E7A; margin-bottom: 3px; font-weight: 600; }
+    select, input[type="text"] { width: 100%; padding: 7px 8px; border: 1px solid #CFD8DC; border-radius: 4px; font-size: 12px; background: #fff; margin-bottom: 6px; }
+    select:focus, input:focus { outline: none; border-color: var(--mgr-header); box-shadow: 0 0 0 2px rgba(21,101,192,0.12); }
+    .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn { display: inline-block; width: 100%; padding: 8px; border: none; border-radius: 4px; font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn:hover:not(:disabled) { opacity: .85; }
+    .btn-reload { background: #37474F; color: white; margin-top: 4px; }
+    .btn-urgent { background: #C62828; color: white; }
+    .btn-walkin { background: #E65100; color: white; }
+    .btn-assign { background: #1565C0; color: white; width: auto; padding: 7px 12px; flex-shrink: 0; }
+    .btn-sm { padding: 6px 8px; font-size: 11px; }
+    .btn-start { background: #2E7D32; color: white; margin-top: 8px; }
+    .btn-end { background: #C62828; color: white; margin-top: 8px; }
+    .task-list { max-height: 340px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .task-row { border: 1px solid #E0E0E0; border-radius: 4px; padding: 8px; margin-bottom: 6px; cursor: pointer; background: #FAFAFA; transition: background .15s; }
+    .task-row:hover { background: #F5F5F5; }
+    .task-row.selected { background: #E3F2FD; border-color: #1565C0; }
+    .task-row.urgent { border-left: 4px solid #C62828; background: #FFF8F8; }
+    .task-row.walkin { border-left: 4px solid #E65100; background: #FFFAF5; }
+    .task-row.working { border-left: 4px solid #2E7D32; background: #F5FFF5; }
+    .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .task-id { font-weight: 700; font-size: 11px; color: #1565C0; word-break: break-all; }
+    .score-badge { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 8px; background: #1565C0; color: white; flex-shrink: 0; margin-left: 4px; }
+    .score-badge.high { background: #C62828; }
+    .task-info { font-size: 11px; color: #424242; }
+    .status-tag { display: inline-block; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 600; }
+    .s-未着手 { background: #ECEFF1; color: #546E7A; }
+    .s-割当済 { background: #E1F5FE; color: #0277BD; }
+    .s-作業中 { background: #E8F5E9; color: #2E7D32; }
+    .s-完了 { background: #F5F5F5; color: #9E9E9E; }
+    .s-保留 { background: #FFF8E1; color: #F57F17; }
+    .flag-tags { margin-top: 2px; }
+    .flag-tag { display: inline-block; font-size: 9px; padding: 1px 4px; border-radius: 3px; margin-right: 2px; }
+    .f-urgent { background: #C62828; color: white; }
+    .f-walkin { background: #E65100; color: white; }
+    .action-panel { border-top: 2px solid #E3F2FD; padding-top: 10px; margin-top: 4px; }
+    .action-title { font-size: 11px; font-weight: 700; color: #37474F; margin-bottom: 8px; }
+    .assign-row { display: flex; gap: 6px; align-items: flex-end; }
+    .assign-row select { margin: 0; flex: 1; }
+    .flag-btns { display: flex; gap: 6px; margin-top: 6px; }
+    .flag-btns .btn { flex: 1; }
+    .msg { padding: 7px 10px; border-radius: 4px; margin-top: 6px; font-size: 11px; }
+    .msg-ok { background: #E8F5E9; color: #1B5E20; }
+    .msg-err { background: #FFEBEE; color: #B71C1C; }
+    .loading { text-align: center; color: #9E9E9E; padding: 20px; font-size: 12px; }
+    .count-badge { font-size: 11px; color: #9E9E9E; margin-left: 4px; font-weight: 400; }
+    .divider { height: 1px; background: #EEEEEE; margin: 6px 0; }
+    .task-card { border: 1px solid #E0E0E0; border-radius: 6px; padding: 10px; background: #FAFAFA; }
+    .task-card.urgent { border-left: 4px solid #C62828; background: #FFF8F8; }
+    .task-card.walkin { border-left: 4px solid #E65100; background: #FFFAF5; }
+    .task-card.working { border-left: 4px solid #2E7D32; background: #F5FFF5; }
+    .badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-right: 4px; margin-bottom: 4px; font-weight: 600; }
+    .badge-urgent { background: #C62828; color: white; }
+    .badge-walkin { background: #E65100; color: white; }
+    .badge-working { background: #2E7D32; color: white; }
+    .badge-score { background: #1565C0; color: white; }
+    .task-label { font-size: 10px; color: #757575; margin-bottom: 2px; }
+    .task-value { font-size: 13px; font-weight: 600; color: #212121; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .timer { font-size: 22px; font-weight: 700; text-align: center; color: #2E7D32; letter-spacing: 2px; padding: 8px 0; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header-meta">
+    <h1>PMAN 部署別タスク管理（体験版）</h1>
+    <a href="index.html" class="btn-link">← ポートフォリオ</a>
+  </div>
+  <div class="demo-notice">
+    <strong>体験版・開発中：</strong> 本番は Google スプレッドシート + GAS + Python RPA 連携です。ここではサンプルデータで管理者・オペレーター操作を再現しています。
+  </div>
+
+  <div class="tab-bar">
+    <button type="button" class="tab-btn active" data-tab="manager">👔 管理者パネル</button>
+    <button type="button" class="tab-btn" data-tab="operator">👷 オペレーターパネル</button>
+  </div>
+
+  <!-- 管理者パネル -->
+  <div id="panelManager" class="panel active">
+    <div class="panel-header mgr"><span>👔</span><span>管理者パネル</span></div>
+    <div class="section">
+      <div class="section-title">フィルター</div>
+      <div class="filter-row">
+        <div>
+          <label for="deptFilter">部署</label>
+          <select id="deptFilter"></select>
+        </div>
+        <div>
+          <label for="statusFilter">ステータス</label>
+          <select id="statusFilter"></select>
+        </div>
+      </div>
+      <button type="button" class="btn btn-reload" id="btnReloadTasks">🔄 再読み込み</button>
+    </div>
+    <div class="section">
+      <div class="section-title">タスク一覧 <span class="count-badge" id="countBadge"></span></div>
+      <div class="task-list" id="taskList"><div class="loading">読み込み中...</div></div>
+    </div>
+    <div class="section" id="actionSection" style="display:none;">
+      <div class="action-panel">
+        <div class="action-title" id="actionTitle">タスク操作</div>
+        <div class="flag-btns">
+          <button type="button" class="btn btn-urgent btn-sm" id="btnUrgent">🚨 至急</button>
+          <button type="button" class="btn btn-walkin btn-sm" id="btnWalkin">⚡ 飛び込み</button>
+        </div>
+        <div class="divider"></div>
+        <label for="operatorAssign">オペレーター割り当て</label>
+        <div class="assign-row">
+          <select id="operatorAssign"></select>
+          <button type="button" class="btn btn-assign btn-sm" id="btnAssign">割当</button>
+        </div>
+        <div id="actionMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- オペレーターパネル -->
+  <div id="panelOperator" class="panel">
+    <div class="panel-header op"><span>👷</span><span>オペレーターパネル</span></div>
+    <div class="section">
+      <div class="section-title">オペレーター</div>
+      <label for="operatorSelect">担当者を選択</label>
+      <select id="operatorSelect">
+        <option value="">-- 選択してください --</option>
+      </select>
+    </div>
+    <div class="section">
+      <div class="section-title">割当タスクを選択</div>
+      <label for="taskSelect">タスク（本番はシートセル選択）</label>
+      <select id="taskSelect" disabled>
+        <option value="">-- オペレーターを先に選択 --</option>
+      </select>
+      <div id="taskArea" style="margin-top:10px;">
+        <div class="loading">タスクを選択してください</div>
+      </div>
+    </div>
+    <div class="section" id="workSection" style="display:none;">
+      <div class="section-title">作業</div>
+      <div id="startBlock">
+        <label for="menuSelect">作業メニューを選択</label>
+        <select id="menuSelect">
+          <option value="">-- 選択してください --</option>
+        </select>
+        <button type="button" class="btn btn-start" id="btnStart" disabled>▶ 作業開始</button>
+      </div>
+      <div id="endBlock" style="display:none;">
+        <div class="timer" id="timerDisplay">00:00:00</div>
+        <div class="divider"></div>
+        <label for="completionSelect">完了ステータス</label>
+        <select id="completionSelect">
+          <option value="正常完了">✅ 正常完了</option>
+          <option value="再作業">🔄 再作業</option>
+          <option value="外注">📦 外注</option>
+          <option value="保留">⏸ 保留</option>
+          <option value="キャンセル">❌ キャンセル</option>
+        </select>
+        <label for="memoInput">備考（任意）</label>
+        <input type="text" id="memoInput" placeholder="メモを入力...">
+        <button type="button" class="btn btn-end" id="btnEnd">⏹ 作業終了</button>
+      </div>
+    </div>
+    <div class="section"><div id="msgArea"></div></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const MOCK_FALLBACK = {"operators":[{"id":"op01","name":"田中 一郎","dept":"製本課"},{"id":"op02","name":"佐藤 花子","dept":"制作課"},{"id":"op03","name":"鈴木 健太","dept":"印刷課"},{"id":"op04","name":"高橋 美咲","dept":"製本課"},{"id":"op05","name":"伊藤 大輔","dept":"制作課"}],"workMenus":[{"id":"m01","name":"丁合・裁断","defaultMins":30},{"id":"m02","name":"製本・綴じ","defaultMins":45},{"id":"m03","name":"表紙印刷","defaultMins":20},{"id":"m04","name":"データ修正","defaultMins":15},{"id":"m05","name":"最終チェック","defaultMins":10}],"tasks":[{"taskId":"A2024-0156-SEIHON-001","orderNo":"A2024-0156","deptName":"製本課","processName":"製本","workName":"無線綴じ","customer":"株式会社ABC出版","productName":"月刊ガイドブック 4月号","partName":"本文","quantity":500,"deadline":"2026-07-08","status":"未着手","operator":"","operatorId":"","urgentFlag":false,"walkinFlag":false,"priorityScore":120},{"taskId":"A2024-0189-INSATSU-002","orderNo":"A2024-0189","deptName":"印刷課","processName":"印刷","workName":"4/6 カラー印刷","customer":"有限会社デザイン工房","productName":"会社案内パンフレット","partName":"中面","quantity":3000,"deadline":"2026-07-06","status":"割当済","operator":"鈴木 健太","operatorId":"op03","urgentFlag":true,"walkinFlag":false,"priorityScore":620},{"taskId":"A2024-0201-SEISAKU-001","orderNo":"A2024-0201","deptName":"制作課","processName":"制作","workName":"レイアウト調整","customer":"医療法人さくら会","productName":"患者向けリーフレット","partName":"表4","quantity":1,"deadline":"2026-07-10","status":"未着手","operator":"","operatorId":"","urgentFlag":false,"walkinFlag":true,"priorityScore":380},{"taskId":"B2024-0042-SEIHON-003","orderNo":"B2024-0042","deptName":"製本課","processName":"製本","workName":"中綴じ","customer":"学校法人テクノ学院","productName":"入学案内2026","partName":"冊子本体","quantity":800,"deadline":"2026-07-12","status":"作業中","operator":"田中 一郎","operatorId":"op01","urgentFlag":false,"walkinFlag":false,"priorityScore":95,"startTime":null},{"taskId":"B2024-0055-INSATSU-001","orderNo":"B2024-0055","deptName":"印刷課","processName":"印刷","workName":"表紙 1C+1C","customer":"株式会社リテールリンク","productName":"夏季セールチラシ","partName":"表紙","quantity":10000,"deadline":"2026-07-05","status":"割当済","operator":"鈴木 健太","operatorId":"op03","urgentFlag":true,"walkinFlag":true,"priorityScore":780},{"taskId":"C2024-0088-SEISAKU-002","orderNo":"C2024-0088","deptName":"制作課","processName":"制作","workName":"画像レタッチ","customer":"NPO法人みらい","productName":"年次報告書2025","partName":"写真ページ","quantity":1,"deadline":"2026-07-15","status":"割当済","operator":"佐藤 花子","operatorId":"op02","urgentFlag":false,"walkinFlag":false,"priorityScore":75},{"taskId":"C2024-0091-SEIHON-002","orderNo":"C2024-0091","deptName":"製本課","processName":"製本","workName":"折り・丁合","customer":"株式会社ABC出版","productName":"月刊ガイドブック 4月号","partName":"折込チラシ","quantity":500,"deadline":"2026-07-09","status":"未着手","operator":"","operatorId":"","urgentFlag":false,"walkinFlag":false,"priorityScore":110},{"taskId":"D2024-0012-SEISAKU-003","orderNo":"D2024-0012","deptName":"制作課","processName":"制作","workName":"PDF出力・入稿","customer":"有限会社デザイン工房","productName":"会社案内パンフレット","partName":"全ページ","quantity":1,"deadline":"2026-07-07","status":"完了","operator":"伊藤 大輔","operatorId":"op05","urgentFlag":false,"walkinFlag":false,"priorityScore":0},{"taskId":"D2024-0033-INSATSU-003","orderNo":"D2024-0033","deptName":"印刷課","processName":"印刷","workName":"両面モノクロ","customer":"医療法人さくら会","productName":"院内掲示板用資料","partName":"A4","quantity":200,"deadline":"2026-07-11","status":"保留","operator":"鈴木 健太","operatorId":"op03","urgentFlag":false,"walkinFlag":false,"priorityScore":60}]};
+
+  let operators = [];
+  let workMenus = [];
+  let tasks = [];
+  let allTasks = [];
+  let selectedTaskId = null;
+  let selectedUrgent = false;
+  let selectedWalkIn = false;
+  let currentOpTaskId = null;
+  let workingStartTime = null;
+  let timerInterval = null;
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function isOverdue(deadline) {
+    if (!deadline) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const d = new Date(deadline + 'T00:00:00');
+    return d < today;
+  }
+
+  function recalcScore(task) {
+    let base = 50;
+    const dl = task.deadline ? new Date(task.deadline + 'T00:00:00') : null;
+    if (dl) {
+      const days = Math.ceil((dl - new Date()) / 86400000);
+      if (days <= 1) base += 200;
+      else if (days <= 3) base += 120;
+      else if (days <= 7) base += 60;
+    }
+    if (task.urgentFlag) base += 300;
+    if (task.walkinFlag) base += 200;
+    if (task.status === '完了') return 0;
+    task.priorityScore = base;
+  }
+
+  function getTask(id) {
+    return tasks.find(t => t.taskId === id);
+  }
+
+  function showMsg(el, text, ok) {
+    el.innerHTML = text ? '<div class="msg ' + (ok ? 'msg-ok' : 'msg-err') + '">' + esc(text) + '</div>' : '';
+  }
+
+  async function loadData() {
+    try {
+      const res = await fetch('assets/demo/pman-task-mock.json');
+      if (!res.ok) throw new Error('fetch failed');
+      const data = await res.json();
+      operators = data.operators.slice();
+      workMenus = data.workMenus.slice();
+      tasks = JSON.parse(JSON.stringify(data.tasks));
+    } catch (_) {
+      operators = MOCK_FALLBACK.operators.slice();
+      workMenus = MOCK_FALLBACK.workMenus.slice();
+      tasks = JSON.parse(JSON.stringify(MOCK_FALLBACK.tasks));
+    }
+    tasks.forEach(recalcScore);
+    initManager();
+    initOperator();
+  }
+
+  // ─── Tabs ───────────────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab === 'manager' ? 'panelManager' : 'panelOperator').classList.add('active');
+      if (btn.dataset.tab === 'operator') refreshOperatorTaskList();
+    });
+  });
+
+  // ─── Manager ────────────────────────────────────────────
+  function initManager() {
+    const depts = ['全部署', ...new Set(tasks.map(t => t.deptName))];
+    const statuses = ['全ステータス', '未着手', '割当済', '作業中', '完了', '保留'];
+    const deptSel = document.getElementById('deptFilter');
+    const statusSel = document.getElementById('statusFilter');
+    deptSel.innerHTML = depts.map(d => '<option value="' + esc(d) + '">' + esc(d) + '</option>').join('');
+    statusSel.innerHTML = statuses.map(s => '<option value="' + esc(s) + '">' + esc(s) + '</option>').join('');
+    deptSel.addEventListener('change', loadTasks);
+    statusSel.addEventListener('change', loadTasks);
+    document.getElementById('btnReloadTasks').addEventListener('click', loadTasks);
+    document.getElementById('btnUrgent').addEventListener('click', doToggleUrgent);
+    document.getElementById('btnWalkin').addEventListener('click', doToggleWalkIn);
+    document.getElementById('btnAssign').addEventListener('click', doAssign);
+    loadTasks();
+  }
+
+  function loadTasks() {
+    const dept = document.getElementById('deptFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    allTasks = tasks.filter(t => {
+      if (dept !== '全部署' && t.deptName !== dept) return false;
+      if (status !== '全ステータス' && t.status !== status) return false;
+      return true;
+    });
+    allTasks.sort((a, b) => b.priorityScore - a.priorityScore);
+    renderTaskList(allTasks);
+    if (selectedTaskId) {
+      const still = allTasks.find(t => t.taskId === selectedTaskId);
+      if (!still) {
+        selectedTaskId = null;
+        document.getElementById('actionSection').style.display = 'none';
+      }
+    }
+  }
+
+  function renderTaskList(list) {
+    const el = document.getElementById('taskList');
+    document.getElementById('countBadge').textContent = list.length + '件';
+    if (!list.length) {
+      el.innerHTML = '<div class="loading">タスクがありません</div>';
+      return;
+    }
+    el.innerHTML = list.map(t => {
+      let rowClass = 'task-row';
+      if (t.urgentFlag) rowClass += ' urgent';
+      else if (t.walkinFlag) rowClass += ' walkin';
+      if (t.status === '作業中') rowClass += ' working';
+      if (t.taskId === selectedTaskId) rowClass += ' selected';
+      const scoreClass = t.priorityScore >= 500 ? ' high' : '';
+      const flags = [
+        t.urgentFlag ? '<span class="flag-tag f-urgent">至急</span>' : '',
+        t.walkinFlag ? '<span class="flag-tag f-walkin">飛び込み</span>' : ''
+      ].join('');
+      const dlColor = isOverdue(t.deadline) ? '#C62828' : '#555';
+      return '<div class="' + rowClass + '" data-task-id="' + esc(t.taskId) + '">' +
+        '<div class="task-header"><span class="task-id">' + esc(t.taskId) + '</span>' +
+        '<span class="score-badge' + scoreClass + '">P:' + t.priorityScore + '</span></div>' +
+        '<div class="task-info"><span class="status-tag s-' + esc(t.status) + '">' + esc(t.status) + '</span>' +
+        (t.operator ? '<span style="margin-left:4px;color:#1565C0;">👤 ' + esc(t.operator) + '</span>' : '') +
+        (t.deadline ? '<span style="margin-left:4px;color:' + dlColor + ';">📅 ' + esc(t.deadline) + '</span>' : '') +
+        '</div><div class="task-info" style="margin-top:3px;"><strong>' + esc(t.deptName) + '</strong> ｜ ' + esc(t.processName) + ' ｜ ' + esc(t.workName) + '</div>' +
+        '<div class="task-info" style="font-size:10px;margin-top:2px;color:#757575;">' + esc(t.customer) + ' / ' + esc(t.productName) + '</div>' +
+        (flags ? '<div class="flag-tags">' + flags + '</div>' : '') + '</div>';
+    }).join('');
+    el.querySelectorAll('.task-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const id = row.dataset.taskId;
+        const task = getTask(id);
+        if (!task) return;
+        selectTask(id, task.urgentFlag, task.walkinFlag, row);
+      });
+    });
+  }
+
+  function selectTask(taskId, urgent, walkin, rowEl) {
+    selectedTaskId = taskId;
+    selectedUrgent = urgent;
+    selectedWalkIn = walkin;
+    document.querySelectorAll('.task-row').forEach(el => el.classList.remove('selected'));
+    if (rowEl) rowEl.classList.add('selected');
+    document.getElementById('actionSection').style.display = 'block';
+    document.getElementById('actionTitle').textContent = 'タスク: ' + taskId;
+    document.getElementById('btnUrgent').textContent = urgent ? '🚨 至急解除' : '🚨 至急セット';
+    document.getElementById('btnWalkin').textContent = walkin ? '⚡ 飛込解除' : '⚡ 飛込セット';
+    showMsg(document.getElementById('actionMsg'), '', true);
+    const task = getTask(taskId);
+    loadOperatorsForAssign(task ? task.deptName : '');
+  }
+
+  function loadOperatorsForAssign(deptName) {
+    const sel = document.getElementById('operatorAssign');
+    const ops = operators.filter(o => !deptName || o.dept === deptName);
+    sel.innerHTML = '<option value="">-- オペレーターを選択 --</option>' +
+      ops.map(o => '<option value="' + esc(o.id) + '">' + esc(o.name) + ' (' + esc(o.dept) + ')</option>').join('');
+  }
+
+  function doToggleUrgent() {
+    if (!selectedTaskId) return;
+    const task = getTask(selectedTaskId);
+    task.urgentFlag = !task.urgentFlag;
+    selectedUrgent = task.urgentFlag;
+    recalcScore(task);
+    document.getElementById('btnUrgent').textContent = task.urgentFlag ? '🚨 至急解除' : '🚨 至急セット';
+    showMsg(document.getElementById('actionMsg'), task.urgentFlag ? '至急フラグを ON にしました' : '至急フラグを OFF にしました', true);
+    loadTasks();
+    const row = document.querySelector('.task-row[data-task-id="' + CSS.escape(selectedTaskId) + '"]');
+    if (row) row.classList.add('selected');
+  }
+
+  function doToggleWalkIn() {
+    if (!selectedTaskId) return;
+    const task = getTask(selectedTaskId);
+    task.walkinFlag = !task.walkinFlag;
+    selectedWalkIn = task.walkinFlag;
+    recalcScore(task);
+    document.getElementById('btnWalkin').textContent = task.walkinFlag ? '⚡ 飛込解除' : '⚡ 飛込セット';
+    showMsg(document.getElementById('actionMsg'), task.walkinFlag ? '飛び込みフラグを ON にしました' : '飛び込みフラグを OFF にしました', true);
+    loadTasks();
+    const row = document.querySelector('.task-row[data-task-id="' + CSS.escape(selectedTaskId) + '"]');
+    if (row) row.classList.add('selected');
+  }
+
+  function doAssign() {
+    if (!selectedTaskId) return;
+    const opId = document.getElementById('operatorAssign').value;
+    if (!opId) {
+      showMsg(document.getElementById('actionMsg'), 'オペレーターを選択してください', false);
+      return;
+    }
+    const op = operators.find(o => o.id === opId);
+    const task = getTask(selectedTaskId);
+    task.operatorId = opId;
+    task.operator = op.name;
+    if (task.status === '未着手') task.status = '割当済';
+    showMsg(document.getElementById('actionMsg'), op.name + ' に割り当てました', true);
+    loadTasks();
+    refreshOperatorTaskList();
+  }
+
+  // ─── Operator ───────────────────────────────────────────
+  function initOperator() {
+    const sel = document.getElementById('operatorSelect');
+    sel.innerHTML = '<option value="">-- 選択してください --</option>' +
+      operators.map(o => '<option value="' + esc(o.id) + '">' + esc(o.name) + ' (' + esc(o.dept) + ')</option>').join('');
+    sel.addEventListener('change', onOperatorChange);
+    document.getElementById('taskSelect').addEventListener('change', onTaskSelectChange);
+    document.getElementById('menuSelect').addEventListener('change', function () {
+      document.getElementById('btnStart').disabled = !this.value;
+    });
+    document.getElementById('btnStart').addEventListener('click', doStartWork);
+    document.getElementById('btnEnd').addEventListener('click', doEndWork);
+    fillWorkMenus();
+  }
+
+  function fillWorkMenus() {
+    const sel = document.getElementById('menuSelect');
+    sel.innerHTML = '<option value="">-- 選択してください --</option>' +
+      workMenus.map(m => '<option value="' + esc(m.id) + '">' + esc(m.name) + (m.defaultMins ? ' (約' + m.defaultMins + '分)' : '') + '</option>').join('');
+  }
+
+  function onOperatorChange() {
+    refreshOperatorTaskList();
+    document.getElementById('taskArea').innerHTML = '<div class="loading">タスクを選択してください</div>';
+    document.getElementById('workSection').style.display = 'none';
+    currentOpTaskId = null;
+    stopTimer();
+  }
+
+  function refreshOperatorTaskList() {
+    const opId = document.getElementById('operatorSelect').value;
+    const taskSel = document.getElementById('taskSelect');
+    if (!opId) {
+      taskSel.disabled = true;
+      taskSel.innerHTML = '<option value="">-- オペレーターを先に選択 --</option>';
+      return;
+    }
+    const mine = tasks.filter(t => t.operatorId === opId && t.status !== '完了');
+    taskSel.disabled = false;
+    if (!mine.length) {
+      taskSel.innerHTML = '<option value="">-- 割当タスクなし --</option>';
+      return;
+    }
+    taskSel.innerHTML = '<option value="">-- タスクを選択 --</option>' +
+      mine.map(t => '<option value="' + esc(t.taskId) + '">' + esc(t.taskId) + ' [' + esc(t.status) + ']</option>').join('');
+    if (currentOpTaskId && mine.some(t => t.taskId === currentOpTaskId)) {
+      taskSel.value = currentOpTaskId;
+    }
+  }
+
+  function onTaskSelectChange() {
+    const id = document.getElementById('taskSelect').value;
+    if (!id) {
+      document.getElementById('taskArea').innerHTML = '<div class="loading">タスクを選択してください</div>';
+      document.getElementById('workSection').style.display = 'none';
+      currentOpTaskId = null;
+      stopTimer();
+      return;
+    }
+    currentOpTaskId = id;
+    renderOperatorTask(getTask(id));
+  }
+
+  function renderOperatorTask(task) {
+    if (!task) return;
+    const area = document.getElementById('taskArea');
+    let cardClass = 'task-card';
+    let badges = '';
+    if (task.urgentFlag) { cardClass += ' urgent'; badges += '<span class="badge badge-urgent">至急</span>'; }
+    if (task.walkinFlag) { cardClass += ' walkin'; badges += '<span class="badge badge-walkin">飛び込み</span>'; }
+    if (task.status === '作業中') { cardClass += ' working'; badges += '<span class="badge badge-working">作業中</span>'; }
+    badges += '<span class="badge badge-score">P:' + task.priorityScore + '</span>';
+    const dlColor = isOverdue(task.deadline) ? '#C62828' : 'inherit';
+    area.innerHTML = '<div class="' + cardClass + '"><div style="margin-bottom:6px;">' + badges + '</div>' +
+      '<div class="info-grid"><div class="info-item"><div class="task-label">受注番号</div><div class="task-value">' + esc(task.orderNo) + '</div></div>' +
+      '<div class="info-item"><div class="task-label">納期</div><div class="task-value" style="color:' + dlColor + '">' + esc(task.deadline) + '</div></div></div>' +
+      '<div class="divider"></div><div class="task-label">得意先</div><div class="task-value" style="font-size:12px;">' + esc(task.customer) + '</div>' +
+      '<div class="task-label" style="margin-top:6px;">品名</div><div class="task-value" style="font-size:11px;">' + esc(task.productName) + '</div>' +
+      '<div class="divider"></div><div class="info-grid"><div class="info-item"><div class="task-label">部品名</div><div class="task-value">' + esc(task.partName) + '</div></div>' +
+      '<div class="info-item"><div class="task-label">工程</div><div class="task-value">' + esc(task.processName) + '</div></div></div>' +
+      '<div class="task-label" style="margin-top:6px;">作業名</div><div class="task-value">' + esc(task.workName) + '</div>' +
+      '<div class="task-label" style="margin-top:6px;">数量: ' + task.quantity + '  /  ステータス: ' + esc(task.status) + '</div></div>';
+    loadWorkMenu(task);
+  }
+
+  function loadWorkMenu(task) {
+    const workSection = document.getElementById('workSection');
+    workSection.style.display = 'block';
+    showMsg(document.getElementById('msgArea'), '', true);
+    if (task.status === '作業中') {
+      document.getElementById('startBlock').style.display = 'none';
+      document.getElementById('endBlock').style.display = 'block';
+      workingStartTime = task.startTime ? new Date(task.startTime) : new Date();
+      startTimer();
+      return;
+    }
+    if (task.status === '完了') {
+      workSection.style.display = 'none';
+      showMsg(document.getElementById('msgArea'), 'このタスクは完了済みです', true);
+      return;
+    }
+    document.getElementById('startBlock').style.display = 'block';
+    document.getElementById('endBlock').style.display = 'none';
+    document.getElementById('menuSelect').value = '';
+    document.getElementById('btnStart').disabled = true;
+    stopTimer();
+  }
+
+  function doStartWork() {
+    const menuId = document.getElementById('menuSelect').value;
+    if (!currentOpTaskId || !menuId) return;
+    const task = getTask(currentOpTaskId);
+    task.status = '作業中';
+    task.startTime = new Date().toISOString();
+    workingStartTime = new Date(task.startTime);
+    document.getElementById('startBlock').style.display = 'none';
+    document.getElementById('endBlock').style.display = 'block';
+    startTimer();
+    showMsg(document.getElementById('msgArea'), '作業を開始しました', true);
+    loadTasks();
+    refreshOperatorTaskList();
+    document.getElementById('taskSelect').value = currentOpTaskId;
+    renderOperatorTask(task);
+  }
+
+  function doEndWork() {
+    if (!currentOpTaskId) return;
+    const completion = document.getElementById('completionSelect').value;
+    const memo = document.getElementById('memoInput').value.trim();
+    const task = getTask(currentOpTaskId);
+    stopTimer();
+    if (completion === '正常完了') {
+      task.status = '完了';
+      recalcScore(task);
+    } else if (completion === '保留') {
+      task.status = '保留';
+    } else if (completion === '再作業') {
+      task.status = '割当済';
+    } else {
+      task.status = '割当済';
+    }
+    task.startTime = null;
+    document.getElementById('memoInput').value = '';
+    let msg = '作業終了: ' + completion;
+    if (memo) msg += '（' + memo + '）';
+    showMsg(document.getElementById('msgArea'), msg, true);
+    loadTasks();
+    refreshOperatorTaskList();
+    if (task.status === '完了') {
+      document.getElementById('workSection').style.display = 'none';
+      document.getElementById('taskArea').innerHTML = '<div class="loading">タスクが完了しました</div>';
+      currentOpTaskId = null;
+    } else {
+      document.getElementById('taskSelect').value = currentOpTaskId;
+      renderOperatorTask(task);
+    }
+  }
+
+  function startTimer() {
+    stopTimer();
+    updateTimerDisplay();
+    timerInterval = setInterval(updateTimerDisplay, 1000);
+  }
+
+  function stopTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    document.getElementById('timerDisplay').textContent = '00:00:00';
+  }
+
+  function updateTimerDisplay() {
+    if (!workingStartTime) return;
+    const sec = Math.floor((Date.now() - workingStartTime.getTime()) / 1000);
+    const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+    const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').textContent = h + ':' + m + ':' + s;
+  }
+
+  loadData();
+})();
+</script>
+</body>
+</html>
