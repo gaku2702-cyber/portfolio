@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>【公式】進捗統合管理ダッシュボード</title>
+  <style>
+    body { font-family: "Helvetica Neue", Arial, sans-serif; background-color: #f0f2f5; color: #333; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    
+    /* ★ 公式ツールっぽいヘッダー帯に変更 */
+    h1 { background-color: #0044cc; color: #fff; padding: 15px 20px; font-size: 1.4rem; margin: -25px -25px 20px -25px; border-radius: 8px 8px 0 0; }
+    
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 0.95rem; }
+    input[type="text"], select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }
+    textarea { resize: vertical; height: 100px; line-height: 1.4; }
+    
+    .row { display: flex; gap: 15px; } .col { flex: 1; }
+    
+    button { background-color: #0044cc; color: white; border: none; padding: 12px 20px; font-size: 1rem; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+    button:hover { background-color: #003399; }
+    .btn-search { background-color: #f39c12; width: auto; white-space: nowrap; } .btn-search:hover { background-color: #e67e22; }
+    
+    .auto-fill-area { background-color: #eef5ff; padding: 15px; border-radius: 4px; border: 1px dashed #0044cc; margin-bottom: 20px; }
+    .auto-fill-area input { background-color: #f9f9f9; }
+
+    .toggle-group { display: flex; gap: 10px; }
+    .btn-toggle { background-color: #f0f0f0; color: #555; border: 1px solid #ccc; padding: 10px; }
+    .btn-toggle.active { background-color: #e67e22; color: white; border-color: #d35400; }
+    
+    .schedule-wrapper { overflow-x: auto; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px; display: none; }
+    .schedule-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+    .schedule-table th, .schedule-table td { border: 1px solid #ddd; padding: 5px; text-align: center; }
+    .schedule-table th { background-color: #fff3e0; font-size: 0.85rem; color: #d35400; white-space: nowrap; }
+    .schedule-table td input { width: 100%; padding: 8px 5px; box-sizing: border-box; font-size: 0.9rem; text-align: center; border: 1px solid transparent; background: transparent; }
+    .schedule-table td input:focus { outline: 2px solid #e67e22; background: #fff; border-radius: 4px;}
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📋 進捗統合管理システム (入力アシストツール)</h1>
+  <p style="font-size: 0.9rem; color: #666; margin-top: 0; margin-bottom: 20px;">
+    本システムは、進捗状況の記録および現場オペレーターへの作業手配を自動化・補助する公式ツールです。<br>
+    <span style="color: #d35400; font-weight: bold;">※本ツールの利用は任意です。日々の業務効率化・入力の省力化にご活用ください。</span>
+  </p>
+
+  <div class="form-group" style="display: flex; gap: 10px; align-items: flex-end;">
+    <div style="flex: 1;"><label>🔍 受注番号 (8桁)</label><input type="text" id="p-order-id" placeholder="例: 12345678"></div>
+    <button class="btn-search" onclick="searchBackup()">⚡ CSVから情報取得</button>
+  </div>
+
+  <div class="auto-fill-area">
+    <div class="row">
+      <div class="col form-group"><label>顧客名</label><input type="text" id="p-client" readonly></div>
+      <div class="col form-group"><label>営業 (姓)</label><input type="text" id="p-eigyo" readonly></div>
+    </div>
+    <div class="form-group"><label>品名</label><input type="text" id="p-job" readonly></div>
+  </div>
+
+  <div class="row">
+    <div class="col form-group"><label>👤 主OP</label><select id="p-main-op"><option value="">選択してください</option></select></div>
+    <div class="col form-group"><label>👥 準OP</label><select id="p-sub-op"><option value="">選択してください</option></select></div>
+  </div>
+
+  <div class="row">
+    <div class="col form-group"><label>サイズ</label><input type="text" id="p-size" placeholder="自動入力されます"></div>
+    <div class="col form-group"><label>カラー</label><input type="text" id="p-color" placeholder="自動入力されます"></div>
+    <div class="col form-group"><label>頁</label><input type="text" id="p-page" placeholder="自動入力されます"></div>
+  </div>
+
+  <div class="form-group">
+    <label>📝 特記事項・指示 (※ロット・用紙・工程などが自動結合されます)</label>
+    <textarea id="p-memo"></textarea>
+  </div>
+
+  <div class="form-group" style="margin-top:25px; border-top: 2px solid #eee; padding-top: 15px;">
+    <label>📅 進捗・校正スケジュール</label>
+    <div class="toggle-group">
+      <button type="button" id="btn-kousei-yes" class="btn-toggle active" onclick="toggleKousei('あり')">📝 校正あり</button>
+      <button type="button" id="btn-kousei-no" class="btn-toggle" onclick="toggleKousei('なし')">🏁 校正なし (責了下版)</button>
+    </div>
+    <input type="hidden" id="p-kousei-type" value="あり">
+
+    <div id="schedule-area" class="schedule-wrapper" style="display: block;">
+      <table class="schedule-table">
+        <tr>
+          <th>入稿</th><th>初出</th><th>初戻</th><th>再出</th><th>再戻</th><th>三出</th><th>三戻</th><th>四出</th><th>責戻</th><th>下版</th><th style="background:#eef5ff; color:#0044cc;">納期</th>
+        </tr>
+        <tr>
+          <td><input type="text" id="sch-nyuko" placeholder="M/D"></td>
+          <td><input type="text" id="sch-sho-shutsu" placeholder="M/D"></td>
+          <td><input type="text" id="sch-sho-modori" placeholder="M/D"></td>
+          <td><input type="text" id="sch-sai-shutsu" placeholder="M/D"></td>
+          <td><input type="text" id="sch-sai-modori" placeholder="M/D"></td>
+          <td><input type="text" id="sch-san-shutsu" placeholder="M/D"></td>
+          <td><input type="text" id="sch-san-modori" placeholder="M/D"></td>
+          <td><input type="text" id="sch-yon-shutsu" placeholder="M/D"></td>
+          <td><input type="text" id="sch-seki-modori" placeholder="M/D"></td>
+          <td><input type="text" id="sch-gehan" placeholder="M/D"></td>
+          <td><input type="text" id="sch-nouki" readonly style="font-weight:bold; color:#0044cc;"></td>
+        </tr>
+      </table>
+      <p style="font-size:0.8rem; color:#888; margin:5px 0 0 5px;">※日付や時間は「7/15夕」のように自由に入力可能です。</p>
+    </div>
+  </div>
+
+  <button id="btn-save" onclick="saveData()" style="margin-top: 20px;">💾 統合データベースに登録する</button>
+
+</div>
+
+<script>
+  window.onload = function() {
+    setTodayNyuko();
+    google.script.run.withSuccessHandler(function(data) {
+      const mainSel = document.getElementById('p-main-op'); const subSel = document.getElementById('p-sub-op');
+      data.staffList.forEach(name => { mainSel.innerHTML += `<option value="${name}">${name}</option>`; subSel.innerHTML += `<option value="${name}">${name}</option>`; });
+    }).getProgressInitData();
+  };
+
+  function setTodayNyuko() {
+    const today = new Date();
+    document.getElementById('sch-nyuko').value = (today.getMonth() + 1) + "/" + today.getDate();
+  }
+
+  function toggleKousei(type) {
+    document.getElementById('p-kousei-type').value = type;
+    if(type === 'あり') {
+      document.getElementById('btn-kousei-yes').classList.add('active');
+      document.getElementById('btn-kousei-no').classList.remove('active');
+      document.getElementById('schedule-area').style.display = 'block';
+    } else {
+      document.getElementById('btn-kousei-yes').classList.remove('active');
+      document.getElementById('btn-kousei-no').classList.add('active');
+      document.getElementById('schedule-area').style.display = 'none';
+    }
+  }
+
+  function searchBackup() {
+    const orderId = document.getElementById('p-order-id').value;
+    if (!orderId) { alert("受注番号を入力してください"); return; }
+    
+    const resetIds = ['p-size','p-color','p-page','p-memo','sch-sho-shutsu','sch-sho-modori','sch-sai-shutsu','sch-sai-modori','sch-san-shutsu','sch-san-modori','sch-yon-shutsu','sch-seki-modori','sch-gehan','sch-nouki'];
+    resetIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; });
+    setTodayNyuko(); // 入稿日だけは本日にリセット
+    
+    document.getElementById('p-client').value = "⏳ 重複チェック＆検索中...";
+    google.script.run.withSuccessHandler(function(res) {
+      // ★ ブロック信号を受け取ったら、赤いアラートを出して強制終了！
+      if (res && res.isDuplicate) {
+        alert("🚨 エラー：受注番号「" + orderId + "」はすでに進捗作成済みです！\n二重登録はできません。");
+        document.getElementById('p-client').value = ""; // 入力欄をクリア
+        return;
+      }
+
+      // 通常の読み込み成功時
+      if(res) {
+        document.getElementById('p-client').value = res.clientName;
+        document.getElementById('p-job').value = res.jobName;
+        document.getElementById('p-eigyo').value = res.eigyo;
+        document.getElementById('p-size').value = res.size;
+        document.getElementById('p-color').value = res.color;
+        document.getElementById('p-page').value = res.page;
+        document.getElementById('p-memo').value = res.memo;
+        document.getElementById('sch-nouki').value = res.nouki;
+      } else {
+        alert("Backup_CSVの中に該当する受注番号が見つかりませんでした。");
+        document.getElementById('p-client').value = "";
+      }
+    }).searchBackupForProgress(orderId);
+  }
+
+
+function saveData() {
+    const orderId = document.getElementById('p-order-id').value;
+    if (!orderId) { alert("受注番号は必須です"); return; }
+
+    const btn = document.getElementById('btn-save'); btn.innerText = "⏳ 保存中..."; btn.disabled = true;
+
+    const pData = {
+      orderId: orderId, mainOp: document.getElementById('p-main-op').value, subOp: document.getElementById('p-sub-op').value,
+      clientName: document.getElementById('p-client').value, jobName: document.getElementById('p-job').value, eigyo: document.getElementById('p-eigyo').value,
+      size: document.getElementById('p-size').value, color: document.getElementById('p-color').value, page: document.getElementById('p-page').value,
+      memo: document.getElementById('p-memo').value,
+      kouseiType: document.getElementById('p-kousei-type').value,
+      nouki: document.getElementById('sch-nouki').value,
+      sch_nyuko: document.getElementById('sch-nyuko').value, sch_sho_shutsu: document.getElementById('sch-sho-shutsu').value, sch_sho_modori: document.getElementById('sch-sho-modori').value,
+      sch_sai_shutsu: document.getElementById('sch-sai-shutsu').value, sch_sai_modori: document.getElementById('sch-sai-modori').value, sch_san_shutsu: document.getElementById('sch-san-shutsu').value,
+      sch_san_modori: document.getElementById('sch-san-modori').value, sch_yon_shutsu: document.getElementById('sch-yon-shutsu').value, sch_seki_modori: document.getElementById('sch-seki-modori').value,
+      sch_gehan: document.getElementById('sch-gehan').value
+    };
+
+    google.script.run.withSuccessHandler(function(res) {
+      // ★ ロボットから「失敗」の報告書が届いた場合（二重ブロック発動！）
+      if (res && res.success === false) {
+        alert("🚨 " + res.message);
+        btn.innerText = "💾 統合データベースに登録する"; btn.disabled = false;
+        return; // ここでストップし、入力欄もクリアしない
+      }
+
+      // ★ ロボットから「成功」の報告書が届いた場合
+      alert("データベースに登録・更新しました！");
+      btn.innerText = "💾 統合データベースに登録する"; btn.disabled = false;
+      
+      const clearIds = ['p-order-id','p-client','p-job','p-eigyo','p-size','p-color','p-page','p-memo','p-main-op','p-sub-op',
+                        'sch-nyuko','sch-sho-shutsu','sch-sho-modori','sch-sai-shutsu','sch-sai-modori','sch-san-shutsu',
+                        'sch-san-modori','sch-yon-shutsu','sch-seki-modori','sch-gehan','sch-nouki'];
+      clearIds.forEach(id => document.getElementById(id).value = "");
+      setTodayNyuko(); 
+      
+    }).withFailureHandler(function(err) { 
+      // 通信自体が切れた場合
+      alert("通信エラー: " + err.message); 
+      btn.innerText = "💾 統合データベースに登録する"; btn.disabled = false; 
+    }).saveProgressData_Strict(pData);
+  }
+</script>
+</body>
+</html>

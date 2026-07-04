@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P-MAN × Google Workspace 連結DX提案書</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #1B3264;
+      --navy-dark: #0F2347;
+      --navy-pale: #E8EDF5;
+      --bg: #F3F4F6;
+      --text: #232323;
+      --muted: #6B7280;
+    }
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--navy);
+      color: #fff;
+      padding: 0 16px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-size: 14px;
+      font-weight: 700;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 3px;
+      background: rgba(255,255,255,0.12);
+      white-space: nowrap;
+    }
+    .header a:hover { background: rgba(255,255,255,0.22); }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: #fff;
+      border-bottom: 1px solid #E2E4E9;
+      flex-wrap: wrap;
+    }
+    .toolbar button {
+      cursor: pointer;
+      border: 1px solid var(--navy);
+      background: #fff;
+      color: var(--navy);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 7px 16px;
+      border-radius: 3px;
+      min-width: 88px;
+    }
+    .toolbar button:hover { background: var(--navy-pale); }
+    .toolbar button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-info {
+      font-size: 13px;
+      color: var(--muted);
+      min-width: 100px;
+      text-align: center;
+    }
+    .toolbar a.dl-link {
+      font-size: 12px;
+      color: var(--navy);
+      text-decoration: none;
+      margin-left: auto;
+    }
+    .toolbar a.dl-link:hover { text-decoration: underline; }
+    .stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow: hidden;
+      background: var(--navy-dark);
+    }
+    #viewer {
+      position: relative;
+      width: min(1100px, 100%);
+      max-height: calc(100vh - 150px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #page-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: calc(100vh - 150px);
+      object-fit: contain;
+      background: #fff;
+      border-radius: 2px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+      user-select: none;
+      -webkit-user-drag: none;
+      transition: opacity 0.18s ease;
+    }
+    #page-img.is-changing { opacity: 0.15; }
+    #viewer .nav-zone {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 18%;
+      cursor: pointer;
+      z-index: 2;
+    }
+    #viewer .nav-zone.prev { left: 0; }
+    #viewer .nav-zone.next { right: 0; }
+    #viewer .nav-zone:hover { background: rgba(255,255,255,0.06); }
+    #loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--bg);
+      z-index: 20;
+    }
+    #loading.hidden { display: none; }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--navy-pale);
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p { font-size: 13px; color: var(--muted); }
+    #error {
+      display: none;
+      padding: 24px;
+      text-align: center;
+      color: #721c24;
+      background: #f8d7da;
+      border-radius: 4px;
+      max-width: 480px;
+    }
+    .hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      padding: 8px 16px 12px;
+      background: var(--bg);
+    }
+    @media (max-width: 640px) {
+      .toolbar a.dl-link { margin-left: 0; width: 100%; text-align: center; }
+      #viewer .nav-zone { width: 22%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <h1>P-MAN × Google Workspace 連結DX提案書</h1>
+    <a href="index.html">← ポートフォリオへ</a>
+  </header>
+
+  <div class="toolbar">
+    <button type="button" id="btn-prev">← 前のページ</button>
+    <span class="page-info" id="page-info">読み込み中…</span>
+    <button type="button" id="btn-next">次のページ →</button>
+    <a class="dl-link" href="assets/docs/pman-google-workspace-dx-roadmap.pdf" target="_blank" rel="noopener">PDFをダウンロード</a>
+  </div>
+
+  <div class="stage">
+    <div id="viewer">
+      <div id="loading">
+        <div class="spinner"></div>
+        <p>提案書を読み込んでいます…</p>
+      </div>
+      <div id="error"></div>
+      <div class="nav-zone prev" id="zone-prev" title="前のページ"></div>
+      <img id="page-img" alt="提案書ページ" style="display:none;">
+      <div class="nav-zone next" id="zone-next" title="次のページ"></div>
+    </div>
+  </div>
+  <p class="hint">1ページずつ大きく表示。左右をクリック、ボタン、キーボード（← →）で切替</p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    const PDF_URL = 'assets/docs/pman-google-workspace-dx-roadmap.pdf';
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    let pageImages = [];
+    let currentIndex = 0;
+
+    const elLoading = document.getElementById('loading');
+    const elError = document.getElementById('error');
+    const elInfo = document.getElementById('page-info');
+    const elImg = document.getElementById('page-img');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const zonePrev = document.getElementById('zone-prev');
+    const zoneNext = document.getElementById('zone-next');
+
+    function displayMaxWidth() {
+      return Math.min(window.innerWidth - 32, 1100);
+    }
+
+    function updateControls() {
+      const cur = currentIndex + 1;
+      const total = pageImages.length;
+      elInfo.textContent = cur + ' / ' + total;
+      btnPrev.disabled = currentIndex <= 0;
+      btnNext.disabled = currentIndex >= total - 1;
+    }
+
+    function showPage(index) {
+      if (index < 0 || index >= pageImages.length) return;
+      currentIndex = index;
+      elImg.classList.add('is-changing');
+      setTimeout(function() {
+        elImg.src = pageImages[currentIndex];
+        elImg.classList.remove('is-changing');
+        updateControls();
+      }, 90);
+    }
+
+    function goPrev() { showPage(currentIndex - 1); }
+    function goNext() { showPage(currentIndex + 1); }
+
+    async function renderPdfPages(url) {
+      const pdf = await pdfjsLib.getDocument(url).promise;
+      const images = [];
+      const targetW = displayMaxWidth() * Math.min(window.devicePixelRatio || 1, 2);
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const vp1 = page.getViewport({ scale: 1 });
+        const scale = targetW / vp1.width;
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        images.push(canvas.toDataURL('image/jpeg', 0.94));
+        elLoading.querySelector('p').textContent =
+          '提案書を読み込んでいます… (' + i + ' / ' + pdf.numPages + ')';
+      }
+
+      return images;
+    }
+
+    btnPrev.addEventListener('click', goPrev);
+    btnNext.addEventListener('click', goNext);
+    zonePrev.addEventListener('click', goPrev);
+    zoneNext.addEventListener('click', goNext);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowLeft') goPrev();
+      if (e.key === 'ArrowRight') goNext();
+    });
+
+    async function start() {
+      try {
+        pageImages = await renderPdfPages(PDF_URL);
+        elLoading.classList.add('hidden');
+        elImg.style.display = 'block';
+        showPage(0);
+      } catch (err) {
+        elLoading.classList.add('hidden');
+        elError.style.display = 'block';
+        elError.textContent = '提案書の読み込みに失敗しました。PDFファイルのパスを確認してください。';
+        elInfo.textContent = '—';
+        console.error(err);
+      }
+    }
+
+    start();
+  </script>
+</body>
+</html>

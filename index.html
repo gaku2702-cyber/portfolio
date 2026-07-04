@@ -70,6 +70,47 @@
       box-shadow: 0 24px 48px rgba(27, 50, 100, 0.12);
     }
 
+    /* Works cover gallery */
+    .work-cover { display: block; }
+    .work-cover-img {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid #E2E4E9;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .work-cover:hover .work-cover-img {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(27, 50, 100, 0.12);
+    }
+    .work-cover-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      transition: transform 0.45s ease;
+    }
+    .work-cover:hover .work-cover-img img {
+      transform: scale(1.02);
+    }
+    .work-cover-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(15, 35, 71, 0.72) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem 1.1rem;
+    }
+    .work-cover:hover .work-cover-overlay,
+    .work-cover:focus-visible .work-cover-overlay {
+      opacity: 1;
+    }
+    button.work-cover { text-align: left; width: 100%; cursor: pointer; }
+
     /* Nav underline */
     .nav-link { position: relative; }
     .nav-link::after {
@@ -417,170 +458,120 @@
             <span class="text-xs tracking-[0.3em] text-[#1B3264] font-medium uppercase">Services &amp; Works</span>
           </div>
           <h2 class="reveal reveal-delay-1 text-[2rem] md:text-[2.6rem] font-light text-[#232323]">
-            サービス・<span class="text-[#1B3264] font-medium">開発実績</span>
+            提案・<span class="text-[#1B3264] font-medium">開発実績</span>
           </h2>
         </div>
         <p class="reveal reveal-delay-2 text-sm text-[#6B7280] md:text-right max-w-xs leading-relaxed">
-          現場の声をもとに開発した<br>自動化ツール群の一部をご紹介
+          アプリ画面・企画書の表紙から<br>成果物をご覧いただけます
         </p>
       </div>
 
-      <!-- Cards grid -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Cover gallery -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7">
 
-        <!-- Card 1 -->
-        <div class="reveal card-lift bg-white p-8 border border-[#E2E4E9]">
-          <div class="flex items-center justify-between mb-7">
-            <span class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase px-2.5 py-1 border border-[#1B3264]/30 bg-[#1B3264]/5">
-              DTP Automation
-            </span>
-            <div class="w-9 h-9 bg-[#1B3264] flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10m0-10a2 2 0 012 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
-              </svg>
+        <!-- Work 1: 面付シミュレーター -->
+        <a href="imposition-demo.html" target="_blank" rel="noopener"
+          class="reveal work-cover group">
+          <div class="work-cover-img">
+            <img src="assets/covers/imposition-demo.jpg"
+              alt="JFX200 面付シミュレーター — アプリ画面"
+              loading="lazy" width="960" height="540">
+            <div class="work-cover-overlay">
+              <span class="text-[12px] text-white font-medium tracking-wide flex items-center gap-1.5">
+                体験デモを開く
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </span>
             </div>
           </div>
-          <h3 class="text-[1.05rem] font-medium text-[#232323] mb-3 leading-snug">
-            JFX200 面付<br>シミュレーター
-          </h3>
-          <p class="text-[13px] text-[#6B7280] leading-relaxed mb-6">
-            UVインクジェット印刷（JFX200）向けに、原反サイズ・トンボ余白・ドブを考慮した
-            最適面付を自動算出する GAS ウェブアプリ。単品・ギャンギング・治具設計の
-            3モードに対応し、SVG プレビューと印刷通数を即時表示。
-            Google Sheets と連携しログ保存・見積連動も実装。
-          </p>
-          <div class="flex flex-wrap gap-1.5 mb-5">
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">GAS</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">JavaScript</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">SVG描画</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">面付アルゴリズム</span>
+          <div class="mt-3">
+            <p class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase">DTP Automation</p>
+            <h3 class="text-sm font-medium text-[#232323] mt-1 leading-snug">JFX200 面付シミュレーター</h3>
           </div>
-          <a href="imposition-demo.html" target="_blank"
-            class="inline-flex items-center gap-1.5 text-[12px] text-[#1B3264] font-medium tracking-wide group hover:opacity-70 transition-opacity">
-            体験デモを開く（ブラウザで動作）
-            <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-            </svg>
-          </a>
-        </div>
+        </a>
 
-        <!-- Card 2 -->
-        <div class="reveal reveal-delay-1 card-lift bg-white p-8 border border-[#E2E4E9]">
-          <div class="flex items-center justify-between mb-7">
-            <span class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase px-2.5 py-1 border border-[#1B3264]/30 bg-[#1B3264]/5">
-              Data Conversion
-            </span>
-            <div class="w-9 h-9 bg-[#1B3264] flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
+        <!-- Work 2: Word タグ付きテキスト -->
+        <button type="button" onclick="openModal('tool-detail')"
+          class="reveal reveal-delay-1 work-cover group">
+          <div class="work-cover-img">
+            <img src="assets/covers/word-tag-extractor.jpg"
+              alt="Wordデータのタグ付きテキスト化 — アプリ画面"
+              loading="lazy" width="960" height="540">
+            <div class="work-cover-overlay">
+              <span class="text-[12px] text-white font-medium tracking-wide flex items-center gap-1.5">
+                詳細・処理例を見る
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </span>
             </div>
           </div>
-          <h3 class="text-[1.05rem] font-medium text-[#232323] mb-3 leading-snug">
-            Wordデータの<br>タグ付きテキスト化
-          </h3>
-          <p class="text-[13px] text-[#6B7280] leading-relaxed mb-6">
-            Word の書式情報（スタイル・太字・色など）を解析し、InDesign 用タグ付きテキストへ
-            自動変換。手作業のミスと工数を劇的に削減。
-          </p>
-          <div class="flex flex-wrap gap-1.5">
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">Python</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">docx解析</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">InDesign</span>
+          <div class="mt-3">
+            <p class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase">Data Conversion</p>
+            <h3 class="text-sm font-medium text-[#232323] mt-1 leading-snug">Wordデータのタグ付きテキスト化</h3>
           </div>
-          <button onclick="openModal('tool-detail')"
-            class="mt-5 text-[12px] text-[#1B3264] font-medium tracking-wide flex items-center gap-1.5 group hover:opacity-70 transition-opacity">
-            詳細・処理例を見る
-            <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-            </svg>
-          </button>
-        </div>
+        </button>
 
-        <!-- Card 3 -->
-        <div class="reveal reveal-delay-2 card-lift bg-white p-8 border border-[#E2E4E9]">
-          <div class="flex items-center justify-between mb-7">
-            <span class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase px-2.5 py-1 border border-[#1B3264]/30 bg-[#1B3264]/5">
-              QA Workflow
-            </span>
-            <div class="w-9 h-9 bg-[#1B3264] flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-              </svg>
-            </div>
+        <!-- Work 3: 入稿チェック -->
+        <div class="reveal reveal-delay-2 work-cover">
+          <div class="work-cover-img">
+            <img src="assets/covers/indesign-qa.jpg"
+              alt="入稿チェック自動化スクリプト — アプリ画面"
+              loading="lazy" width="960" height="540">
           </div>
-          <h3 class="text-[1.05rem] font-medium text-[#232323] mb-3 leading-snug">
-            入稿チェック<br>自動化スクリプト
-          </h3>
-          <p class="text-[13px] text-[#6B7280] leading-relaxed mb-6">
-            InDesign ドキュメントを解析し、フォント・画像解像度・カラーモード・
-            オーバーフローなどを自動チェック。品質を担保しつつ確認工数を削減。
-          </p>
-          <div class="flex flex-wrap gap-1.5">
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">ExtendScript</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">InDesign</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">品質管理</span>
+          <div class="mt-3">
+            <p class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase">QA Workflow</p>
+            <h3 class="text-sm font-medium text-[#232323] mt-1 leading-snug">入稿チェック自動化スクリプト</h3>
           </div>
         </div>
 
-        <!-- Card 4 -->
-        <div class="reveal reveal-delay-3 card-lift bg-white p-8 border border-[#E2E4E9]">
-          <div class="flex items-center justify-between mb-7">
-            <span class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase px-2.5 py-1 border border-[#1B3264]/30 bg-[#1B3264]/5">
-              GAS / Sheets
-            </span>
-            <div class="w-9 h-9 bg-[#1B3264] flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-              </svg>
+        <!-- Work 4: P-MAN DX 提案書（PDF表紙 → PDF直接表示） -->
+        <a href="assets/docs/pman-google-workspace-dx-roadmap.pdf" target="_blank" rel="noopener"
+          class="reveal reveal-delay-3 work-cover group">
+          <div class="work-cover-img">
+            <img src="assets/covers/pman-dx-proposal.jpg"
+              alt="P-MAN × Google Workspace 連結 DX 提案 — 企画書表紙"
+              loading="lazy" width="1920" height="1080">
+            <div class="work-cover-overlay">
+              <span class="text-[12px] text-white font-medium tracking-wide flex items-center gap-1.5">
+                PDFを開く
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </span>
             </div>
           </div>
-          <h3 class="text-[1.05rem] font-medium text-[#232323] mb-3 leading-snug">
-            見積・進行管理<br>GAS システム
-          </h3>
-          <p class="text-[13px] text-[#6B7280] leading-relaxed mb-6">
-            Google Sheets と GAS を組み合わせた見積書・請求書自動生成システム。
-            案件ステータス管理・リマインダー通知機能を統合し、管理業務を一元化。
-          </p>
-          <div class="flex flex-wrap gap-1.5">
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">GAS</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">Sheets</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">業務効率化</span>
+          <div class="mt-3">
+            <p class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase">Smart Factory / DX</p>
+            <h3 class="text-sm font-medium text-[#232323] mt-1 leading-snug">P-MAN × Google Workspace 連結 DX 提案</h3>
           </div>
-        </div>
+        </a>
 
-        <!-- Card 5 -->
-        <div class="reveal reveal-delay-4 card-lift bg-white p-8 border border-[#E2E4E9]">
-          <div class="flex items-center justify-between mb-7">
-            <span class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase px-2.5 py-1 border border-[#1B3264]/30 bg-[#1B3264]/5">
-              DX Support
-            </span>
-            <div class="w-9 h-9 bg-[#1B3264] flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
+        <!-- Work 5: DX ヒアリング -->
+        <a href="#contact"
+          class="reveal reveal-delay-4 work-cover group">
+          <div class="work-cover-img">
+            <img src="assets/covers/dx-consulting.jpg"
+              alt="DX化ヒアリング &amp; ロードマップ策定"
+              loading="lazy" width="960" height="540">
+            <div class="work-cover-overlay">
+              <span class="text-[12px] text-white font-medium tracking-wide flex items-center gap-1.5">
+                お問い合わせへ
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </span>
             </div>
           </div>
-          <h3 class="text-[1.05rem] font-medium text-[#232323] mb-3 leading-snug">
-            DX化ヒアリング<br>&amp; ロードマップ策定
-          </h3>
-          <p class="text-[13px] text-[#6B7280] leading-relaxed mb-6">
-            現状業務のヒアリングと課題の可視化から始め、優先順位・リスク・費用対効果を
-            整理したDXロードマップの策定と実行支援を行います。
-          </p>
-          <div class="flex flex-wrap gap-1.5">
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">コンサルティング</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">業務分析</span>
-            <span class="text-[11px] px-2.5 py-1 bg-[#F3F4F6] border border-[#E2E4E9] text-[#6B7280]">DX戦略</span>
+          <div class="mt-3">
+            <p class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase">DX Support</p>
+            <h3 class="text-sm font-medium text-[#232323] mt-1 leading-snug">DX化ヒアリング &amp; ロードマップ策定</h3>
           </div>
-        </div>
+        </a>
 
-        <!-- Card 6: CTA -->
-        <div class="reveal reveal-delay-5 card-lift bg-[#1B3264] p-8 border border-[#1B3264] flex flex-col justify-between min-h-[280px]">
+        <!-- CTA -->
+        <div class="reveal reveal-delay-5 card-lift bg-[#1B3264] p-8 border border-[#1B3264] flex flex-col justify-between min-h-[280px] sm:col-span-2 lg:col-span-1">
           <div>
             <p class="text-[10px] tracking-[0.25em] text-white/50 uppercase mb-6">お気軽にご相談ください</p>
             <h3 class="text-xl font-light text-white mb-4 leading-snug">

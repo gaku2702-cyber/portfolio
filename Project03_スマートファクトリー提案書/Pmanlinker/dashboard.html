@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>進捗見える化ダッシュボード [PRO Custom]</title>
+  <style>
+    :root {
+      --bg-main: #f1f5f9;
+      --bg-surface: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #cbd5e1;
+      --primary: #0f172a;
+      --alert: #ef4444;
+      /* 各列のテーマカラー */
+      --color-jutsu: #64748b; --color-dtp: #ea580c; --color-gehan: #059669; --color-press: #4f46e5;
+    }
+    
+    body { font-family: 'BIZ UDPGothic', sans-serif; margin: 0; background: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    
+    /* ヘッダー */
+    .header { background: var(--bg-surface); padding: 10px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    .title { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+    .header-controls { display: flex; gap: 15px; align-items: center; }
+    .search-box { padding: 8px 12px; border-radius: 4px; border: 1px solid var(--border-color); width: 220px; }
+
+    /* 看板ボードの土台 */
+    .content-area { flex: 1; overflow: hidden; position: relative; }
+    .kanban-board {
+      display: flex;
+      overflow-x: auto; /* 横スクロールを許可 */
+      gap: 12px;
+      padding: 15px;
+      height: 100%;
+      box-sizing: border-box;
+      align-items: flex-start;
+    }
+
+    /* 各列のスタイル */
+    .kanban-col {
+      flex: 0 0 320px; /* 列の幅を320pxで固定 */
+      background: #e2e8f0;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      max-height: 100%;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .k-col-header {
+      padding: 12px 16px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.5);
+      border-radius: 8px 8px 0 0;
+    }
+    .cnt-badge { background: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; }
+
+    /* カードのスタイル */
+    .k-cards-area { padding: 8px; overflow-y: auto; flex: 1; }
+    .k-card {
+      background: white;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-left: 6px solid #94a3b8;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .k-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
+
+    /* 機械別バッジ */
+    .m-badge { font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 3px; background: #475569; color: white; }
+    
+    /* 納期遅れアラート */
+    .alert-card { border: 2px solid var(--alert) !important; border-left: 6px solid var(--alert) !important; background: #fff1f2; }
+    .alert-text { color: var(--alert); font-weight: bold; }
+
+    /* モーダル */
+    .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-content { background: white; width: 600px; border-radius: 8px; overflow: hidden; }
+
+    #loading-screen { position: absolute; top:0; left:0; width:100%; height:100%; background:var(--bg-main); display:flex; align-items:center; justify-content:center; z-index: 2000; }
+
+    /* 機械別バッジの色設定 */
+    .m-badge { background: #94a3b8; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+
+    /* 特定の機械に色を付ける */
+    .badge-UV4 { background: #3b82f6 !important; } /* 青 */
+    .badge-UV5 { background: #8b5cf6 !important; } /* 紫 */
+    .badge-K2 { background: #10b981 !important; }  /* 緑 */
+    .badge-Versa { background: #ec4899 !important; } /* 桃 */
+    .badge-BIZHUB { background: #f59e0b !important; } /* 橙 */
+    .badge-JFX200 { background: #06b6d4 !important; } /* 水色 */
+    .badge-外注 { background: #64748b !important; } /* 灰 */
+
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="title">📊 PROGRESS DASHBOARD <span id="last-sync" style="font-size:0.8rem; font-weight:normal;"></span></div>
+    <div class="header-controls">
+      <input type="text" id="search-input" class="search-box" placeholder="🔍 ID, 客名, 品名で検索..." onkeyup="applySearch()">
+      <div class="main-tabs">
+        <button class="tab-btn active" onclick="switchView('kanban', this)">看板表示</button>
+        <button class="tab-btn" onclick="switchView('seisaku', this)">制作リスト</button>
+        <button class="tab-btn" onclick="switchView('seizou', this)">製造リスト</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <div id="loading-screen"><b>LOADING DATA...</b></div>
+    
+    <div id="view-kanban" style="display: block; height: 100%;">
+      <div class="kanban-board">
+        </div>
+    </div>
+
+    <div id="view-seisaku" style="display: none; padding: 20px; overflow-y: auto;">
+      <table border="1" style="width:100%; border-collapse: collapse; background:white;">
+        <thead style="background:#f8fafc;"><tr><th>ID</th><th>客名/品名</th><th>ステータス</th><th>納期</th></tr></thead>
+        <tbody id="list-seisaku"></tbody>
+      </table>
+    </div>
+
+    <div id="view-seizou" style="display: none; padding: 20px; overflow-y: auto;">
+      <table border="1" style="width:100%; border-collapse: collapse; background:white;">
+        <thead style="background:#f8fafc;"><tr><th>ID</th><th>客名/品名</th><th>ステータス</th><th>納期</th></tr></thead>
+        <tbody id="list-seizou"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="detail-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div id="m-header" style="padding:20px; background:var(--primary); color:white;">
+        <div id="m-meta" style="font-size:0.8rem;"></div>
+        <div id="m-client" style="font-size:1.2rem; font-weight:bold;"></div>
+        <div id="m-job"></div>
+      </div>
+      <div id="m-spec" style="padding:10px 20px; background:#f1f5f9; font-size:0.9rem; font-weight:bold;"></div>
+      <div id="m-schedule-box"></div>
+      <div style="padding:20px; max-height:400px; overflow-y:auto;">
+        <div id="m-timeline"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+    let globalData = [];
+    let displayData = [];
+
+    // 1. 印刷機名の翻訳機（GAS側と同じルール）
+    function getMachineAlias(m) {
+      if (!m || m === "" || m === "未定") return "刷機未";
+      let name = String(m).trim();
+      if (name.includes("81") || name.includes("71")) return "刷機未";
+      if (name.includes("4UVﾌﾟ")) return "JFX200";
+      if (name.includes("1Ver")) return "Versa";
+      if (name.includes("2BIZ")) return "BIZHUB";
+      if (name.includes("泉")) return "外注";
+      return name.replace(/^[0-9\s]+/, '').trim();
+    }
+
+    // 2. データの読み込み
+    window.onload = function() {
+      google.script.run
+        .withSuccessHandler(function(data) {
+          globalData = data;
+          displayData = [...globalData];
+          document.getElementById('loading-screen').style.display = 'none';
+          document.getElementById('last-sync').innerText = `UPDATED: ${new Date().toLocaleTimeString()}`;
+          renderAll();
+        })
+        .getDashboardData();
+    };
+
+    // 3. 全体描画の司令塔
+    function renderAll() {
+      renderKanban();
+      renderList('seisaku'); // 制作リストを描画
+      renderList('seizou');  // 製造リストを描画
+    }
+
+    // 4. 11列看板の描画ロジック
+    function renderKanban() {
+      const columns = [
+        { id: "col-jutsu", title: "① 受注", status: "① 受注・未着手" },
+        { id: "col-nyuko", title: "② 入稿", status: "② 入稿・作業中" },
+        { id: "col-dtp",   title: "③ DTP",  status: "③ DTP・校正中" },
+        { id: "col-komu",  title: "④ 工務(未定)", status: "④ 工務手配(未確定)" },
+        { id: "col-sapan", title: "⑤ 刷版", status: "⑤ 刷版" },
+        { id: "col-uv4",   title: "UV4",   status: "UV4" },
+        { id: "col-uv5",   title: "UV5",   status: "UV5" },
+        { id: "col-k2",    title: "K2",    status: "K2" },
+        { id: "col-versa", title: "Versa", status: "Versa" },
+        { id: "col-biz",   title: "BIZHUB",status: "BIZHUB" },
+        { id: "col-jfx",   title: "JFX200",status: "JFX200" }
+      ];
+
+      const board = document.querySelector('.kanban-board');
+      board.innerHTML = ''; 
+
+      columns.forEach(col => {
+        board.insertAdjacentHTML('beforeend', `
+          <div class="kanban-col" id="${col.id}">
+            <div class="k-col-header">
+              <span>${col.title}</span>
+              <span class="cnt-badge" id="${col.id}-cnt">0</span>
+            </div>
+            <div class="k-cards-area" id="${col.id}-list"></div>
+          </div>
+        `);
+      });
+
+      displayData.forEach(item => {
+        const targetCol = columns.find(c => c.status === item.latestStatus);
+        if (!targetCol) return;
+
+        let rawM = (item.printMachine && item.printMachine !== "未定") ? item.printMachine : item.machine;
+        let aliasM = getMachineAlias(rawM);
+        let alertClass = isNearDeadline(item.nouki) ? 'alert-card' : '';
+        let alertText  = isNearDeadline(item.nouki) ? 'alert-text' : '';
+
+        // 🌟 修正：機械別バッジに色クラス（badge-UV4など）を付与
+        let cardHtml = `
+          <div class="k-card ${alertClass}" onclick='openModal(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div class="text-sm font-bold" style="color: #64748b;">${item.clientName}</div>
+              <div style="display:flex; gap:4px;">
+                <span class="m-badge badge-${aliasM}">${aliasM}</span>
+              </div>
+            </div>
+              <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">🏷️ #${item.orderId}</div>
+              <div class="text-md" style="line-height: 1.4; margin-top: 2px; margin-bottom: 8px; font-weight: 600;">
+                ${item.jobName}
+              </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.7rem; border-top:1px solid #eee; padding-top:5px;">
+              <span>📦 ${item.qty || '-'} / ${item.pages || '-'}p</span>
+              <span class="${alertText}">DUE: ${item.nouki}</span>
+            </div>
+            ${(item.deadline && item.deadline !== "-") ? `<div style="font-size:0.65rem; color:#d35400; text-align:right; font-weight:bold; margin-top:2px;">🎯目標: ${item.deadline}</div>` : ""}
+          </div>
+        `;
+        document.getElementById(`${targetCol.id}-list`).insertAdjacentHTML('beforeend', cardHtml);
+      });
+
+      columns.forEach(col => {
+        document.getElementById(`${col.id}-cnt`).innerText = document.getElementById(`${col.id}-list`).children.length;
+      });
+    }
+
+    // 5. リスト表示の描画ロジック（ここが抜けていました！）
+    function renderList(type) {
+      const tbody = document.getElementById(`list-${type}`);
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      
+      const seisakuDepts = ['制作課', 'デジタルメディア課', '編集・校正製版課', '生産管理室', '制作部門'];
+      const seizouDepts = ['印刷課', 'オンデマンド課', 'ものづくり出力', '製本課', '製造部門'];
+      let count = 0;
+
+      displayData.forEach(item => {
+        let isTarget = false;
+        let targetDepts = (type === 'seisaku') ? seisakuDepts : seizouDepts;
+        item.departments.forEach(d => { if (targetDepts.includes(d)) isTarget = true; });
+        if(item.departments.length === 0) isTarget = true;
+        if (!isTarget) return;
+
+        count++;
+        
+        let bgClass = "bg-1"; 
+        let s = item.latestStatus;
+        if(s.includes("②")) bgClass = "bg-2";
+        else if(s.includes("③")) bgClass = "bg-3";
+        else if(s.includes("④") || s.includes("⑤") || ["UV4","UV5","K2","Versa","BIZHUB","JFX200"].includes(s)) bgClass = "bg-4";
+
+        let html = `
+          <tr onclick='openModal(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+            <td style="font-weight:bold; color:var(--primary);">${item.orderId}</td>
+            <td>
+              <div style="font-size:0.7rem; color:#666;">${item.clientName}</div>
+              <div style="font-weight:bold;">${item.jobName}</div>
+            </td>
+            <td><span class="status-badge ${bgClass}">${item.latestStatus}</span></td>
+            <td style="${isNearDeadline(item.nouki) ? 'color:red; font-weight:bold;' : ''}">${item.nouki}</td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', html);
+      });
+      const countLabel = document.getElementById(`cnt-${type}-all`);
+      if (countLabel) countLabel.innerText = `(${count})`;
+    }
+
+    // 6. ユーティリティ・ボタン操作系
+    function isNearDeadline(noukiStr) {
+      if(!noukiStr || noukiStr === '未定') return false;
+      let d = new Date(noukiStr); d.setHours(0,0,0,0);
+      let now = new Date(); now.setHours(0,0,0,0);
+      let diff = Math.round((d - now) / (1000 * 60 * 60 * 24));
+      return diff >= -3 && diff <= 3;
+    }
+
+    function switchView(viewId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('view-kanban').style.display = (viewId === 'kanban') ? 'block' : 'none';
+      document.getElementById('view-seisaku').style.display = (viewId === 'seisaku') ? 'block' : 'none';
+      document.getElementById('view-seizou').style.display = (viewId === 'seizou') ? 'block' : 'none';
+      renderAll();
+    }
+
+    function applySearch() {
+      let query = document.getElementById('search-input').value.toLowerCase();
+      displayData = globalData.filter(item => 
+        item.orderId.toLowerCase().includes(query) || item.clientName.toLowerCase().includes(query) || item.jobName.toLowerCase().includes(query)
+      );
+      renderAll();
+    }
+
+    function openModal(item) {
+      document.getElementById('m-meta').innerText = `ID: ${item.orderId} | DUE: ${item.nouki}`;
+      document.getElementById('m-client').innerText = item.clientName;
+      document.getElementById('m-job').innerText = item.jobName;
+      document.getElementById('m-spec').innerText = `📦 ${(item.qty || "")} ${(item.spec || "")}`;
+      
+      let scheduleBox = document.getElementById('m-schedule-box');
+      if (item.deadline && item.deadline !== "-") {
+        scheduleBox.innerHTML = `<div style="background:#fff3cd; padding:15px; border-left:5px solid #ffc107; margin:10px 0;">🔥 目標下版: ${item.deadline} | 🖨️ ${item.printMachine}</div>`;
+      } else {
+        scheduleBox.innerHTML = '';
+      }
+
+      let tlHtml = '';
+      item.history.forEach(h => {
+        tlHtml += `<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
+          <span style="font-size:0.75rem; color:#666;">${h.date}</span><br>
+          <b>${h.title}</b> (${h.status}) - ${h.user}
+        </div>`;
+      });
+      document.getElementById('m-timeline').innerHTML = tlHtml;
+      document.getElementById('detail-modal').style.display = 'flex';
+    }
+
+    function closeModal(e) {
+      if(e.target.id === 'detail-modal') document.getElementById('detail-modal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
