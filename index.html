@@ -14,16 +14,16 @@
       theme: {
         extend: {
           colors: {
-            base: '#F5F1EA',
+            base: '#FFFFFF',
             charcoal: '#232323',
             navy: '#1B3264',
             'navy-dark': '#0F2347',
             'mid-gray': '#525252',
             'muted': '#525252',
             'placeholder': '#737373',
-            'light-border': '#E8E0D4',
+            'light-border': '#E5E7EB',
             amber: { DEFAULT: '#C8863A', light: '#E6A055', pale: '#F5E6D3', dark: '#9A6328' },
-            paper: '#F5F1EA',
+            paper: '#FFFFFF',
           },
           fontFamily: {
             sans: ['"Noto Sans JP"', 'Inter', 'sans-serif'],
@@ -39,16 +39,10 @@
     body {
       font-family: 'Noto Sans JP', 'Inter', sans-serif;
       color: #232323;
-      background-color: #F5F1EA;
+      background-color: #FFFFFF;
     }
     .paper-bg {
-      background-color: #F5F1EA;
-      background-image:
-        url('assets/textures/paper.png'),
-        linear-gradient(rgba(27, 50, 100, 0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(27, 50, 100, 0.06) 1px, transparent 1px);
-      background-size: 512px 512px, 72px 72px, 72px 72px;
-      background-attachment: fixed, scroll, scroll;
+      background-color: #FFFFFF;
     }
 
     .text-muted { color: #525252; }
@@ -61,15 +55,15 @@
     }
     .btn-amber:hover { filter: brightness(1.05); }
 
-    /* Hero visual — assets/hero/hero-bg.jpg 推奨 960×1200px (4:5) */
+    /* Hero visual — assets/hero/desk.png */
     .hero-visual-wrap { position: relative; width: 100%; max-width: 480px; margin: 0 auto; }
     .hero-bg-panel {
       width: 100%;
       aspect-ratio: 4 / 5;
-      border: 1px solid #D4C8B8;
-      box-shadow: 0 24px 48px rgba(27, 50, 100, 0.12);
-      background-color: #EDE6DA;
-      background-image: url('assets/hero/hero-bg.jpg'), url('assets/hero/desk.png');
+      border: 1px solid #E5E7EB;
+      box-shadow: 0 16px 40px rgba(27, 50, 100, 0.1);
+      background-color: #FFFFFF;
+      background-image: url('assets/hero/desk.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -93,8 +87,8 @@
     }
     .concept-card {
       position: relative;
-      background: #FFFCF7;
-      border: 1px solid #D4C8B8;
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
       padding: 1.75rem 1.5rem 1.5rem;
       overflow: hidden;
     }
@@ -167,8 +161,8 @@
       position: relative;
       aspect-ratio: 16 / 9;
       overflow: hidden;
-      background: #FAF7F2;
-      border: 1px solid #D4C8B8;
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     .work-cover:hover .work-cover-img {
@@ -240,7 +234,7 @@
 
     /* Scrollbar */
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: #F5F1EA; }
+    ::-webkit-scrollbar-track { background: #FFFFFF; }
     ::-webkit-scrollbar-thumb { background: #1B3264; border-radius: 2px; }
 
     /* Honeypot: 人には完全に見えないが display:none でないため多くのボットが埋める */
@@ -260,7 +254,7 @@
 <body class="paper-bg">
 
   <!-- ========== NAVIGATION ========== -->
-  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="background: rgba(245,241,234,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid #E8E0D4;">
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid #E5E7EB;">
     <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
 
       <!-- Logo -->
@@ -293,7 +287,7 @@
   </nav>
 
   <!-- Mobile drawer -->
-  <div id="drawer" class="fixed inset-0 z-40 hidden" style="background: rgba(245,241,234,0.98); backdrop-filter: blur(12px);">
+  <div id="drawer" class="fixed inset-0 z-40 hidden" style="background: rgba(255,255,255,0.98); backdrop-filter: blur(12px);">
     <div class="flex flex-col items-center justify-center h-full gap-10">
       <a href="#concept" class="drawer-link text-2xl font-light text-[#232323] tracking-widest uppercase hover:text-[#1B3264] transition-colors">Concept</a>
       <a href="#services" class="drawer-link text-2xl font-light text-[#232323] tracking-widest uppercase hover:text-[#1B3264] transition-colors">Works</a>
@@ -347,7 +341,7 @@
           </div>
         </div>
 
-        <!-- Hero visual — 画像: assets/hero/hero-bg.jpg（960×1200px 推奨） -->
+        <!-- Hero visual — assets/hero/desk.png -->
         <div class="anim-visual md:col-span-5 flex items-center justify-center">
           <div class="hero-visual-wrap">
             <div class="hero-bg-panel" role="img" aria-label="DTP・DX 開発デスク"></div>
@@ -364,7 +358,7 @@
       </div>
 
       <!-- Stats bar -->
-      <div class="mt-16 pt-10 border-t border-[#E8E0D4] grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div class="mt-16 pt-10 border-t border-[#E5E7EB] grid grid-cols-2 md:grid-cols-4 gap-8">
         <div class="anim-hero-4">
           <p class="stat-num text-4xl font-light text-[#1B3264]">15<span class="text-2xl text-amber">+</span></p>
           <p class="text-[11px] text-[#525252] mt-1.5 tracking-wide">自動化ツール開発実績</p>
@@ -387,7 +381,7 @@
 
 
   <!-- ========== TECH STRIP ========== -->
-  <div class="py-5 overflow-hidden border-y border-[#E8E0D4]" style="background: linear-gradient(90deg, #1B3264 0%, #243d6e 50%, #1B3264 100%);">
+  <div class="py-5 overflow-hidden border-y border-[#E5E7EB]" style="background: linear-gradient(90deg, #1B3264 0%, #243d6e 50%, #1B3264 100%);">
     <div class="flex gap-12 items-center whitespace-nowrap animate-marquee-wrapper">
       <div class="flex gap-12 items-center shrink-0" id="marquee-inner">
         <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber shrink-0"></span>
@@ -716,7 +710,7 @@
           </div>
         </div>
         <div class="lg:col-span-7">
-      <form class="reveal reveal-delay-1 space-y-5 bg-[#FFFCF7] border border-[#D4C8B8] p-6 md:p-8" onsubmit="handleSubmit(event)" id="contactForm">
+      <form class="reveal reveal-delay-1 space-y-5 bg-white border border-[#E5E7EB] p-6 md:p-8" onsubmit="handleSubmit(event)" id="contactForm">
 
         <!-- ① ハニーポットフィールド（人には見えない・スクリーンリーダーからも除外） -->
         <div class="hp-trap" aria-hidden="true">
@@ -730,14 +724,14 @@
               お名前 <span class="text-amber">*</span>
             </label>
             <input type="text" placeholder="山田 太郎" required
-              class="w-full px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] placeholder-[#737373] transition-all">
+              class="w-full px-4 py-3.5 bg-white border border-[#E5E7EB] text-sm text-[#232323] placeholder-[#737373] transition-all">
           </div>
           <div>
             <label class="block text-[11px] font-medium text-[#232323] tracking-wider mb-2 uppercase">
               会社名
             </label>
             <input type="text" placeholder="株式会社〇〇"
-              class="w-full px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] placeholder-[#737373] transition-all">
+              class="w-full px-4 py-3.5 bg-white border border-[#E5E7EB] text-sm text-[#232323] placeholder-[#737373] transition-all">
           </div>
         </div>
 
@@ -746,7 +740,7 @@
             メールアドレス <span class="text-amber">*</span>
           </label>
           <input type="email" placeholder="example@company.com" required
-            class="w-full px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] placeholder-[#737373] transition-all">
+            class="w-full px-4 py-3.5 bg-white border border-[#E5E7EB] text-sm text-[#232323] placeholder-[#737373] transition-all">
         </div>
 
         <div>
@@ -754,7 +748,7 @@
             お問い合わせ種別
           </label>
           <div class="relative">
-            <select class="w-full px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] transition-all appearance-none pr-10">
+            <select class="w-full px-4 py-3.5 bg-white border border-[#E5E7EB] text-sm text-[#232323] transition-all appearance-none pr-10">
               <option value="">選択してください</option>
               <option>DTP自動化ツール開発のご相談</option>
               <option>DXロードマップ策定のご相談</option>
@@ -776,7 +770,7 @@
           </label>
           <textarea rows="6"
             placeholder="ご相談内容や解決したい課題を、できるだけ具体的にご記入ください。" required
-            class="w-full px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] placeholder-[#737373] transition-all resize-none"></textarea>
+            class="w-full px-4 py-3.5 bg-white border border-[#E5E7EB] text-sm text-[#232323] placeholder-[#737373] transition-all resize-none"></textarea>
         </div>
 
         <!-- ② 算数CAPTCHA（毎回ランダム生成） -->
@@ -792,7 +786,7 @@
             </div>
             <input type="text" id="captchaInput" inputmode="numeric" pattern="-?[0-9]+"
               placeholder="答えを入力" required autocomplete="off"
-              class="flex-1 px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] placeholder-[#737373] transition-all">
+              class="flex-1 px-4 py-3.5 bg-white border border-[#E5E7EB] text-sm text-[#232323] placeholder-[#737373] transition-all">
           </div>
           <p id="captchaError" class="hidden mt-2 text-[11px] text-red-500 flex items-center gap-1">
             <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -1045,10 +1039,10 @@
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
     <!-- Panel -->
-    <div class="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-[#FAF7F2] border border-[#E8E0D4] shadow-2xl">
+    <div class="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white border border-[#E5E7EB] shadow-2xl">
 
       <!-- Header -->
-      <div class="flex items-center justify-between px-8 py-5 border-b border-[#D4C8B8] bg-[#FFFCF7]">
+      <div class="flex items-center justify-between px-8 py-5 border-b border-[#E5E7EB] bg-white">
         <div class="flex items-center gap-4">
           <div class="w-8 h-8 btn-amber flex items-center justify-center flex-shrink-0 rounded-sm">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1107,7 +1101,7 @@
             <p class="text-[11px] tracking-[0.2em] text-amber font-medium uppercase mb-4">処理フロー</p>
             <div class="flex flex-col gap-0">
               <!-- Step 1 -->
-              <div class="flex items-center gap-3 bg-[#FFFCF7] border border-[#D4C8B8] px-4 py-3">
+              <div class="flex items-center gap-3 bg-white border border-[#E5E7EB] px-4 py-3">
                 <span class="stat-num text-lg font-light text-amber w-7 text-center flex-shrink-0 leading-none">01</span>
                 <span class="text-[13px] text-[#232323]">Word 一括変換</span>
                 <span class="text-[11px] text-[#525252] ml-auto">Python</span>
@@ -1118,7 +1112,7 @@
                 </svg>
               </div>
               <!-- Step 2 -->
-              <div class="flex items-center gap-3 bg-[#FFFCF7] border border-[#D4C8B8] px-4 py-3">
+              <div class="flex items-center gap-3 bg-white border border-[#E5E7EB] px-4 py-3">
                 <span class="stat-num text-lg font-light text-amber w-7 text-center flex-shrink-0 leading-none">02</span>
                 <span class="text-[13px] text-[#232323]">タグ付き TXT 出力</span>
                 <span class="text-[11px] text-[#525252] ml-auto">.txt</span>
@@ -1129,7 +1123,7 @@
                 </svg>
               </div>
               <!-- Step 3 -->
-              <div class="flex items-center gap-3 bg-[#FFFCF7] border border-[#D4C8B8] px-4 py-3">
+              <div class="flex items-center gap-3 bg-white border border-[#E5E7EB] px-4 py-3">
                 <span class="stat-num text-lg font-light text-amber w-7 text-center flex-shrink-0 leading-none">03</span>
                 <span class="text-[13px] text-[#232323]">InDesign に Place</span>
                 <span class="text-[11px] text-[#525252] ml-auto">UTF-8</span>
@@ -1151,7 +1145,7 @@
                 </svg>
               </div>
               <!-- Step 5 -->
-              <div class="flex items-center gap-3 bg-[#FFFCF7] border border-[#D4C8B8] px-4 py-3">
+              <div class="flex items-center gap-3 bg-white border border-[#E5E7EB] px-4 py-3">
                 <span class="stat-num text-lg font-light text-amber w-7 text-center flex-shrink-0 leading-none">05</span>
                 <span class="text-[13px] text-[#232323]">組版完成</span>
                 <span class="text-[11px] text-[#525252] ml-auto">ルビ・表・書式</span>
@@ -1171,7 +1165,7 @@
                 <div class="w-2 h-2 rounded-full bg-[#D97706]"></div>
                 <span class="text-[11px] font-medium text-[#525252] tracking-wide uppercase">Before — Word 原稿</span>
               </div>
-              <pre class="text-[12px] font-mono leading-relaxed bg-[#FFFCF7] border border-[#D4C8B8] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">3. 斜体＋下線テキスト
+              <pre class="text-[12px] font-mono leading-relaxed bg-white border border-[#E5E7EB] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">3. 斜体＋下線テキスト
 4. 太字＋下線テキスト
 下線付（ルビ：かせんつ）
 表：項目｜ふりがな｜姓</pre>
@@ -1185,7 +1179,7 @@
                 <div class="w-2 h-2 rounded-full bg-[#16A34A]"></div>
                 <span class="text-[11px] font-medium text-[#525252] tracking-wide uppercase">After — InDesign 組版後</span>
               </div>
-              <pre class="text-[12px] font-mono leading-relaxed bg-[#FFFCF7] border border-[#D4C8B8] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">3. 斜体テキスト ← Italic+Underline
+              <pre class="text-[12px] font-mono leading-relaxed bg-white border border-[#E5E7EB] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">3. 斜体テキスト ← Italic+Underline
 4. ボールドテキスト ← Bold+Underline
 下線付（ルビ適用済）
 ネイティブ表として配置
