@@ -18,7 +18,9 @@
             charcoal: '#232323',
             navy: '#1B3264',
             'navy-dark': '#0F2347',
-            'mid-gray': '#6B7280',
+            'mid-gray': '#525252',
+            'muted': '#525252',
+            'placeholder': '#737373',
             'light-border': '#E8E0D4',
             amber: { DEFAULT: '#C8863A', light: '#E6A055', pale: '#F5E6D3', dark: '#9A6328' },
             paper: '#F5F1EA',
@@ -43,11 +45,14 @@
       background-color: #F5F1EA;
       background-image:
         url('assets/textures/paper.png'),
-        linear-gradient(rgba(27, 50, 100, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(27, 50, 100, 0.035) 1px, transparent 1px);
+        linear-gradient(rgba(27, 50, 100, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(27, 50, 100, 0.06) 1px, transparent 1px);
       background-size: 512px 512px, 72px 72px, 72px 72px;
       background-attachment: fixed, scroll, scroll;
     }
+
+    .text-muted { color: #525252; }
+    .text-placeholder { color: #737373; }
 
     .btn-amber {
       background: linear-gradient(135deg, #C8863A 0%, #E6A055 55%, #D4924E 100%);
@@ -56,16 +61,19 @@
     }
     .btn-amber:hover { filter: brightness(1.05); }
 
-    /* Hero photo */
-    .hero-visual-wrap { position: relative; width: 100%; max-width: 420px; margin: 0 auto; }
-    .hero-photo-ring {
-      border-radius: 50%;
-      overflow: hidden;
-      aspect-ratio: 1;
-      border: 1px solid rgba(232, 224, 212, 0.9);
-      box-shadow: 0 32px 64px rgba(27, 50, 100, 0.14), 0 0 0 12px rgba(245, 241, 234, 0.6);
+    /* Hero visual — assets/hero/hero-bg.jpg 推奨 960×1200px (4:5) */
+    .hero-visual-wrap { position: relative; width: 100%; max-width: 480px; margin: 0 auto; }
+    .hero-bg-panel {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      border: 1px solid #D4C8B8;
+      box-shadow: 0 24px 48px rgba(27, 50, 100, 0.12);
+      background-color: #EDE6DA;
+      background-image: url('assets/hero/hero-bg.jpg'), url('assets/hero/desk.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
-    .hero-photo { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block; }
     .hero-amber-badge {
       position: absolute;
       left: -8%;
@@ -78,19 +86,17 @@
       color: #fff;
     }
 
-    /* Concept cards — chidori + big numbers */
-    .concept-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+    /* Concept cards — aligned grid + big numbers */
+    .concept-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; align-items: stretch; }
     @media (min-width: 768px) {
-      .concept-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; }
-      .concept-card:nth-child(even) { margin-top: 3rem; }
+      .concept-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
     }
     .concept-card {
       position: relative;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid #E8E0D4;
+      background: #FFFCF7;
+      border: 1px solid #D4C8B8;
       padding: 1.75rem 1.5rem 1.5rem;
       overflow: hidden;
-      backdrop-filter: blur(4px);
     }
     .concept-bg-num {
       position: absolute;
@@ -99,7 +105,7 @@
       font-size: clamp(4.5rem, 10vw, 7rem);
       font-weight: 300;
       line-height: 1;
-      color: rgba(27, 50, 100, 0.07);
+      color: rgba(200, 134, 58, 0.22);
       pointer-events: none;
       user-select: none;
     }
@@ -111,16 +117,13 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Works — chidori grid */
-    .works-grid { display: grid; grid-template-columns: 1fr; gap: 2rem 1.5rem; }
+    /* Works — uniform aligned grid */
+    .works-grid { display: grid; grid-template-columns: 1fr; gap: 2rem 1.5rem; align-items: start; }
     @media (min-width: 640px) {
       .works-grid { grid-template-columns: repeat(2, 1fr); }
-      .works-grid > .work-item:nth-child(even) { transform: translateY(2.25rem); }
     }
     @media (min-width: 1024px) {
       .works-grid { grid-template-columns: repeat(3, 1fr); }
-      .works-grid > .work-item { transform: none; }
-      .works-grid > .work-item:nth-child(3n+2) { transform: translateY(2.75rem); }
     }
     .works-cta-card {
       background: linear-gradient(145deg, #C8863A 0%, #E6A055 45%, #D4924E 100%);
@@ -165,7 +168,7 @@
       aspect-ratio: 16 / 9;
       overflow: hidden;
       background: #FAF7F2;
-      border: 1px solid #E8E0D4;
+      border: 1px solid #D4C8B8;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     .work-cover:hover .work-cover-img {
@@ -271,9 +274,9 @@
 
       <!-- Desktop links -->
       <div class="hidden md:flex items-center gap-8">
-        <a href="#concept" class="nav-link text-xs tracking-widest text-[#6B7280] hover:text-[#232323] uppercase transition-colors">Concept</a>
-        <a href="#services" class="nav-link text-xs tracking-widest text-[#6B7280] hover:text-[#232323] uppercase transition-colors">Works</a>
-        <a href="#contact" class="nav-link text-xs tracking-widest text-[#6B7280] hover:text-[#232323] uppercase transition-colors">Contact</a>
+        <a href="#concept" class="nav-link text-xs tracking-widest text-[#525252] hover:text-[#232323] uppercase transition-colors">Concept</a>
+        <a href="#services" class="nav-link text-xs tracking-widest text-[#525252] hover:text-[#232323] uppercase transition-colors">Works</a>
+        <a href="#contact" class="nav-link text-xs tracking-widest text-[#525252] hover:text-[#232323] uppercase transition-colors">Contact</a>
         <a href="#contact"
           class="px-5 py-2.5 btn-amber text-xs font-medium tracking-widest uppercase transition-all">
           Get in Touch
@@ -320,7 +323,7 @@
             DXを。
           </h1>
 
-          <p class="anim-hero-3 text-[#6B7280] text-[0.9rem] leading-[1.9] mb-10 max-w-lg">
+          <p class="anim-hero-3 text-[#525252] text-[0.9rem] leading-[1.9] mb-10 max-w-lg">
             長年のDTP制作現場での実務経験と、Python・GASによる自動化スキルを掛け合わせ、
             <strong class="font-medium text-[#232323]">安全で可逆性のある</strong>ワークフロー改善を提供します。
             現場を知る者だけがつくれるシステムで、あなたの業務を変えます。
@@ -344,14 +347,10 @@
           </div>
         </div>
 
-        <!-- Hero photo -->
+        <!-- Hero visual — 画像: assets/hero/hero-bg.jpg（960×1200px 推奨） -->
         <div class="anim-visual md:col-span-5 flex items-center justify-center">
           <div class="hero-visual-wrap">
-            <div class="hero-photo-ring">
-              <img src="assets/hero/desk.jpg"
-                alt="DTP・DX 開発デスク — モニター、キーボード、コーヒー"
-                class="hero-photo" width="880" height="850" loading="eager">
-            </div>
+            <div class="hero-bg-panel" role="img" aria-label="DTP・DX 開発デスク"></div>
             <div class="hero-amber-badge" aria-hidden="true">
               <svg class="w-7 h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -368,19 +367,19 @@
       <div class="mt-16 pt-10 border-t border-[#E8E0D4] grid grid-cols-2 md:grid-cols-4 gap-8">
         <div class="anim-hero-4">
           <p class="stat-num text-4xl font-light text-[#1B3264]">15<span class="text-2xl text-amber">+</span></p>
-          <p class="text-[11px] text-[#6B7280] mt-1.5 tracking-wide">自動化ツール開発実績</p>
+          <p class="text-[11px] text-[#525252] mt-1.5 tracking-wide">自動化ツール開発実績</p>
         </div>
         <div class="anim-hero-4" style="animation-delay:0.8s;">
           <p class="stat-num text-4xl font-light text-[#1B3264]">30<span class="text-2xl text-amber">+</span></p>
-          <p class="text-[11px] text-[#6B7280] mt-1.5 tracking-wide">年のDTP実務経験</p>
+          <p class="text-[11px] text-[#525252] mt-1.5 tracking-wide">年のDTP実務経験</p>
         </div>
         <div class="anim-hero-4" style="animation-delay:0.9s;">
           <p class="stat-num text-4xl font-light text-[#1B3264]">100<span class="text-2xl text-amber">%</span></p>
-          <p class="text-[11px] text-[#6B7280] mt-1.5 tracking-wide">可逆性のある設計思想</p>
+          <p class="text-[11px] text-[#525252] mt-1.5 tracking-wide">可逆性のある設計思想</p>
         </div>
         <div class="anim-hero-4" style="animation-delay:1s;">
           <p class="stat-num text-2xl font-light text-[#1B3264] leading-snug">Python<br>GAS</p>
-          <p class="text-[11px] text-[#6B7280] mt-1.5 tracking-wide">主要開発技術</p>
+          <p class="text-[11px] text-[#525252] mt-1.5 tracking-wide">主要開発技術</p>
         </div>
       </div>
     </div>
@@ -392,24 +391,24 @@
     <div class="flex gap-12 items-center whitespace-nowrap animate-marquee-wrapper">
       <div class="flex gap-12 items-center shrink-0" id="marquee-inner">
         <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber shrink-0"></span>
-        <span class="text-xs tracking-[0.25em] text-white/60 uppercase">Python</span>
-        <span class="text-amber/50">·</span>
-        <span class="text-xs tracking-[0.25em] text-white/60 uppercase">Google Apps Script</span>
-        <span class="text-amber/50">·</span>
-        <span class="text-xs tracking-[0.25em] text-white/60 uppercase">Adobe ExtendScript</span>
-        <span class="text-amber/50">·</span>
-        <span class="text-xs tracking-[0.25em] text-white/60 uppercase">InDesign</span>
-        <span class="text-amber/50">·</span>
-        <span class="text-xs tracking-[0.25em] text-white/60 uppercase">Illustrator</span>
-        <span class="text-amber/50">·</span>
-        <span class="text-xs tracking-[0.25em] text-white/60 uppercase">Google Sheets</span>
-        <span class="text-amber/50">·</span>
-        <span class="text-xs tracking-[0.25em] text-white/60 uppercase">Word / Excel VBA</span>
-        <span class="text-amber/50">·</span>
-        <span class="text-xs tracking-[0.25em] text-white/60 uppercase">PDF処理</span>
-        <span class="text-amber/50">·</span>
-        <span class="text-xs tracking-[0.25em] text-white/60 uppercase">DTP Workflow</span>
-        <span class="text-amber/50">·</span>
+        <span class="text-xs tracking-[0.25em] text-white/90 uppercase">Python</span>
+        <span class="text-amber-light">·</span>
+        <span class="text-xs tracking-[0.25em] text-white/90 uppercase">Google Apps Script</span>
+        <span class="text-amber-light">·</span>
+        <span class="text-xs tracking-[0.25em] text-white/90 uppercase">Adobe ExtendScript</span>
+        <span class="text-amber-light">·</span>
+        <span class="text-xs tracking-[0.25em] text-white/90 uppercase">InDesign</span>
+        <span class="text-amber-light">·</span>
+        <span class="text-xs tracking-[0.25em] text-white/90 uppercase">Illustrator</span>
+        <span class="text-amber-light">·</span>
+        <span class="text-xs tracking-[0.25em] text-white/90 uppercase">Google Sheets</span>
+        <span class="text-amber-light">·</span>
+        <span class="text-xs tracking-[0.25em] text-white/90 uppercase">Word / Excel VBA</span>
+        <span class="text-amber-light">·</span>
+        <span class="text-xs tracking-[0.25em] text-white/90 uppercase">PDF処理</span>
+        <span class="text-amber-light">·</span>
+        <span class="text-xs tracking-[0.25em] text-white/90 uppercase">DTP Workflow</span>
+        <span class="text-amber-light">·</span>
       </div>
     </div>
     <style>
@@ -443,7 +442,7 @@
           </h2>
         </div>
         <div class="reveal reveal-delay-2">
-          <p class="text-[#6B7280] text-sm leading-[1.9]">
+          <p class="text-[#525252] text-sm leading-[1.9]">
             DTP制作の現場で積み重ねた知識と、エンジニアリングの視点の融合。
             単なる「作業の自動化」ではなく、業務全体のフローを俯瞰したうえで、
             リスクを最小化した改善を実現します。
@@ -456,7 +455,7 @@
           <span class="concept-bg-num">01</span>
           <p class="concept-label">01 — DISCOVERY</p>
           <h3 class="text-base font-medium text-[#232323] mb-3">現場目線の課題発見</h3>
-          <p class="text-sm text-[#6B7280] leading-relaxed">
+          <p class="text-sm text-[#525252] leading-relaxed">
             DTPオペレーター・ディレクターとしての長年の経験から、現場が本当に困っているポイントを正確に把握。
             ツールの使いやすさと業務フローへの影響を熟知したうえで、最適な解を提案します。
           </p>
@@ -465,7 +464,7 @@
           <span class="concept-bg-num">02</span>
           <p class="concept-label">02 — SAFETY</p>
           <h3 class="text-base font-medium text-[#232323] mb-3">安全・可逆性のある設計</h3>
-          <p class="text-sm text-[#6B7280] leading-relaxed">
+          <p class="text-sm text-[#525252] leading-relaxed">
             元データを絶対に破壊しない設計思想。処理を段階的に分解し、何か起きても即座にロールバックできる
             仕組みを徹底。現場に「壊れる恐怖」を持ち込みません。
           </p>
@@ -474,7 +473,7 @@
           <span class="concept-bg-num">03</span>
           <p class="concept-label">03 — STACK</p>
           <h3 class="text-base font-medium text-[#232323] mb-3">Python × GAS で幅広く対応</h3>
-          <p class="text-sm text-[#6B7280] leading-relaxed">
+          <p class="text-sm text-[#525252] leading-relaxed">
             Illustrator・InDesign スクリプトから Google Workspace の GAS まで対応。
             既存の業務環境に馴染む形でDXを推進し、学習コストを最小化します。
           </p>
@@ -483,7 +482,7 @@
           <span class="concept-bg-num">04</span>
           <p class="concept-label">04 — AGILITY</p>
           <h3 class="text-base font-medium text-[#232323] mb-3">フリーランスの機動力</h3>
-          <p class="text-sm text-[#6B7280] leading-relaxed">
+          <p class="text-sm text-[#525252] leading-relaxed">
             大企業の硬直した体制とは異なり、課題に応じて素早く動けます。
             初回ヒアリングから実装・納品まで、スピーディかつ柔軟に対応します。
           </p>
@@ -508,7 +507,7 @@
             <span class="text-[#1B3264] font-medium">提案・開発実績</span>
           </h2>
         </div>
-        <p class="reveal reveal-delay-2 text-sm text-[#6B7280] md:text-right max-w-xs leading-relaxed">
+        <p class="reveal reveal-delay-2 text-sm text-[#525252] md:text-right max-w-xs leading-relaxed">
           アプリ画面・企画書の表紙から<br>成果物をご覧いただけます
         </p>
       </div>
@@ -673,16 +672,16 @@
         <!-- CTA -->
         <div class="reveal reveal-delay-6 work-item card-lift works-cta-card p-8 flex flex-col justify-between min-h-[280px]">
           <div>
-            <p class="text-[10px] tracking-[0.25em] text-white/70 uppercase mb-6">Contact</p>
+            <p class="text-[10px] tracking-[0.25em] text-white/90 uppercase mb-6">Contact</p>
             <h3 class="text-xl font-light text-white mb-4 leading-snug">
               あなたの現場の課題を<br>一緒に解決しましょう
             </h3>
-            <p class="text-[13px] text-white/80 leading-relaxed">
+            <p class="text-[13px] text-white leading-relaxed">
               まずは無料ヒアリングから。<br>
               どんな小さな悩みでも歓迎です。
             </p>
           </div>
-          <a href="#contact" class="mt-8 inline-flex items-center gap-2 text-white text-sm font-medium group border-b border-white/40 pb-1 w-fit hover:border-white transition-colors">
+          <a href="#contact" class="mt-8 inline-flex items-center gap-2 text-white text-sm font-medium group border-b border-white/80 pb-1 w-fit hover:border-white transition-colors">
             お問い合わせへ
             <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -707,17 +706,17 @@
           <h2 class="text-[2rem] md:text-[2.6rem] font-light text-[#232323] mb-4 leading-snug">
             お問い合わせ
           </h2>
-          <p class="text-sm text-[#6B7280] leading-relaxed mb-8">
+          <p class="text-sm text-[#525252] leading-relaxed mb-8">
             ご相談・お見積もりはお気軽にどうぞ。<br>
             通常 2 営業日以内にご返信いたします。
           </p>
           <div class="works-cta-card rounded-sm p-8 text-white hidden lg:block">
-            <p class="text-[10px] tracking-[0.25em] text-white/70 uppercase mb-3">Free Consultation</p>
+            <p class="text-[10px] tracking-[0.25em] text-white/90 uppercase mb-3">Free Consultation</p>
             <p class="text-lg font-light leading-relaxed">DTP 現場の知見と<br>エンジニアリングで、<br>確実な DX を。</p>
           </div>
         </div>
         <div class="lg:col-span-7">
-      <form class="reveal reveal-delay-1 space-y-5 bg-white/70 border border-[#E8E0D4] p-6 md:p-8 backdrop-blur-sm" onsubmit="handleSubmit(event)" id="contactForm">
+      <form class="reveal reveal-delay-1 space-y-5 bg-[#FFFCF7] border border-[#D4C8B8] p-6 md:p-8" onsubmit="handleSubmit(event)" id="contactForm">
 
         <!-- ① ハニーポットフィールド（人には見えない・スクリーンリーダーからも除外） -->
         <div class="hp-trap" aria-hidden="true">
@@ -731,14 +730,14 @@
               お名前 <span class="text-amber">*</span>
             </label>
             <input type="text" placeholder="山田 太郎" required
-              class="w-full px-4 py-3.5 bg-[#FAF7F2] border border-[#E8E0D4] text-sm text-[#232323] placeholder-[#9CA3AF] transition-all">
+              class="w-full px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] placeholder-[#737373] transition-all">
           </div>
           <div>
             <label class="block text-[11px] font-medium text-[#232323] tracking-wider mb-2 uppercase">
               会社名
             </label>
             <input type="text" placeholder="株式会社〇〇"
-              class="w-full px-4 py-3.5 bg-[#FAF7F2] border border-[#E8E0D4] text-sm text-[#232323] placeholder-[#9CA3AF] transition-all">
+              class="w-full px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] placeholder-[#737373] transition-all">
           </div>
         </div>
 
@@ -747,7 +746,7 @@
             メールアドレス <span class="text-amber">*</span>
           </label>
           <input type="email" placeholder="example@company.com" required
-            class="w-full px-4 py-3.5 bg-[#FAF7F2] border border-[#E8E0D4] text-sm text-[#232323] placeholder-[#9CA3AF] transition-all">
+            class="w-full px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] placeholder-[#737373] transition-all">
         </div>
 
         <div>
@@ -755,7 +754,7 @@
             お問い合わせ種別
           </label>
           <div class="relative">
-            <select class="w-full px-4 py-3.5 bg-[#FAF7F2] border border-[#E8E0D4] text-sm text-[#232323] transition-all appearance-none pr-10">
+            <select class="w-full px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] transition-all appearance-none pr-10">
               <option value="">選択してください</option>
               <option>DTP自動化ツール開発のご相談</option>
               <option>DXロードマップ策定のご相談</option>
@@ -764,7 +763,7 @@
               <option>その他</option>
             </select>
             <div class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
-              <svg class="w-4 h-4 text-[#6B7280]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-[#525252]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"/>
               </svg>
             </div>
@@ -777,14 +776,14 @@
           </label>
           <textarea rows="6"
             placeholder="ご相談内容や解決したい課題を、できるだけ具体的にご記入ください。" required
-            class="w-full px-4 py-3.5 bg-[#FAF7F2] border border-[#E8E0D4] text-sm text-[#232323] placeholder-[#9CA3AF] transition-all resize-none"></textarea>
+            class="w-full px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] placeholder-[#737373] transition-all resize-none"></textarea>
         </div>
 
         <!-- ② 算数CAPTCHA（毎回ランダム生成） -->
         <div>
           <label class="block text-[11px] font-medium text-[#232323] tracking-wider mb-2 uppercase">
             スパム確認 <span class="text-amber">*</span>
-            <span class="ml-1 text-[#9CA3AF] font-normal normal-case tracking-normal">（以下の計算の答えを入力してください）</span>
+            <span class="ml-1 text-[#737373] font-normal normal-case tracking-normal">（以下の計算の答えを入力してください）</span>
           </label>
           <div class="flex items-center gap-3">
             <div id="captchaQuestion"
@@ -793,7 +792,7 @@
             </div>
             <input type="text" id="captchaInput" inputmode="numeric" pattern="-?[0-9]+"
               placeholder="答えを入力" required autocomplete="off"
-              class="flex-1 px-4 py-3.5 bg-[#FAF7F2] border border-[#E8E0D4] text-sm text-[#232323] placeholder-[#9CA3AF] transition-all">
+              class="flex-1 px-4 py-3.5 bg-[#FFFCF7] border border-[#D4C8B8] text-sm text-[#232323] placeholder-[#737373] transition-all">
           </div>
           <p id="captchaError" class="hidden mt-2 text-[11px] text-red-500 flex items-center gap-1">
             <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -816,7 +815,7 @@
           <p class="text-sm text-amber font-medium">送信完了しました。近日中にご連絡いたします。</p>
         </div>
 
-        <p class="text-[11px] text-center text-[#9CA3AF] leading-relaxed">
+        <p class="text-[11px] text-center text-[#737373] leading-relaxed">
           送信いただいた情報は、お問い合わせへの返信にのみ使用します。<br>
           プライバシーポリシーに基づき適切に管理いたします。
         </p>
@@ -838,15 +837,15 @@
           </div>
           <div>
             <p class="text-sm font-medium tracking-[0.2em] uppercase">DTP Automation Engineer</p>
-            <p class="text-[11px] text-white/40 tracking-wide mt-0.5">Freelance DTP × DX Support</p>
+            <p class="text-[11px] text-white/75 tracking-wide mt-0.5">Freelance DTP × DX Support</p>
           </div>
         </div>
         <div class="flex items-center gap-8">
-          <a href="#concept" class="text-[11px] tracking-widest text-white/50 uppercase hover:text-white transition-colors">Concept</a>
-          <a href="#services" class="text-[11px] tracking-widest text-white/50 uppercase hover:text-white transition-colors">Works</a>
-          <a href="#contact" class="text-[11px] tracking-widest text-white/50 uppercase hover:text-white transition-colors">Contact</a>
+          <a href="#concept" class="text-[11px] tracking-widest text-white/80 uppercase hover:text-white transition-colors">Concept</a>
+          <a href="#services" class="text-[11px] tracking-widest text-white/80 uppercase hover:text-white transition-colors">Works</a>
+          <a href="#contact" class="text-[11px] tracking-widest text-white/80 uppercase hover:text-white transition-colors">Contact</a>
         </div>
-        <p class="text-[11px] text-white/30">&copy; 2026 All Rights Reserved.</p>
+        <p class="text-[11px] text-white/70">&copy; 2026 All Rights Reserved.</p>
       </div>
     </div>
   </footer>
@@ -1049,7 +1048,7 @@
     <div class="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-[#FAF7F2] border border-[#E8E0D4] shadow-2xl">
 
       <!-- Header -->
-      <div class="flex items-center justify-between px-8 py-5 border-b border-[#E8E0D4] bg-white/80">
+      <div class="flex items-center justify-between px-8 py-5 border-b border-[#D4C8B8] bg-[#FFFCF7]">
         <div class="flex items-center gap-4">
           <div class="w-8 h-8 btn-amber flex items-center justify-center flex-shrink-0 rounded-sm">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1063,7 +1062,7 @@
           </div>
         </div>
         <button onclick="closeModal('tool-detail')"
-          class="w-8 h-8 flex items-center justify-center text-[#6B7280] hover:text-[#232323] hover:bg-[#E2E4E9] transition-colors">
+          class="w-8 h-8 flex items-center justify-center text-[#525252] hover:text-[#232323] hover:bg-[#E2E4E9] transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
@@ -1108,35 +1107,35 @@
             <p class="text-[11px] tracking-[0.2em] text-amber font-medium uppercase mb-4">処理フロー</p>
             <div class="flex flex-col gap-0">
               <!-- Step 1 -->
-              <div class="flex items-center gap-3 bg-white/70 border border-[#E8E0D4] px-4 py-3">
+              <div class="flex items-center gap-3 bg-[#FFFCF7] border border-[#D4C8B8] px-4 py-3">
                 <span class="stat-num text-lg font-light text-amber w-7 text-center flex-shrink-0 leading-none">01</span>
                 <span class="text-[13px] text-[#232323]">Word 一括変換</span>
-                <span class="text-[11px] text-[#6B7280] ml-auto">Python</span>
+                <span class="text-[11px] text-[#525252] ml-auto">Python</span>
               </div>
               <div class="flex justify-center py-1">
-                <svg class="w-3.5 h-3.5 text-amber/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </div>
               <!-- Step 2 -->
-              <div class="flex items-center gap-3 bg-white/70 border border-[#E8E0D4] px-4 py-3">
+              <div class="flex items-center gap-3 bg-[#FFFCF7] border border-[#D4C8B8] px-4 py-3">
                 <span class="stat-num text-lg font-light text-amber w-7 text-center flex-shrink-0 leading-none">02</span>
                 <span class="text-[13px] text-[#232323]">タグ付き TXT 出力</span>
-                <span class="text-[11px] text-[#6B7280] ml-auto">.txt</span>
+                <span class="text-[11px] text-[#525252] ml-auto">.txt</span>
               </div>
               <div class="flex justify-center py-1">
-                <svg class="w-3.5 h-3.5 text-amber/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </div>
               <!-- Step 3 -->
-              <div class="flex items-center gap-3 bg-white/70 border border-[#E8E0D4] px-4 py-3">
+              <div class="flex items-center gap-3 bg-[#FFFCF7] border border-[#D4C8B8] px-4 py-3">
                 <span class="stat-num text-lg font-light text-amber w-7 text-center flex-shrink-0 leading-none">03</span>
                 <span class="text-[13px] text-[#232323]">InDesign に Place</span>
-                <span class="text-[11px] text-[#6B7280] ml-auto">UTF-8</span>
+                <span class="text-[11px] text-[#525252] ml-auto">UTF-8</span>
               </div>
               <div class="flex justify-center py-1">
-                <svg class="w-3.5 h-3.5 text-amber/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </div>
@@ -1144,18 +1143,18 @@
               <div class="flex items-center gap-3 btn-amber px-4 py-3 rounded-sm">
                 <span class="stat-num text-lg font-light text-white w-7 text-center flex-shrink-0 leading-none">04</span>
                 <span class="text-[13px] text-white">統合タグプロセッサー v4.7</span>
-                <span class="text-[11px] text-white/50 ml-auto">ExtendScript</span>
+                <span class="text-[11px] text-white/90 ml-auto">ExtendScript</span>
               </div>
               <div class="flex justify-center py-1">
-                <svg class="w-3.5 h-3.5 text-amber/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </div>
               <!-- Step 5 -->
-              <div class="flex items-center gap-3 bg-white/70 border border-[#E8E0D4] px-4 py-3">
+              <div class="flex items-center gap-3 bg-[#FFFCF7] border border-[#D4C8B8] px-4 py-3">
                 <span class="stat-num text-lg font-light text-amber w-7 text-center flex-shrink-0 leading-none">05</span>
                 <span class="text-[13px] text-[#232323]">組版完成</span>
-                <span class="text-[11px] text-[#6B7280] ml-auto">ルビ・表・書式</span>
+                <span class="text-[11px] text-[#525252] ml-auto">ルビ・表・書式</span>
               </div>
             </div>
           </div>
@@ -1170,9 +1169,9 @@
             <div>
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-2 h-2 rounded-full bg-[#D97706]"></div>
-                <span class="text-[11px] font-medium text-[#6B7280] tracking-wide uppercase">Before — Word 原稿</span>
+                <span class="text-[11px] font-medium text-[#525252] tracking-wide uppercase">Before — Word 原稿</span>
               </div>
-              <pre class="text-[12px] font-mono leading-relaxed bg-white/70 border border-[#E8E0D4] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">3. 斜体＋下線テキスト
+              <pre class="text-[12px] font-mono leading-relaxed bg-[#FFFCF7] border border-[#D4C8B8] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">3. 斜体＋下線テキスト
 4. 太字＋下線テキスト
 下線付（ルビ：かせんつ）
 表：項目｜ふりがな｜姓</pre>
@@ -1184,9 +1183,9 @@
             <div>
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-2 h-2 rounded-full bg-[#16A34A]"></div>
-                <span class="text-[11px] font-medium text-[#6B7280] tracking-wide uppercase">After — InDesign 組版後</span>
+                <span class="text-[11px] font-medium text-[#525252] tracking-wide uppercase">After — InDesign 組版後</span>
               </div>
-              <pre class="text-[12px] font-mono leading-relaxed bg-white/70 border border-[#E8E0D4] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">3. 斜体テキスト ← Italic+Underline
+              <pre class="text-[12px] font-mono leading-relaxed bg-[#FFFCF7] border border-[#D4C8B8] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">3. 斜体テキスト ← Italic+Underline
 4. ボールドテキスト ← Bold+Underline
 下線付（ルビ適用済）
 ネイティブ表として配置
@@ -1201,11 +1200,11 @@
           <div class="grid sm:grid-cols-2 gap-4">
             <div class="bg-[#F8F9FB] border border-[#E2E4E9] px-5 py-4">
               <p class="text-[11px] font-medium text-[#1B3264] tracking-wide uppercase mb-2">Python アプリ</p>
-              <p class="text-[13px] text-[#6B7280] leading-relaxed">Word COM / python-docx による書式解析、複合タグ出力、相関表・ページ割 Excel 生成</p>
+              <p class="text-[13px] text-[#525252] leading-relaxed">Word COM / python-docx による書式解析、複合タグ出力、相関表・ページ割 Excel 生成</p>
             </div>
             <div class="bg-[#F8F9FB] border border-[#E2E4E9] px-5 py-4">
               <p class="text-[11px] font-medium text-[#1B3264] tracking-wide uppercase mb-2">InDesign v4.7</p>
-              <p class="text-[13px] text-[#6B7280] leading-relaxed">GREP 一括処理でルビ・表・複合文字スタイルを適用。ドキュメント全体をデフォルト対象とし、部分選択事故を防止</p>
+              <p class="text-[13px] text-[#525252] leading-relaxed">GREP 一括処理でルビ・表・複合文字スタイルを適用。ドキュメント全体をデフォルト対象とし、部分選択事故を防止</p>
             </div>
           </div>
         </div>
