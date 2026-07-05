@@ -37,6 +37,9 @@
     .count-box { padding: 10px 12px; background: var(--navy-pale); border-left: 4px solid var(--navy); font-size: 13px; font-weight: 700; margin: 10px 0; }
     .demo-notice { background: var(--navy-pale); border: 1px solid var(--border); border-radius: 3px; padding: 8px 12px; font-size: 11px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.55; }
     .demo-notice strong { color: var(--navy); }
+    .demo-notice ul { margin: 8px 0 0 1.1em; padding: 0; }
+    .demo-notice li { margin-bottom: 4px; }
+    .demo-notice li:last-child { margin-bottom: 0; }
     .preview-wrap { flex: 1; display: flex; align-items: center; justify-content: center; background: var(--navy-dark); border-radius: 3px; overflow: auto; min-height: 280px; padding: 8px; -webkit-overflow-scrolling: touch; }
     #previewCanvas { max-width: 100%; height: auto; background: #222; border-radius: 2px; }
     .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--text-sub); margin-bottom: 10px; }
@@ -64,7 +67,12 @@
     <div class="col-input">
       <h2>1. スキャン画像</h2>
       <div class="demo-notice">
-        <strong>体験版：</strong> 黒紙背景と写真の明度差で各枚を検出。認識感度を上げると暗い写真も拾います。1200dpi 切り出し保存はデスクトップ版（Python）の機能です。
+        <strong>体験版について</strong>
+        <ul>
+          <li>このページは<strong>認識プレビュー</strong>です。検出の考え方（黒紙と写真の明度差）は Python 版と同じですが、<strong>解像度・検出精度は Python 版と異なります</strong>（プレビュー用に画像を縮小して解析しています）。</li>
+          <li>赤枠は矩形のおおよその位置です。斜めに置いた写真は角に黒が残る場合があります。</li>
+          <li><strong>Python 版（本番アプリ）</strong>では、切り出しに加えて<strong>傾き・歪み補正</strong>（台形補正）を行い、写真を正位置に整えてから保存します。1200dpi での書き出しにも対応しています。</li>
+        </ul>
       </div>
       <div id="dropZone" class="drop-zone loading">タップまたは選択で画像を読込</div>
       <input type="file" id="fileInput" class="file-input-hidden" accept="image/jpeg,image/png,image/webp,image/*">
