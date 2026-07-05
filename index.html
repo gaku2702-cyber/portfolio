@@ -496,7 +496,7 @@
           class="reveal reveal-delay-1 work-cover group">
           <div class="work-cover-img">
             <img src="assets/covers/word-tag-extractor.jpg"
-              alt="Wordデータのタグ付きテキスト化 — アプリ画面"
+              alt="Word → InDesign 組版パイプライン — アプリ画面"
               loading="lazy" width="960" height="540">
             <div class="work-cover-overlay">
               <span class="text-[12px] text-white font-medium tracking-wide flex items-center gap-1.5">
@@ -509,7 +509,7 @@
           </div>
           <div class="mt-3">
             <p class="text-[10px] tracking-[0.2em] text-[#1B3264] font-medium uppercase">Data Conversion</p>
-            <h3 class="text-sm font-medium text-[#232323] mt-1 leading-snug">Wordデータのタグ付きテキスト化</h3>
+            <h3 class="text-sm font-medium text-[#232323] mt-1 leading-snug">Word → InDesign 組版パイプライン</h3>
           </div>
         </button>
 
@@ -794,7 +794,7 @@
           <a href="#services" class="text-[11px] tracking-widest text-white/50 uppercase hover:text-white transition-colors">Works</a>
           <a href="#contact" class="text-[11px] tracking-widest text-white/50 uppercase hover:text-white transition-colors">Contact</a>
         </div>
-        <p class="text-[11px] text-white/30">&copy; 2025 All Rights Reserved.</p>
+        <p class="text-[11px] text-white/30">&copy; 2026 All Rights Reserved.</p>
       </div>
     </div>
   </footer>
@@ -1007,7 +1007,7 @@
           </div>
           <div>
             <p class="text-[10px] tracking-[0.25em] text-[#1B3264] font-medium uppercase mb-0.5">Data Conversion</p>
-            <h2 class="text-base font-medium text-[#232323]">DTP Tag Extractor</h2>
+            <h2 class="text-base font-medium text-[#232323]">Word → InDesign DTP 変換パイプライン</h2>
           </div>
         </div>
         <button onclick="closeModal('tool-detail')"
@@ -1030,23 +1030,23 @@
             <ul class="space-y-3">
               <li class="flex items-start gap-3">
                 <div class="w-1 h-1 rounded-full bg-[#1B3264] mt-2 flex-shrink-0"></div>
-                <span class="text-[13px] text-[#232323] leading-relaxed">複数の <code class="text-[11px] px-1.5 py-0.5 bg-[#F3F4F6] border border-[#E2E4E9] font-mono">.docx</code> ファイルを一括処理し、1 つのテキストファイルに結合出力</span>
+                <span class="text-[13px] text-[#232323] leading-relaxed">複数の <code class="text-[11px] px-1.5 py-0.5 bg-[#F3F4F6] border border-[#E2E4E9] font-mono">.docx</code> を一括処理し、InDesign 流し込み用のタグ付き TXT を生成</span>
               </li>
               <li class="flex items-start gap-3">
                 <div class="w-1 h-1 rounded-full bg-[#1B3264] mt-2 flex-shrink-0"></div>
-                <span class="text-[13px] text-[#232323] leading-relaxed">太字・斜体・下線・上下付き・ルビ・表などの書式を設定可能なタグへ自動変換</span>
+                <span class="text-[13px] text-[#232323] leading-relaxed">太字・斜体・下線の<strong class="font-medium">重なり</strong>を <code class="text-[11px] px-1.5 py-0.5 bg-[#F3F4F6] border border-[#E2E4E9] font-mono">&lt;biu&gt;</code> 等の複合タグで再現</span>
               </li>
               <li class="flex items-start gap-3">
                 <div class="w-1 h-1 rounded-full bg-[#1B3264] mt-2 flex-shrink-0"></div>
-                <span class="text-[13px] text-[#232323] leading-relaxed">全角 / 半角の統一変換（カタカナ・英数字・スペース）</span>
+                <span class="text-[13px] text-[#232323] leading-relaxed">ルビ・表・改ページ・上下付き・画像マーカーをタグ化</span>
               </li>
               <li class="flex items-start gap-3">
                 <div class="w-1 h-1 rounded-full bg-[#1B3264] mt-2 flex-shrink-0"></div>
-                <span class="text-[13px] text-[#232323] leading-relaxed">誤字・表記の揺れを辞書ベースで自動修正</span>
+                <span class="text-[13px] text-[#232323] leading-relaxed">InDesign 統合スクリプト <strong class="font-medium">v4.7</strong> でタグ除去・文字スタイル適用・表生成を<strong class="font-medium">1 回の実行</strong>で完了</span>
               </li>
               <li class="flex items-start gap-3">
                 <div class="w-1 h-1 rounded-full bg-[#1B3264] mt-2 flex-shrink-0"></div>
-                <span class="text-[13px] text-[#232323] leading-relaxed">タグ文字列・変換辞書を GUI 上のテーブルで柔軟にカスタマイズ</span>
+                <span class="text-[13px] text-[#232323] leading-relaxed">全角 / 半角統一・誤字辞書・タグ設定を GUI でカスタマイズ可能</span>
               </li>
             </ul>
           </div>
@@ -1058,8 +1058,8 @@
               <!-- Step 1 -->
               <div class="flex items-center gap-3 bg-[#F8F9FB] border border-[#E2E4E9] px-4 py-3">
                 <span class="text-[10px] font-medium text-[#1B3264] w-5 text-center flex-shrink-0">01</span>
-                <span class="text-[13px] text-[#232323]">フォルダを選択</span>
-                <span class="text-[11px] text-[#6B7280] ml-auto">.docx / .doc</span>
+                <span class="text-[13px] text-[#232323]">Word 一括変換</span>
+                <span class="text-[11px] text-[#6B7280] ml-auto">Python</span>
               </div>
               <div class="flex justify-center py-1">
                 <svg class="w-3.5 h-3.5 text-[#1B3264]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1069,8 +1069,8 @@
               <!-- Step 2 -->
               <div class="flex items-center gap-3 bg-[#F8F9FB] border border-[#E2E4E9] px-4 py-3">
                 <span class="text-[10px] font-medium text-[#1B3264] w-5 text-center flex-shrink-0">02</span>
-                <span class="text-[13px] text-[#232323]">書式・段落を解析</span>
-                <span class="text-[11px] text-[#6B7280] ml-auto">python-docx</span>
+                <span class="text-[13px] text-[#232323]">タグ付き TXT 出力</span>
+                <span class="text-[11px] text-[#6B7280] ml-auto">.txt</span>
               </div>
               <div class="flex justify-center py-1">
                 <svg class="w-3.5 h-3.5 text-[#1B3264]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1080,8 +1080,8 @@
               <!-- Step 3 -->
               <div class="flex items-center gap-3 bg-[#F8F9FB] border border-[#E2E4E9] px-4 py-3">
                 <span class="text-[10px] font-medium text-[#1B3264] w-5 text-center flex-shrink-0">03</span>
-                <span class="text-[13px] text-[#232323]">タグ付与・正規化</span>
-                <span class="text-[11px] text-[#6B7280] ml-auto">jaconv / janome</span>
+                <span class="text-[13px] text-[#232323]">InDesign に Place</span>
+                <span class="text-[11px] text-[#6B7280] ml-auto">UTF-8</span>
               </div>
               <div class="flex justify-center py-1">
                 <svg class="w-3.5 h-3.5 text-[#1B3264]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1091,8 +1091,19 @@
               <!-- Step 4 -->
               <div class="flex items-center gap-3 bg-[#1B3264] px-4 py-3">
                 <span class="text-[10px] font-medium text-white w-5 text-center flex-shrink-0">04</span>
-                <span class="text-[13px] text-white">タグ付きテキスト出力</span>
-                <span class="text-[11px] text-white/50 ml-auto">.txt</span>
+                <span class="text-[13px] text-white">統合タグプロセッサー v4.7</span>
+                <span class="text-[11px] text-white/50 ml-auto">ExtendScript</span>
+              </div>
+              <div class="flex justify-center py-1">
+                <svg class="w-3.5 h-3.5 text-[#1B3264]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </div>
+              <!-- Step 5 -->
+              <div class="flex items-center gap-3 bg-[#F8F9FB] border border-[#E2E4E9] px-4 py-3">
+                <span class="text-[10px] font-medium text-[#1B3264] w-5 text-center flex-shrink-0">05</span>
+                <span class="text-[13px] text-[#232323]">組版完成</span>
+                <span class="text-[11px] text-[#6B7280] ml-auto">ルビ・表・書式</span>
               </div>
             </div>
           </div>
@@ -1109,46 +1120,40 @@
                 <div class="w-2 h-2 rounded-full bg-[#D97706]"></div>
                 <span class="text-[11px] font-medium text-[#6B7280] tracking-wide uppercase">Before — Word 原稿</span>
               </div>
-              <pre class="text-[12px] font-mono leading-relaxed bg-[#F8F9FB] border border-[#E2E4E9] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">【太字】重要なお知らせ
-下線付きテキスト
-上付き注釈²
-表：
-┌──────┬──────┐
-│ 品目 │ 数量 │
-└──────┴──────┘
----ページ区切り---</pre>
+              <pre class="text-[12px] font-mono leading-relaxed bg-[#F8F9FB] border border-[#E2E4E9] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">3. 斜体＋下線テキスト
+4. 太字＋下線テキスト
+下線付（ルビ：かせんつ）
+表：項目｜ふりがな｜姓</pre>
             </div>
 
             <!-- Arrow (hidden on mobile) -->
 
-            <!-- After -->
+            <!-- After side label -->
             <div>
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-2 h-2 rounded-full bg-[#16A34A]"></div>
-                <span class="text-[11px] font-medium text-[#6B7280] tracking-wide uppercase">After — タグ付きテキスト</span>
+                <span class="text-[11px] font-medium text-[#6B7280] tracking-wide uppercase">After — InDesign 組版後</span>
               </div>
-              <pre class="text-[12px] font-mono leading-relaxed bg-[#F8F9FB] border border-[#E2E4E9] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">&lt;b&gt;重要なお知らせ&lt;/b&gt;
-&lt;u&gt;下線付きテキスト&lt;/u&gt;
-上付き注釈&lt;up&gt;2&lt;/up&gt;
-&lt;table&gt;
-品目&lt;tb&gt;数量&lt;lb&gt;
-&lt;/table&gt;
-&lt;pb&gt;</pre>
+              <pre class="text-[12px] font-mono leading-relaxed bg-[#F8F9FB] border border-[#E2E4E9] px-5 py-4 overflow-x-auto whitespace-pre-wrap text-[#232323]">3. 斜体テキスト ← Italic+Underline
+4. ボールドテキスト ← Bold+Underline
+下線付（ルビ適用済）
+ネイティブ表として配置
+※タグはすべて除去済</pre>
             </div>
           </div>
         </div>
 
-        <!-- GUI スクリーンショット placeholder -->
+        <!-- 技術スタック -->
         <div>
-          <p class="text-[11px] tracking-[0.2em] text-[#1B3264] font-medium uppercase mb-4">GUI — DTP Tag Extractor</p>
-          <div class="relative bg-[#F3F4F6] border border-[#E2E4E9] flex items-center justify-center min-h-[180px]">
-            <!-- スクリーンショット画像をここに配置: <img src="./screenshot.png" ...> -->
-            <div class="text-center py-12">
-              <svg class="w-10 h-10 text-[#D1D5DB] mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              <p class="text-[12px] text-[#9CA3AF]">スクリーンショットを配置予定</p>
-              <p class="text-[11px] text-[#D1D5DB] mt-1">screenshot.png をこのフォルダに置き &lt;img&gt; タグに差し替えてください</p>
+          <p class="text-[11px] tracking-[0.2em] text-[#1B3264] font-medium uppercase mb-4">技術構成</p>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="bg-[#F8F9FB] border border-[#E2E4E9] px-5 py-4">
+              <p class="text-[11px] font-medium text-[#1B3264] tracking-wide uppercase mb-2">Python アプリ</p>
+              <p class="text-[13px] text-[#6B7280] leading-relaxed">Word COM / python-docx による書式解析、複合タグ出力、相関表・ページ割 Excel 生成</p>
+            </div>
+            <div class="bg-[#F8F9FB] border border-[#E2E4E9] px-5 py-4">
+              <p class="text-[11px] font-medium text-[#1B3264] tracking-wide uppercase mb-2">InDesign v4.7</p>
+              <p class="text-[13px] text-[#6B7280] leading-relaxed">GREP 一括処理でルビ・表・複合文字スタイルを適用。ドキュメント全体をデフォルト対象とし、部分選択事故を防止</p>
             </div>
           </div>
         </div>

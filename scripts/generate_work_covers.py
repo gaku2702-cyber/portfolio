@@ -26,7 +26,7 @@ COVERS = [
     {
         "file": "word-tag-extractor.jpg",
         "category": "Data Conversion",
-        "title": ["Wordデータの", "タグ付きテキスト化"],
+        "title": ["Word → InDesign", "組版パイプライン"],
         "motif": "word",
     },
     {
