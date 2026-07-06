@@ -55,11 +55,28 @@
     }
     .btn-amber:hover { filter: brightness(1.05); }
 
-    /* Hero visual — assets/hero/desk.png */
-    .hero-visual-wrap { position: relative; width: 100%; max-width: 640px; margin: 0 auto; }
+    /* Hero visual — assets/hero/desk.png（左方向へはみ出して広げる） */
+    .hero-visual-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    @media (min-width: 768px) {
+      .hero-visual-col {
+        justify-content: flex-end;
+        overflow: visible;
+      }
+      .hero-visual-wrap {
+        width: calc(100% + 6rem);
+        max-width: none;
+        margin-left: -6rem;
+        margin-right: 0;
+      }
+    }
     .hero-bg-panel {
       width: 100%;
-      aspect-ratio: 4 / 5;
+      aspect-ratio: 5 / 4;
       border: 1px solid #E5E7EB;
       box-shadow: 0 16px 40px rgba(27, 50, 100, 0.1);
       background-color: #FFFFFF;
@@ -302,10 +319,10 @@
   <!-- ========== HERO ========== -->
   <section class="min-h-screen flex items-center pt-20">
     <div class="max-w-6xl mx-auto px-6 w-full py-16">
-      <div class="grid md:grid-cols-12 gap-8 items-center">
+      <div class="grid md:grid-cols-12 gap-8 items-center overflow-visible">
 
         <!-- Text block -->
-        <div class="md:col-span-7">
+        <div class="md:col-span-7 relative z-10">
           <div class="anim-hero-1 flex items-center gap-3 mb-10">
             <div class="w-10 h-px bg-[#1B3264]"></div>
             <span class="text-xs tracking-[0.35em] text-[#1B3264] font-medium uppercase">Freelance DTP Automation &amp; DX Engineer</span>
@@ -342,7 +359,7 @@
         </div>
 
         <!-- Hero visual — assets/hero/desk.png -->
-        <div class="anim-visual md:col-span-5 flex items-center justify-center">
+        <div class="anim-visual md:col-span-5 hero-visual-col flex items-center justify-center">
           <div class="hero-visual-wrap">
             <div class="hero-bg-panel" role="img" aria-label="DTP・DX 開発デスク"></div>
             <div class="hero-amber-badge" aria-hidden="true">
