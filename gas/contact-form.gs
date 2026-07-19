@@ -1,16 +1,17 @@
 /**
  * Portfolio contact form backend.
+ *
  * Deploy: Deploy > New deployment > Web app
  *   Execute as: Me
  *   Who has access: Anyone
- * Paste the Web app URL into index.html (gasUrl).
+ * Paste the Web app URL into index.html (GAS_URL).
  */
 
 const RECIPIENT_EMAIL = 'smartdtp.studio.works@gmail.com';
 
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    const data = parsePayload_(e);
     const name = sanitize_(data.name);
     const company = sanitize_(data.company);
     const email = sanitize_(data.email);
@@ -18,7 +19,7 @@ function doPost(e) {
     const message = sanitize_(data.message);
 
     if (!name || !email || !message) {
-      return jsonResponse_({ status: 'error', message: 'missing fields' });
+      return htmlResponse_('missing fields', false);
     }
 
     const subject = '[Portfolio] ' + (type || 'お問い合わせ') + ' — ' + name;
@@ -39,22 +40,47 @@ function doPost(e) {
       name: 'Portfolio Contact Form',
     });
 
-    return jsonResponse_({ status: 'success' });
+    return htmlResponse_('success', true);
   } catch (err) {
-    return jsonResponse_({ status: 'error', message: String(err) });
+    return htmlResponse_(String(err), false);
   }
 }
 
 function doGet() {
-  return jsonResponse_({ status: 'ok' });
+  return htmlResponse_('ok', true);
+}
+
+function parsePayload_(e) {
+  if (e.parameter && (e.parameter.name || e.parameter.email || e.parameter.message)) {
+    return {
+      name: e.parameter.name,
+      company: e.parameter.company,
+      email: e.parameter.email,
+      type: e.parameter.type,
+      message: e.parameter.message,
+    };
+  }
+
+  if (e.postData && e.postData.contents) {
+    const type = (e.postData.type || '').toLowerCase();
+    if (type.indexOf('application/json') >= 0) {
+      return JSON.parse(e.postData.contents);
+    }
+  }
+
+  return {};
 }
 
 function sanitize_(value) {
   return String(value || '').trim();
 }
 
-function jsonResponse_(payload) {
-  return ContentService
-    .createTextOutput(JSON.stringify(payload))
-    .setMimeType(ContentService.MimeType.JSON);
+function htmlResponse_(message, ok) {
+  const safe = String(message)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  const html = '<!DOCTYPE html><html><body data-status="' + (ok ? 'success' : 'error') + '">' +
+    safe + '</body></html>';
+  return HtmlService.createHtmlOutput(html).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

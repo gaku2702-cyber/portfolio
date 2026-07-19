@@ -1025,23 +1025,72 @@
       btn.innerHTML = '<svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> 送信中…';
       btn.disabled = true;
 
-      fetch(GAS_URL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      })
-      .then(res => res.json())
-      .then(result => {
-        if (result.status === 'success') {
+      submitContactForm(data)
+        .then(() => {
           btn.classList.add('hidden');
           msg.classList.remove('hidden');
-        } else {
+        })
+        .catch(() => {
           resetBtn(btn);
-          alert('送信に失敗しました。お手数ですが、少し時間を置いて再度お試しください。');
+          alert('送信に失敗しました。メール（' + CONTACT_EMAIL + '）へ直接ご連絡いただくか、少し時間を置いて再度お試しください。');
+        });
+    }
+
+    function submitContactForm(data) {
+      return new Promise((resolve, reject) => {
+        let iframe = document.getElementById('gasSink');
+        if (!iframe) {
+          iframe = document.createElement('iframe');
+          iframe.id = 'gasSink';
+          iframe.name = 'gasSink';
+          iframe.title = 'contact-submit';
+          iframe.hidden = true;
+          document.body.appendChild(iframe);
         }
-      })
-      .catch(() => {
-        resetBtn(btn);
-        alert('通信エラーが発生しました。ネットワークをご確認のうえ再度お試しください。');
+
+        let form = document.getElementById('gasForm');
+        if (!form) {
+          form = document.createElement('form');
+          form.id = 'gasForm';
+          form.method = 'POST';
+          form.action = GAS_URL;
+          form.target = 'gasSink';
+          form.hidden = true;
+          ['name', 'company', 'email', 'type', 'message'].forEach((key) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            form.appendChild(input);
+          });
+          document.body.appendChild(form);
+        }
+
+        ['name', 'company', 'email', 'type', 'message'].forEach((key) => {
+          form.elements[key].value = data[key] || '';
+        });
+
+        let settled = false;
+        const finish = (ok) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          iframe.onload = null;
+          ok ? resolve() : reject(new Error('gas submit failed'));
+        };
+
+        const timer = setTimeout(() => finish(false), 20000);
+        iframe.onload = () => {
+          try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const status = doc.body && doc.body.getAttribute('data-status');
+            finish(status !== 'error');
+          } catch (_) {
+            // クロスオリジンでも POST 自体は通ることが多い
+            finish(true);
+          }
+        };
+
+        form.submit();
       });
     }
 

@@ -1,17 +1,30 @@
 # お問い合わせフォーム（Google Apps Script）
 
-フォーム送信先: **smartdtp.studio.works@gmail.com**
+送信先: **smartdtp.studio.works@gmail.com**
 
-## 初回セットアップ / 宛先変更時
+## 重要: GAS を必ず再デプロイしてください
 
-1. [Google Apps Script](https://script.google.com/) で新規プロジェクトを作成
-2. `contact-form.gs` の内容を貼り付け（`RECIPIENT_EMAIL` を確認）
-3. **デプロイ** → **新しいデプロイ** → 種類: **ウェブアプリ**
+フォームが「通信エラー」「送信失敗」になる主な原因は、**Google 側のスクリプトが未設定・古いまま**であることです。
+
+1. [Google Apps Script](https://script.google.com/) を開く
+2. ポートフォリオ用プロジェクトを開く（または新規作成）
+3. エディタのコードを **`contact-form.gs` の内容すべて** に置き換える
+4. **デプロイ** → **新しいデプロイ**（初回）または **デプロイを管理** → 鉛筆 → **バージョン: 新規**（更新時）
+   - 種類: **ウェブアプリ**
    - 実行ユーザー: **自分**
-   - アクセス: **全員**
-4. 表示された **ウェブアプリ URL** を `index.html` の `gasUrl` に貼り付け
-5. 既存デプロイの更新時は **デプロイを管理** → 鉛筆アイコン → **バージョン: 新規** → **デプロイ**
+   - アクセスできるユーザー: **全員**
+5. 表示された **ウェブアプリ URL** を `index.html` の `GAS_URL` に貼り付けて push
 
-## 動作確認
+### 動作確認
 
-ブラウザでフォームからテスト送信し、`smartdtp.studio.works@gmail.com` に届くことを確認してください。
+ブラウザで次の URL を開き、`success` または `ok` と表示されればデプロイ成功です。
+
+```
+（あなたの GAS URL）?test=1
+```
+
+`スクリプト関数が見つかりません: doGet` と出る場合は、コード未反映またはデプロイ未更新です。
+
+## サイト側の仕組み
+
+`index.html` は **hidden iframe への form POST** で GAS に送信します（fetch + JSON は CORS で失敗しやすいため）。
