@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カラー補正ツール（体験デモ）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #1B3264; --navy-dark: #0F2347; --navy-pale: #E8EDF5;
+      --text-main: #232323; --text-sub: #6B7280;
+      --border: #E2E4E9; --bg-page: #F3F4F6;
+    }
+    body { font-family: 'Noto Sans JP', 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); font-size: 13px; line-height: 1.55; }
+    .container { max-width: 1180px; margin: 10px auto; background: #fff; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); overflow: hidden; }
+    .header-meta { display: flex; align-items: center; background: var(--navy); color: #fff; padding: 0 12px; height: 44px; gap: 8px; }
+    h1 { font-size: 14px; font-weight: 700; color: #fff; flex: 1; }
+    .btn-link { display: inline-block; padding: 5px 10px; background: rgba(255,255,255,0.18); color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); border-radius: 3px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .grid { display: flex; min-height: calc(100vh - 44px); }
+    .col-side { flex: 0 0 340px; width: 340px; padding: 16px; border-right: 1px solid var(--border); background: #FAFAFA; overflow-y: auto; }
+    .col-main { flex: 1; min-width: 0; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    h2 { font-size: 12px; font-weight: 700; color: #fff; background: var(--navy); padding: 8px 16px; margin: 12px -16px 12px; }
+    .col-side > h2:first-child { margin-top: -16px; }
+    .demo-notice { background: var(--navy-pale); border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; font-size: 11px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.6; }
+    .demo-notice strong { color: var(--navy); }
+    .demo-notice ul { margin: 8px 0 0 1.1em; }
+    .demo-notice li { margin-bottom: 4px; }
+    .drop-zone { border: 2px dashed #B0B8C8; border-radius: 4px; background: #EAEAEA; color: #555; text-align: center; padding: 22px 12px; font-size: 12px; font-weight: 600; margin-bottom: 10px; cursor: pointer; }
+    .drop-zone.ready { background: #D4EDDA; border-color: #28A745; color: #155724; }
+    .drop-zone.drag { background: #D5E0F0; border-color: var(--navy); color: var(--navy); }
+    .file-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+    .btn-primary { width: 100%; padding: 10px; background: var(--navy); color: #fff; border: none; border-radius: 3px; font-size: 13px; font-weight: 700; cursor: pointer; min-height: 40px; margin-top: 6px; }
+    .btn-secondary { width: 100%; padding: 8px; background: #fff; color: var(--navy); border: 1px solid var(--navy); border-radius: 3px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+    .metric { background: #fff; border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; margin-bottom: 8px; }
+    .metric-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-sub); font-weight: 700; margin-bottom: 4px; }
+    .metric-rgb { font-size: 13px; font-weight: 700; color: var(--text-main); font-variant-numeric: tabular-nums; }
+    .swatch-row { display: flex; gap: 6px; margin-top: 6px; }
+    .swatch { width: 28px; height: 28px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.12); }
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; min-height: 280px; }
+    .pane { display: flex; flex-direction: column; background: var(--navy-dark); border-radius: 3px; overflow: hidden; min-height: 260px; }
+    .pane-label { font-size: 11px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.35); padding: 6px 10px; }
+    .pane-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 8px; overflow: auto; }
+    .pane-body img, .pane-body canvas { max-width: 100%; max-height: 52vh; height: auto; border-radius: 2px; background: #222; }
+    .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px; }
+    .flow-step { background: var(--navy-pale); border: 1px solid var(--border); border-radius: 3px; padding: 10px 8px; text-align: center; }
+    .flow-num { font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .flow-txt { font-size: 11px; color: var(--text-main); line-height: 1.4; }
+    .status-bar { padding: 8px 16px; background: #F8F9FB; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-sub); }
+    .status-bar.ok { color: #155724; }
+    .status-bar.error { color: #CC2233; }
+    .check-row { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 4px; font-size: 12px; }
+    .check-row label { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-main); font-weight: 600; }
+    @media (max-width: 860px) {
+      .grid { flex-direction: column; }
+      .col-side { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+      .compare { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header-meta">
+    <h1>カラー補正ツール（体験デモ）</h1>
+    <a href="index.html" class="btn-link">← 戻る</a>
+  </div>
+
+  <div class="grid">
+    <div class="col-side">
+      <h2>1. 写真を読み込む</h2>
+      <div class="demo-notice">
+        <strong>体験デモについて</strong>
+        <ul>
+          <li>ブラウザ上で<strong>解析プレビュー</strong>と補正イメージを確認できます。</li>
+          <li>本番の Windows アプリでは、写真をドロップ → Photoshop 起動 → 画像を開く → 調整レイヤーで色補正 → <strong>PSD（レイヤー付き）保存</strong>まで自動化します。</li>
+          <li>このデモはプレビュー用です。Photoshop 連携や PSD 書き出しは Windows 版で行います。</li>
+        </ul>
+      </div>
+
+      <div id="dropZone" class="drop-zone">ここに写真をドロップ<br>またはタップして選択</div>
+      <input type="file" id="fileInput" class="file-hidden" accept="image/jpeg,image/png,image/webp,image/*">
+
+      <div class="check-row">
+        <label><input type="checkbox" id="chkLevels" checked> レベル補正（HL/SH）</label>
+        <label><input type="checkbox" id="chkCurves" checked> トーンカーブ（中間かぶり）</label>
+      </div>
+      <button type="button" class="btn-primary" id="btnRun">解析してプレビュー</button>
+      <button type="button" class="btn-secondary" id="btnSample">サンプルで試す</button>
+
+      <h2>2. 測色結果</h2>
+      <div class="metric">
+        <div class="metric-label">Shadow</div>
+        <div class="metric-rgb" id="valShadow">—</div>
+        <div class="swatch-row"><span class="swatch" id="swShadow"></span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Highlight</div>
+        <div class="metric-rgb" id="valHighlight">—</div>
+        <div class="swatch-row"><span class="swatch" id="swHighlight"></span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Neutral Gray</div>
+        <div class="metric-rgb" id="valGray">—</div>
+        <div class="swatch-row"><span class="swatch" id="swGray"></span></div>
+      </div>
+
+      <h2>3. Windows 版の流れ</h2>
+      <div class="flow" style="grid-template-columns:1fr; gap:6px;">
+        <div class="flow-step"><div class="flow-num">①</div><div class="flow-txt">写真をアプリへドロップ</div></div>
+        <div class="flow-step"><div class="flow-num">②</div><div class="flow-txt">Photoshop を自動起動</div></div>
+        <div class="flow-step"><div class="flow-num">③</div><div class="flow-txt">画像を開き色補正</div></div>
+        <div class="flow-step"><div class="flow-num">④</div><div class="flow-txt">調整レイヤー付き PSD 保存</div></div>
+      </div>
+    </div>
+
+    <div class="col-main">
+      <div class="compare">
+        <div class="pane">
+          <div class="pane-label">Before</div>
+          <div class="pane-body"><canvas id="beforeCanvas"></canvas></div>
+        </div>
+        <div class="pane">
+          <div class="pane-label">After（プレビュー）</div>
+          <div class="pane-body"><canvas id="afterCanvas"></canvas></div>
+        </div>
+      </div>
+      <div class="demo-notice" style="margin:0">
+        <strong>本番アプリの補正仕様</strong>
+        レベル: ハイライト／シャドー（出力シャドー ≈ C95 M88 Y88 K70、出力白 245）／
+        カーブ: 中間調のかぶり取りのみ（端点固定）／
+        出力: <code>*_corrected.psd</code>（Auto Levels / Auto Curves レイヤー）
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">ステータス: 写真をドロップするか、サンプルで試してください</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const MAX_SIDE = 900;
+  const HIGHLIGHT_OUT = 245;
+  const SHADOW_OUT = { r: 4, g: 9, b: 9 };
+
+  const els = {
+    dropZone: document.getElementById('dropZone'),
+    fileInput: document.getElementById('fileInput'),
+    btnRun: document.getElementById('btnRun'),
+    btnSample: document.getElementById('btnSample'),
+    chkLevels: document.getElementById('chkLevels'),
+    chkCurves: document.getElementById('chkCurves'),
+    before: document.getElementById('beforeCanvas'),
+    after: document.getElementById('afterCanvas'),
+    status: document.getElementById('statusBar'),
+    valShadow: document.getElementById('valShadow'),
+    valHighlight: document.getElementById('valHighlight'),
+    valGray: document.getElementById('valGray'),
+    swShadow: document.getElementById('swShadow'),
+    swHighlight: document.getElementById('swHighlight'),
+    swGray: document.getElementById('swGray'),
+  };
+
+  let sourceImage = null;
+  let lastMetrics = null;
+
+  function setStatus(text, kind) {
+    els.status.textContent = 'ステータス: ' + text;
+    els.status.className = 'status-bar' + (kind ? ' ' + kind : '');
+  }
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  function setRgb(elVal, elSw, rgb) {
+    elVal.textContent = 'R ' + rgb.r + '  /  G ' + rgb.g + '  /  B ' + rgb.b;
+    elSw.style.background = 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')';
+  }
+
+  function drawImageToCanvas(img, canvas) {
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let w = img.naturalWidth || img.width;
+    let h = img.naturalHeight || img.height;
+    const scale = Math.min(1, MAX_SIDE / Math.max(w, h));
+    w = Math.max(1, Math.round(w * scale));
+    h = Math.max(1, Math.round(h * scale));
+    canvas.width = w;
+    canvas.height = h;
+    ctx.drawImage(img, 0, 0, w, h);
+    return ctx.getImageData(0, 0, w, h);
+  }
+
+  function lumaAt(data, i) {
+    const r = data[i], g = data[i + 1], b = data[i + 2];
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+
+  function meanRgbNear(imageData, targetLuma, band) {
+    const { data, width, height } = imageData;
+    let sr = 0, sg = 0, sb = 0, n = 0;
+    let best = 0, bestDiff = 1e9;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4;
+        const L = lumaAt(data, i);
+        const d = Math.abs(L - targetLuma);
+        if (d < bestDiff) { bestDiff = d; best = i; }
+        if (L >= targetLuma - band && L <= targetLuma + band) {
+          sr += data[i]; sg += data[i + 1]; sb += data[i + 2]; n++;
+        }
+      }
+    }
+    if (n > 0) {
+      return { r: Math.round(sr / n), g: Math.round(sg / n), b: Math.round(sb / n) };
+    }
+    return {
+      r: data[best],
+      g: data[best + 1],
+      b: data[best + 2],
+    };
+  }
+
+  function analyze(imageData) {
+    const { data } = imageData;
+    const lumas = [];
+    for (let i = 0; i < data.length; i += 4) lumas.push(lumaAt(data, i));
+    lumas.sort((a, b) => a - b);
+    const p = (pct) => lumas[Math.min(lumas.length - 1, Math.floor(lumas.length * pct / 100))];
+    const shadowL = p(0.1);
+    const highlightL = p(100 - 0.25);
+    const shadow = meanRgbNear(imageData, shadowL, 2);
+    const highlight = meanRgbNear(imageData, highlightL, 2);
+
+    // 簡易ニュートラル: 中間輝度かつ RGB 差が小さい画素
+    let sr = 0, sg = 0, sb = 0, n = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      if (L < 35 || L > 65) continue;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      if (mx - mn > 18) continue;
+      sr += r; sg += g; sb += b; n++;
+    }
+    const gray = n > 30
+      ? { r: Math.round(sr / n), g: Math.round(sg / n), b: Math.round(sb / n) }
+      : meanRgbNear(imageData, 50, 8);
+
+    return { shadow, highlight, gray };
+  }
+
+  function levelsLut(black, white, gamma, outBlack, outWhite) {
+    const lut = new Uint8ClampedArray(256);
+    const b = clamp(black, 0, 254);
+    const w = clamp(Math.max(b + 1, white), b + 1, 255);
+    const g = clamp(gamma, 0.1, 9.99);
+    const ob = clamp(outBlack, 0, 254);
+    const ow = clamp(Math.max(ob + 1, outWhite), ob + 1, 255);
+    for (let x = 0; x < 256; x++) {
+      let t = (x - b) / (w - b);
+      t = clamp(t, 0, 1);
+      if (Math.abs(g - 1) > 1e-9) t = Math.pow(t, 1 / g);
+      lut[x] = Math.round(ob + t * (ow - ob));
+    }
+    return lut;
+  }
+
+  function curveLut(points) {
+    const lut = new Uint8ClampedArray(256);
+    const xs = points.map(p => p[0]);
+    const ys = points.map(p => p[1]);
+    for (let x = 0; x < 256; x++) {
+      let y;
+      if (x <= xs[0]) y = ys[0];
+      else if (x >= xs[xs.length - 1]) y = ys[ys.length - 1];
+      else {
+        let i = 0;
+        while (i < xs.length - 1 && xs[i + 1] < x) i++;
+        const t = (x - xs[i]) / (xs[i + 1] - xs[i] || 1);
+        y = ys[i] + t * (ys[i + 1] - ys[i]);
+      }
+      lut[x] = clamp(Math.round(y), 0, 255);
+    }
+    return lut;
+  }
+
+  function midCastPoints(gray, target) {
+    const g = clamp(gray, 1, HIGHLIGHT_OUT - 1);
+    const t = clamp(target, 0, 255);
+    return [[0, 0], [g, t], [HIGHLIGHT_OUT, HIGHLIGHT_OUT]];
+  }
+
+  function applyCorrection(imageData, metrics, useLevels, useCurves) {
+    const out = new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height);
+    const d = out.data;
+    const meanGray = (metrics.gray.r + metrics.gray.g + metrics.gray.b) / 3;
+
+    let lutR = null, lutG = null, lutB = null;
+    if (useLevels) {
+      lutR = levelsLut(metrics.shadow.r, metrics.highlight.r, 1, SHADOW_OUT.r, HIGHLIGHT_OUT);
+      lutG = levelsLut(metrics.shadow.g, metrics.highlight.g, 1, SHADOW_OUT.g, HIGHLIGHT_OUT);
+      lutB = levelsLut(metrics.shadow.b, metrics.highlight.b, 1, SHADOW_OUT.b, HIGHLIGHT_OUT);
+      for (let i = 0; i < d.length; i += 4) {
+        d[i] = lutR[d[i]];
+        d[i + 1] = lutG[d[i + 1]];
+        d[i + 2] = lutB[d[i + 2]];
+      }
+    }
+    if (useCurves) {
+      lutR = curveLut(midCastPoints(metrics.gray.r, meanGray));
+      lutG = curveLut(midCastPoints(metrics.gray.g, meanGray));
+      lutB = curveLut(midCastPoints(metrics.gray.b, meanGray));
+      for (let i = 0; i < d.length; i += 4) {
+        d[i] = lutR[d[i]];
+        d[i + 1] = lutG[d[i + 1]];
+        d[i + 2] = lutB[d[i + 2]];
+      }
+    }
+    return out;
+  }
+
+  function putImageData(canvas, imageData) {
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
+    canvas.getContext('2d').putImageData(imageData, 0, 0);
+  }
+
+  function runPreview() {
+    if (!sourceImage) {
+      setStatus('先に写真を読み込んでください', 'error');
+      return;
+    }
+    const useLevels = els.chkLevels.checked;
+    const useCurves = els.chkCurves.checked;
+    if (!useLevels && !useCurves) {
+      setStatus('レベルまたはカーブを選んでください', 'error');
+      return;
+    }
+    setStatus('解析中…');
+    const beforeData = drawImageToCanvas(sourceImage, els.before);
+    const metrics = analyze(beforeData);
+    lastMetrics = metrics;
+    setRgb(els.valShadow, els.swShadow, metrics.shadow);
+    setRgb(els.valHighlight, els.swHighlight, metrics.highlight);
+    setRgb(els.valGray, els.swGray, metrics.gray);
+    const afterData = applyCorrection(beforeData, metrics, useLevels, useCurves);
+    putImageData(els.after, afterData);
+    setStatus('プレビュー完了（本番は調整レイヤー付き PSD を保存）', 'ok');
+  }
+
+  function loadFile(file) {
+    if (!file || !file.type.startsWith('image/')) {
+      setStatus('画像ファイルを選んでください', 'error');
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      sourceImage = img;
+      els.dropZone.classList.add('ready');
+      els.dropZone.textContent = file.name + '\nクリックで変更可';
+      runPreview();
+    };
+    img.onerror = function () {
+      URL.revokeObjectURL(url);
+      setStatus('画像の読み込みに失敗しました', 'error');
+    };
+    img.src = url;
+  }
+
+  function loadSample() {
+    // 簡易サンプル（グラデーション＋色かぶり）を生成
+    const c = document.createElement('canvas');
+    c.width = 640; c.height = 420;
+    const ctx = c.getContext('2d');
+    const g = ctx.createLinearGradient(0, 0, 640, 420);
+    g.addColorStop(0, '#2a1a12');
+    g.addColorStop(0.45, '#9a6a4a');
+    g.addColorStop(1, '#e8c8a8');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 640, 420);
+    ctx.fillStyle = 'rgba(40,90,160,0.18)';
+    ctx.fillRect(0, 0, 640, 420);
+    ctx.fillStyle = '#f2efe8';
+    ctx.beginPath(); ctx.arc(480, 120, 55, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#1a120e';
+    ctx.fillRect(40, 300, 160, 80);
+    const img = new Image();
+    img.onload = function () {
+      sourceImage = img;
+      els.dropZone.classList.add('ready');
+      els.dropZone.textContent = 'サンプル画像\nクリックで差し替え可';
+      runPreview();
+    };
+    img.src = c.toDataURL('image/jpeg', 0.92);
+  }
+
+  els.dropZone.addEventListener('click', () => els.fileInput.click());
+  els.fileInput.addEventListener('change', () => {
+    if (els.fileInput.files && els.fileInput.files[0]) loadFile(els.fileInput.files[0]);
+  });
+  ['dragenter', 'dragover'].forEach((ev) => {
+    els.dropZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      els.dropZone.classList.add('drag');
+    });
+  });
+  ['dragleave', 'drop'].forEach((ev) => {
+    els.dropZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      els.dropZone.classList.remove('drag');
+    });
+  });
+  els.dropZone.addEventListener('drop', (e) => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) loadFile(f);
+  });
+  els.btnRun.addEventListener('click', runPreview);
+  els.btnSample.addEventListener('click', loadSample);
+  els.chkLevels.addEventListener('change', () => { if (sourceImage) runPreview(); });
+  els.chkCurves.addEventListener('change', () => { if (sourceImage) runPreview(); });
+
+  loadSample();
+})();
+</script>
+</body>
+</html>

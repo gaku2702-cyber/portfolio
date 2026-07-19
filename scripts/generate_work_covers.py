@@ -36,6 +36,12 @@ COVERS = [
         "motif": "photo",
     },
     {
+        "file": "color-correct-demo.jpg",
+        "category": "Color Correction",
+        "title": ["カラー補正ツール", "Photoshop 連携"],
+        "motif": "color",
+    },
+    {
         "file": "pman-task-demo.jpg",
         "category": "Production Workflow",
         "title": ["MIS 部署別", "タスク管理"],
@@ -168,10 +174,22 @@ def draw_motif_consulting(d: ImageDraw.ImageDraw) -> None:
     d.rounded_rectangle([ox + 24, y + 8, ox + 160, y + 44], radius=4, fill=NAVY)
 
 
+def draw_motif_color(d: ImageDraw.ImageDraw) -> None:
+    ox, oy = 500, 210
+    for i, (label_color, pane_bg) in enumerate([(NAVY, "#1A3050"), ("#1565C0", "#243B55")]):
+        px = ox + i * 195
+        d.rounded_rectangle([px, oy, px + 180, oy + 260], radius=8, fill=pane_bg, outline=BORDER, width=2)
+        d.rectangle([px, oy, px + 180, oy + 32], fill=label_color)
+        d.ellipse([px + 50, oy + 70, px + 130, oy + 150], fill="#4A6741", outline="#8BC34A", width=2)
+        d.rectangle([px + 24, oy + 180, px + 156, oy + 196], fill="#FFFFFF" if i else "#546E7A")
+        d.rectangle([px + 24, oy + 206, px + 120, oy + 222], fill=NAVY_PALE if i else "#37474F")
+
+
 MOTIF_DRAWERS = {
     "imposition": draw_motif_imposition,
     "word": draw_motif_word,
     "photo": draw_motif_photo,
+    "color": draw_motif_color,
     "task": draw_motif_task,
     "consulting": draw_motif_consulting,
 }
