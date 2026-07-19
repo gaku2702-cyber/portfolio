@@ -1030,14 +1030,36 @@
           btn.classList.add('hidden');
           msg.classList.remove('hidden');
         })
-        .catch(() => {
+        .catch((err) => {
           resetBtn(btn);
-          alert('送信に失敗しました。メール（' + CONTACT_EMAIL + '）へ直接ご連絡いただくか、少し時間を置いて再度お試しください。');
+          const detail = err && err.message ? '\n\n詳細: ' + err.message : '';
+          alert('送信に失敗しました。メール（' + CONTACT_EMAIL + '）へ直接ご連絡いただくか、少し時間を置いて再度お試しください。' + detail);
         });
     }
 
     function submitContactForm(data) {
       return new Promise((resolve, reject) => {
+        let settled = false;
+        const cleanup = () => {
+          window.removeEventListener('message', onMessage);
+          clearTimeout(timer);
+        };
+        const finish = (ok, errMsg) => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          ok ? resolve() : reject(new Error(errMsg || 'gas submit failed'));
+        };
+
+        const onMessage = (event) => {
+          const payload = event.data;
+          if (!payload || payload.source !== 'portfolio-contact') return;
+          finish(payload.status === 'success', payload.message);
+        };
+
+        const timer = setTimeout(() => finish(false, 'timeout'), 25000);
+        window.addEventListener('message', onMessage);
+
         let iframe = document.getElementById('gasSink');
         if (!iframe) {
           iframe = document.createElement('iframe');
@@ -1068,27 +1090,6 @@
         ['name', 'company', 'email', 'type', 'message'].forEach((key) => {
           form.elements[key].value = data[key] || '';
         });
-
-        let settled = false;
-        const finish = (ok) => {
-          if (settled) return;
-          settled = true;
-          clearTimeout(timer);
-          iframe.onload = null;
-          ok ? resolve() : reject(new Error('gas submit failed'));
-        };
-
-        const timer = setTimeout(() => finish(false), 20000);
-        iframe.onload = () => {
-          try {
-            const doc = iframe.contentDocument || iframe.contentWindow.document;
-            const status = doc.body && doc.body.getAttribute('data-status');
-            finish(status !== 'error');
-          } catch (_) {
-            // クロスオリジンでも POST 自体は通ることが多い
-            finish(true);
-          }
-        };
 
         form.submit();
       });
