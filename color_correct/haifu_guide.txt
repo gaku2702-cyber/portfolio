@@ -1,0 +1,52 @@
+Color Correct Tool - Distribution Guide
+=======================================
+
+IMPORTANT
+- Distribute the whole ColorCorrect folder (not the .exe alone)
+- The _internal folder is required (PyInstaller onedir)
+- Extract the ZIP, then run ColorCorrect.exe
+
+Requirements
+- Windows 10/11 64-bit
+- Adobe Photoshop (desktop) for PSD export
+  (Store / broken COM installs may fail automation)
+
+First-time setup
+1. Extract ColorCorrect_dist.zip
+2. Launch Photoshop once and finish login
+3. Run ColorCorrect\ColorCorrect.exe
+4. Confirm status shows "Photoshop: detected"
+
+Recommended Photoshop setting
+- Preferences > File Handling
+- Turn OFF "Open JPEG files with Camera Raw"
+
+Usage
+1. Drop photos onto the app (multiple OK)
+2. The app will:
+   1) Start Photoshop
+   2) Open the photos
+   3) Add adjustment layers (Levels + midtone Curves)
+   4) Save *_corrected.psd next to originals
+3. Confirm the completion dialog
+
+Notes
+- Originals are never overwritten
+- *_correction.json is also saved
+- "Browse files..." starts the same pipeline
+
+If it fails
+1. Start Photoshop manually, finish login, retry
+2. Run the shown .jsx via File > Scripts > Browse...
+3. A JPEG fallback (*_corrected.jpg) may be created
+4. Log file: %TEMP%\ColorCorrect_drop_error.txt
+
+Pre-distribution checklist
+- Extract ZIP to a fresh folder and launch EXE
+- Test ASCII-path JPEG drop -> PSD
+- Test Japanese-path JPEG drop -> PSD
+- Test with Photoshop not already running
+
+Other
+- SmartScreen may warn (unsigned). Use More info > Run anyway
+- Without Photoshop: analysis + JPEG fallback only (no layered PSD)

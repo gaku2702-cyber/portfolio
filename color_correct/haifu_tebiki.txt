@@ -1,0 +1,54 @@
+カラー補正ツール 配布ガイド
+========================
+
+【重要】
+- 必ず「ColorCorrect」フォルダごと渡してください
+- ColorCorrect.exe 単体だけでは動きません（_internal が必要）
+- ZIP を展開してから ColorCorrect.exe を起動します
+
+【動作環境】
+- Windows 10 / 11 64bit
+- Adobe Photoshop（デスクトップ版）※ PSD 保存に必要
+  （Microsoft Store 版や体験版では自動化が失敗することがあります）
+
+【初回セットアップ】
+1. ColorCorrect_dist.zip を任意フォルダへ解凍
+2. 先に Photoshop を一度起動し、ログイン完了まで進める
+3. ColorCorrect\ColorCorrect.exe をダブルクリック
+4. 起動時ステータスで「Photoshop: 検出済み」になっているか確認
+
+【推奨設定（Photoshop）】
+- 編集 → 環境設定 → ファイル処理
+- 「JPEG ファイルを Camera Raw で開く」をオフ
+
+【使い方】
+1. アプリ画面に写真をドロップする（複数可）
+2. 自動で次を実行します
+   ① Photoshop 起動
+   ② ドロップした写真を開く
+   ③ 色補正（調整レイヤー追加）
+   ④ 同じフォルダに *_corrected.psd を保存（レイヤー付き）
+3. 完了メッセージを確認
+
+※ 「ファイルを選ぶ…」でも同じ処理が始まります
+※ 元ファイルは上書きしません
+※ 解析 JSON（*_correction.json）も同じフォルダに保存されます
+
+【うまくいかないとき】
+1. Photoshop を手動起動 → ログイン完了 → 本ツールを再実行
+2. 結果ダイアログに出る .jsx を
+   Photoshop → ファイル → スクリプト → 参照… で実行
+3. PSD が作れない場合、同じフォルダに *_corrected.jpg が
+   フォールバック保存されることがあります（補正プレビュー用）
+4. 詳細ログ: %TEMP%\ColorCorrect_drop_error.txt
+
+【配布前チェック（作成者向け）】
+- 別フォルダに ZIP 展開 → EXE 起動
+- 英数字パスの JPEG でドロップ〜 PSD
+- 日本語パスの JPEG で同確認
+- Photoshop 未起動状態からの起動も確認
+
+【注意】
+- SmartScreen で「不明な発行元」と出る場合は「詳細情報」→「実行」
+- Photoshop 未インストールの PC では解析と JPEG 保存まで可能、
+  調整レイヤー付き PSD は作成できません

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "source": "sample.jpg",
+  "shadow": {"r": 18, "g": 16, "b": 22},
+  "highlight": {"r": 242, "g": 245, "b": 248},
+  "gray": {"r": 128, "g": 130, "b": 126},
+  "params": {
+    "clip_percent": 0.1,
+    "lab_l_range": [35, 65],
+    "ab_threshold": 8,
+    "neutral_pixel_count": 0,
+    "note": "手置きサンプル。実画像の解析結果で置き換えてください。"
+  }
+}

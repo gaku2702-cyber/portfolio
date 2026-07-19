@@ -1,0 +1,5 @@
+opencv-python-headless>=4.8.0,<5
+numpy>=1.24.0,<3
+pywin32>=306
+pyinstaller>=6.0.0
+windnd>=1.0.7
