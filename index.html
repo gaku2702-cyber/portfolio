@@ -157,6 +157,114 @@
     }
     .stat-num { font-family: 'Cormorant Garamond', Georgia, serif; }
 
+    /* Profile timeline — chronology style */
+    .profile-timeline {
+      --track: 1.5rem;
+      --role: 12.5rem;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding-left: 0;
+    }
+    .profile-timeline::before {
+      content: '';
+      position: absolute;
+      left: calc(var(--track) / 2);
+      top: 0.55rem;
+      bottom: 0.55rem;
+      width: 2px;
+      background: linear-gradient(180deg, #C8D4E8 0%, #1B3264 45%, #C8863A 100%);
+      transform: translateX(-50%);
+      border-radius: 2px;
+      z-index: 0;
+    }
+    @media (min-width: 768px) {
+      .profile-timeline::before {
+        left: calc(var(--role) + 1.5rem + var(--track) / 2);
+      }
+    }
+    .profile-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: var(--track) 1fr;
+      column-gap: 1.25rem;
+      row-gap: 0.4rem;
+      padding: 1.5rem 0;
+      align-items: start;
+    }
+    .profile-item:last-child { padding-bottom: 0.25rem; }
+    .profile-dot {
+      width: 0.9rem;
+      height: 0.9rem;
+      margin-top: 0.28rem;
+      border-radius: 9999px;
+      background: #fff;
+      border: 2.5px solid #1B3264;
+      box-shadow: 0 0 0 3px #F7F8FA;
+      z-index: 2;
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: center;
+      flex-shrink: 0;
+    }
+    .profile-role {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #1B3264;
+      line-height: 1.45;
+      grid-column: 2;
+      grid-row: 1;
+      padding-top: 0.1rem;
+    }
+    .profile-body {
+      grid-column: 2;
+      grid-row: 2;
+    }
+    @media (min-width: 768px) {
+      .profile-item {
+        grid-template-columns: var(--role) var(--track) 1fr;
+        column-gap: 1.5rem;
+        row-gap: 0;
+      }
+      .profile-role {
+        grid-column: 1;
+        grid-row: 1;
+        text-align: right;
+        padding-right: 0.25rem;
+      }
+      .profile-dot {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: center;
+      }
+      .profile-body {
+        grid-column: 3;
+        grid-row: 1;
+        padding-top: 0.05rem;
+      }
+    }
+    .profile-item.is-current .profile-dot {
+      background: #C8863A;
+      border-color: #C8863A;
+      box-shadow: 0 0 0 4px rgba(200, 134, 58, 0.2), 0 0 0 3px #F7F8FA;
+      transform: scale(1.15);
+    }
+    .profile-body p {
+      font-size: 0.875rem;
+      color: #525252;
+      line-height: 1.9;
+    }
+    .profile-current-badge {
+      display: inline-block;
+      margin-bottom: 0.4rem;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #C8863A;
+      font-weight: 500;
+    }
+
     /* Animations */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(24px); }
@@ -300,6 +408,7 @@
       <!-- Desktop links -->
       <div class="hidden md:flex items-center gap-8">
         <a href="#concept" class="nav-link text-xs tracking-widest text-[#525252] hover:text-[#232323] uppercase transition-colors">Concept</a>
+        <a href="#profile" class="nav-link text-xs tracking-widest text-[#525252] hover:text-[#232323] uppercase transition-colors">Profile</a>
         <a href="#services" class="nav-link text-xs tracking-widest text-[#525252] hover:text-[#232323] uppercase transition-colors">Works</a>
         <a href="#contact" class="nav-link text-xs tracking-widest text-[#525252] hover:text-[#232323] uppercase transition-colors">Contact</a>
         <a href="#contact"
@@ -321,6 +430,7 @@
   <div id="drawer" class="fixed inset-0 z-40 hidden" style="background: rgba(255,255,255,0.98); backdrop-filter: blur(12px);">
     <div class="flex flex-col items-center justify-center h-full gap-10">
       <a href="#concept" class="drawer-link text-2xl font-light text-[#232323] tracking-widest uppercase hover:text-[#1B3264] transition-colors">Concept</a>
+      <a href="#profile" class="drawer-link text-2xl font-light text-[#232323] tracking-widest uppercase hover:text-[#1B3264] transition-colors">Profile</a>
       <a href="#services" class="drawer-link text-2xl font-light text-[#232323] tracking-widest uppercase hover:text-[#1B3264] transition-colors">Works</a>
       <a href="#contact" class="drawer-link text-2xl font-light text-[#232323] tracking-widest uppercase hover:text-[#1B3264] transition-colors">Contact</a>
       <a href="#contact" class="drawer-link mt-4 px-10 py-4 btn-amber text-sm font-medium tracking-widest uppercase transition-all">
@@ -512,6 +622,94 @@
             初回ヒアリングから実装・納品まで、スピーディかつ柔軟に対応します。
           </p>
         </article>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========== PROFILE ========== -->
+  <section id="profile" class="py-28" style="background: linear-gradient(180deg, #F7F8FA 0%, #FFFFFF 100%);">
+    <div class="max-w-6xl mx-auto px-6">
+
+      <div class="grid md:grid-cols-2 gap-12 items-end mb-16">
+        <div>
+          <div class="reveal flex items-center gap-3 mb-5">
+            <div class="w-8 h-px bg-amber"></div>
+            <span class="text-xs tracking-[0.3em] text-amber font-medium uppercase">Profile</span>
+          </div>
+          <h2 class="reveal reveal-delay-1 text-[2rem] md:text-[2.6rem] font-light leading-snug text-[#232323]">
+            現場で培った<br>
+            <span class="text-[#1B3264] font-medium">経歴</span>
+          </h2>
+        </div>
+        <div class="reveal reveal-delay-2">
+          <p class="text-[#525252] text-sm leading-[1.9]">
+            製版・印刷・組版の現場で培った専門知見を土台に、
+            いまは Python・GAS・JavaScript と AI を掛け合わせ、
+            出版ワークフローの DX を手がけています。
+          </p>
+        </div>
+      </div>
+
+      <div class="profile-timeline">
+
+        <article class="profile-item reveal">
+          <h3 class="profile-role">アナログ製版レタッチャー</h3>
+          <span class="profile-dot" aria-hidden="true"></span>
+          <div class="profile-body">
+            <p>写真の基礎と「職人の眼」を培った原点。網点や光の階調、インクと紙の関係といった製版の深い物理的知識を叩き込み、すべての表現の土台となる色彩感覚と、ものづくりへの矜持を習得。</p>
+          </div>
+        </article>
+
+        <article class="profile-item reveal reveal-delay-1">
+          <h3 class="profile-role">ドラムスキャナオペレーター</h3>
+          <span class="profile-dot" aria-hidden="true"></span>
+          <div class="profile-body">
+            <p>ハイエンド機を駆使した極上のカラーマネジメントと、原稿の魅力を極限まで引き出す色分解・レタッチ技術を体得。</p>
+          </div>
+        </article>
+
+        <article class="profile-item reveal reveal-delay-2">
+          <h3 class="profile-role">DTP・組版スペシャリスト</h3>
+          <span class="profile-dot" aria-hidden="true"></span>
+          <div class="profile-body">
+            <p>長年の実務経験の中で、「文字組版の美しさ」「可読性の追求」「複雑なドキュメント構造の設計力」を追求し、極める。単なるオペレーションにとどまらず、エディトリアルデザインの本質を熟知。</p>
+          </div>
+        </article>
+
+        <article class="profile-item reveal">
+          <h3 class="profile-role">POD（オンデマンド）印刷機オペレーター</h3>
+          <span class="profile-dot" aria-hidden="true"></span>
+          <div class="profile-body">
+            <p>小ロット・多品種・短納期が求められる現場において、デジタル印刷の特性とカラーコントロールを徹底追求。</p>
+          </div>
+        </article>
+
+        <article class="profile-item reveal reveal-delay-1">
+          <h3 class="profile-role">大判UVインクジェットオペレーター</h3>
+          <span class="profile-dot" aria-hidden="true"></span>
+          <div class="profile-body">
+            <p>特殊メディアや大型出力における最適な出力プロファイルと、現物合わせの細やかな調整力を発揮。</p>
+          </div>
+        </article>
+
+        <article class="profile-item reveal reveal-delay-2">
+          <h3 class="profile-role">プレイングマネージャー<br class="hidden md:block">（工程DX・生産管理）</h3>
+          <span class="profile-dot" aria-hidden="true"></span>
+          <div class="profile-body">
+            <p>入稿から印刷までの全工程における進行管理、ページ割の設計、品質・スケジュール管理を統括。現場のアナログなボトルネックを解消するため、人事・リソース管理とリアルタイムの進捗管理を融合させたAppSheet製カスタム進捗管理アプリを自ら開発・導入。チーム全体の生産性を飛躍的に向上させた。</p>
+          </div>
+        </article>
+
+        <article class="profile-item is-current reveal">
+          <h3 class="profile-role">AI駆動型・出版ワークフローエンジニア</h3>
+          <span class="profile-dot" aria-hidden="true"></span>
+          <div class="profile-body">
+            <span class="profile-current-badge">Current</span>
+            <p>DTP・印刷現場で積み重ねた専門知見を軸に、独学でPython・GAS・JavaScriptによるコーディング知識を習得。AIと掛け合わせながら、現場の繰り返し作業や煩雑な業務を効率化するDXツールの開発に重きを置いて活動している。</p>
+          </div>
+        </article>
+
       </div>
     </div>
   </section>
@@ -877,6 +1075,7 @@
         </div>
         <div class="flex items-center gap-8">
           <a href="#concept" class="text-[11px] tracking-widest text-white/80 uppercase hover:text-white transition-colors">Concept</a>
+          <a href="#profile" class="text-[11px] tracking-widest text-white/80 uppercase hover:text-white transition-colors">Profile</a>
           <a href="#services" class="text-[11px] tracking-widest text-white/80 uppercase hover:text-white transition-colors">Works</a>
           <a href="#contact" class="text-[11px] tracking-widest text-white/80 uppercase hover:text-white transition-colors">Contact</a>
         </div>
