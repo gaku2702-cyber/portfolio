@@ -1,382 +1,314 @@
-"""Generate content-matched Works gallery covers (960x540 JPEG).
+"""Generate Works gallery covers in the color-correct promo style (960x540).
 
-Uses real demo samples / promo art where available, and richer
-product-specific illustrations for the rest.
+Dark navy product-promo look: soft spotlight, centered JP title with amber
+accent, floating UI mockups — matching color_correct/note_thumbnail.png.
 """
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "assets" / "covers"
 W, H = 960, 540
 
-NAVY = (27, 50, 100)
-NAVY_DEEP = (15, 35, 71)
-AMBER = (200, 134, 58)
+NAVY = (12, 28, 58)
+NAVY_MID = (22, 42, 82)
+NAVY_LIGHT = (40, 70, 120)
+CYAN = (90, 170, 255)
+AMBER = (232, 170, 60)
 WHITE = (255, 255, 255)
-MUTED = (107, 114, 128)
-LIGHT = (248, 250, 252)
-BORDER = (226, 228, 233)
+MUTED = (160, 180, 210)
 
 
 def load_fonts():
     meiryo = "C:/Windows/Fonts/meiryo.ttc"
     meiryo_b = "C:/Windows/Fonts/meiryob.ttc"
+    bold = meiryo_b if Path(meiryo_b).exists() else meiryo
     try:
         return {
-            "pill": ImageFont.truetype(meiryo, 13),
-            "title": ImageFont.truetype(meiryo_b if Path(meiryo_b).exists() else meiryo, 34),
-            "title_sm": ImageFont.truetype(meiryo, 22),
-            "body": ImageFont.truetype(meiryo, 15),
-            "tiny": ImageFont.truetype(meiryo, 12),
-            "mono": ImageFont.truetype("C:/Windows/Fonts/consola.ttf", 13),
+            "title": ImageFont.truetype(bold, 48),
+            "title_sm": ImageFont.truetype(bold, 36),
+            "sub": ImageFont.truetype(meiryo, 18),
+            "ui": ImageFont.truetype(meiryo, 13),
+            "tiny": ImageFont.truetype(meiryo, 11),
+            "label": ImageFont.truetype(meiryo, 12),
         }
     except OSError:
         d = ImageFont.load_default()
-        return {k: d for k in ("pill", "title", "title_sm", "body", "tiny", "mono")}
+        return {k: d for k in ("title", "title_sm", "sub", "ui", "tiny", "label")}
 
 
-def fit_cover(img: Image.Image) -> Image.Image:
-    return ImageOps.fit(img.convert("RGB"), (W, H), method=Image.Resampling.LANCZOS, centering=(0.5, 0.45))
+def make_bg() -> Image.Image:
+    """Dark navy with soft diagonal spotlight (like note_thumbnail)."""
+    img = Image.new("RGB", (W, H), NAVY)
+    # radial-ish spotlight via blurred ellipse
+    glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    gd = ImageDraw.Draw(glow)
+    gd.ellipse([-120, -180, 620, 420], fill=(40, 80, 150, 70))
+    gd.ellipse([480, 200, 1100, 700], fill=(30, 60, 110, 50))
+    glow = glow.filter(ImageFilter.GaussianBlur(80))
+    base = img.convert("RGBA")
+    base = Image.alpha_composite(base, glow)
+    return base.convert("RGB")
 
 
-def darken(img: Image.Image, alpha: float = 0.35) -> Image.Image:
-    overlay = Image.new("RGB", img.size, NAVY_DEEP)
-    return Image.blend(img.convert("RGB"), overlay, alpha)
+def panel(d: ImageDraw.ImageDraw, box, radius=12, fill=(18, 36, 68), outline=(60, 100, 160), width=2):
+    d.rounded_rectangle(box, radius=radius, fill=fill, outline=outline, width=width)
 
 
-def draw_pill(d: ImageDraw.ImageDraw, x: int, y: int, text: str, font, fill=(232, 237, 245), color=NAVY):
-    bbox = d.textbbox((0, 0), text, font=font)
-    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    pad_x, pad_y = 12, 5
-    d.rounded_rectangle([x, y, x + tw + pad_x * 2, y + th + pad_y * 2], radius=12, fill=fill)
-    d.text((x + pad_x, y + pad_y - 1), text, fill=color, font=font)
+def draw_centered_title(d, fonts, line1: str, line2: str | None, accent_word: str | None = None, y=210):
+    """Big centered title; optional amber accent on accent_word inside line1."""
+    font = fonts["title"] if len(line1) <= 12 else fonts["title_sm"]
+
+    def text_w(s, f):
+        b = d.textbbox((0, 0), s, font=f)
+        return b[2] - b[0]
+
+    if accent_word and accent_word in line1:
+        before, _, after = line1.partition(accent_word)
+        total = text_w(before, font) + text_w(accent_word, font) + text_w(after, font)
+        x = (W - total) // 2
+        # shadow
+        d.text((x + 2, y + 2), line1, fill=(0, 0, 0), font=font)
+        d.text((x, y), before, fill=WHITE, font=font)
+        x += text_w(before, font)
+        d.text((x, y), accent_word, fill=AMBER, font=font)
+        x += text_w(accent_word, font)
+        d.text((x, y), after, fill=WHITE, font=font)
+        title_bottom = y + 58
+    else:
+        tw = text_w(line1, font)
+        x = (W - tw) // 2
+        d.text((x + 2, y + 2), line1, fill=(0, 0, 0), font=font)
+        d.text((x, y), line1, fill=WHITE, font=font)
+        title_bottom = y + 58
+
+    # amber underline
+    uw = min(220, text_w(line1, font) // 2)
+    d.rectangle([(W - uw) // 2, title_bottom - 4, (W + uw) // 2, title_bottom - 1], fill=AMBER)
+
+    if line2:
+        sw = text_w(line2, fonts["sub"])
+        d.text(((W - sw) // 2, title_bottom + 10), line2, fill=MUTED, font=fonts["sub"])
 
 
-def draw_title_block(d: ImageDraw.ImageDraw, lines: list[str], fonts, x=40, y=70, color=WHITE):
-    for i, line in enumerate(lines):
-        font = fonts["title"] if i == 0 else fonts["title_sm"]
-        # soft shadow
-        d.text((x + 1, y + 1), line, fill=(0, 0, 0, 120), font=font)
-        d.text((x, y), line, fill=color, font=font)
-        bbox = d.textbbox((x, y), line, font=font)
-        y = bbox[3] + 6
-    return y
-
-
-def frosted_panel(base: Image.Image, box, radius=16, opacity=210):
-    """Semi-transparent navy panel."""
-    overlay = Image.new("RGBA", base.size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(overlay)
-    d.rounded_rectangle(box, radius=radius, fill=(*NAVY_DEEP, opacity))
-    out = base.convert("RGBA")
-    out = Image.alpha_composite(out, overlay)
-    return out.convert("RGB")
-
-
-SRC_DIR = Path(os.environ.get("LOCALAPPDATA", "")) / "Temp" / "cursor" / "screenshots"
-
-
-def from_screenshot(candidates: list[str], crop_right_ratio: float = 0.0) -> Image.Image | None:
-    """Load latest matching screenshot and fit to cover size."""
-    for name in candidates:
-        path = SRC_DIR / name
-        if not path.exists():
-            continue
-        img = Image.open(path).convert("RGB")
-        if crop_right_ratio > 0:
-            w, h = img.size
-            left = int(w * crop_right_ratio)
-            img = img.crop((left, 0, w, h))
-        return fit_cover(img)
-    return None
-
-
-# ── Photo cut: real sample scan + detection frames ───────────────
-def cover_photo_cut(fonts) -> Image.Image:
-    shot = from_screenshot(["cover-src-photo-cut.png"], crop_right_ratio=0.28)
-    if shot:
-        shot = darken(shot, 0.18)
-        shot = frosted_panel(shot, [28, 28, 430, 160], opacity=200)
-        d = ImageDraw.Draw(shot)
-        draw_pill(d, 48, 44, "Image Processing", fonts["pill"], fill=(255, 255, 255), color=NAVY)
-        draw_title_block(d, ["写真切り出しツール", "黒台紙スキャン → 自動検出"], fonts, x=48, y=78)
-        return shot
-
-    src = ROOT / "assets" / "demo" / "sample-scan.jpg"
-    if not src.exists():
-        src = ROOT / "photoshop_sab" / "cut_sample.jpg"
-    base = fit_cover(Image.open(src))
-    base = darken(base, 0.22)
-
-    # Detection overlays (approximate 2x4 grid like the product)
-    d = ImageDraw.Draw(base)
-    frames = [
-        (70, 55, 430, 160),
-        (500, 50, 880, 165),
-        (80, 180, 440, 290),
-        (510, 185, 890, 300),
-        (75, 310, 435, 420),
-        (505, 315, 885, 430),
-        (90, 440, 420, 520),
-        (520, 445, 860, 525),
-    ]
-    for i, (x1, y1, x2, y2) in enumerate(frames, 1):
-        # red detect
-        d.rectangle([x1 - 4, y1 - 4, x2 + 4, y2 + 4], outline=(220, 60, 60), width=2)
-        # green cut
-        d.rectangle([x1, y1, x2, y2], outline=(40, 180, 80), width=3)
-        d.ellipse([x1 + 6, y1 + 6, x1 + 28, y1 + 28], fill=(40, 180, 80))
-        d.text((x1 + 11, y1 + 7), str(i), fill=WHITE, font=fonts["tiny"])
-
-    base = frosted_panel(base, [28, 28, 430, 160], opacity=200)
-    d = ImageDraw.Draw(base)
-    draw_pill(d, 48, 44, "Image Processing", fonts["pill"], fill=(255, 255, 255), color=NAVY)
-    draw_title_block(d, ["写真切り出しツール", "黒台紙スキャン → 自動検出"], fonts, x=48, y=78)
-    return base
-
-
-# ── Color correct: note thumbnail promo art ──────────────────────
 def cover_color_correct(fonts) -> Image.Image:
     src = ROOT / "color_correct" / "note_thumbnail.png"
     if src.exists():
-        return fit_cover(Image.open(src))
-
-    # Fallback: before/after with sample photo
-    photo = ROOT / "photoshop_sab" / "sample" / "photo_0001.jpg"
-    img = Image.new("RGB", (W, H), NAVY_DEEP)
-    if photo.exists():
-        p = ImageOps.fit(Image.open(photo), (420, 420), Image.Resampling.LANCZOS)
-        warm = ImageOps.colorize(ImageOps.grayscale(p), black="#1a1020", white="#ffe8c8")
-        cool = p
-        img.paste(warm, (40, 60))
-        img.paste(cool, (500, 60))
+        return ImageOps.fit(Image.open(src).convert("RGB"), (W, H), Image.Resampling.LANCZOS)
+    # fallback minimal
+    img = make_bg()
     d = ImageDraw.Draw(img)
-    draw_pill(d, 40, 24, "Color Correction", fonts["pill"])
-    draw_title_block(d, ["カラー補正ツール", "Photoshop 連携"], fonts, x=40, y=470, color=WHITE)
+    draw_centered_title(d, fonts, "カラー補正ツール", "Photoshop連携 / 有料配布", "ツール")
     return img
 
 
-# ── Imposition: sheet preview matching JFX200 demo ───────────────
 def cover_imposition(fonts) -> Image.Image:
-    shot = from_screenshot(["cover-src-imposition.png"], crop_right_ratio=0.32)
-    if shot:
-        shot = darken(shot, 0.12)
-        shot = frosted_panel(shot, [28, 28, 420, 160], opacity=210)
-        d = ImageDraw.Draw(shot)
-        draw_pill(d, 48, 44, "DTP Automation", fonts["pill"], fill=WHITE, color=NAVY)
-        draw_title_block(d, ["JFX200", "面付シミュレーター"], fonts, x=48, y=78)
-        return shot
-
-    img = Image.new("RGB", (W, H), NAVY_DEEP)
+    img = make_bg()
     d = ImageDraw.Draw(img)
 
-    # left accent
-    d.rectangle([0, 0, 8, H], fill=AMBER)
+    # Left: settings card
+    panel(d, [40, 80, 280, 460], fill=(16, 32, 62), outline=(70, 120, 190))
+    d.text((58, 98), "原反 / 仕上がり", fill=CYAN, font=fonts["label"])
+    fields = ["面付モード: 単品", "原反 600×2500", "A4 297×210", "数量 30 / ドブ 3mm"]
+    y = 140
+    for f in fields:
+        d.rounded_rectangle([58, y, 262, y + 36], radius=6, fill=(28, 50, 90), outline=(55, 90, 140))
+        d.text((70, y + 9), f, fill=MUTED, font=fonts["tiny"])
+        y += 48
+    d.rounded_rectangle([58, 400, 262, 436], radius=6, fill=(40, 100, 200))
+    d.text((88, 410), "▶ 面付計算", fill=WHITE, font=fonts["ui"])
 
-    # machine label
-    draw_pill(d, 36, 28, "DTP Automation", fonts["pill"], fill=(40, 60, 110), color=(220, 230, 245))
-    draw_title_block(d, ["JFX200", "面付シミュレーター"], fonts, x=36, y=70)
+    # Right: sheet preview
+    panel(d, [680, 70, 920, 470], fill=(20, 38, 72), outline=(80, 130, 200))
+    d.text((700, 86), "面付プレビュー", fill=CYAN, font=fonts["label"])
+    d.rectangle([710, 120, 890, 440], fill=(35, 55, 95), outline=(100, 140, 190))
+    # mini sheet parts
+    for r in range(4):
+        for c in range(2):
+            x1 = 725 + c * 80
+            y1 = 140 + r * 70
+            d.rounded_rectangle([x1, y1, x1 + 68, y1 + 58], radius=3, fill=(70, 130, 210), outline=(140, 180, 230))
+            d.text((x1 + 14, y1 + 20), "A4", fill=WHITE, font=fonts["tiny"])
 
-    # Sheet preview panel
-    sx, sy, sw, sh = 380, 70, 540, 420
-    d.rounded_rectangle([sx, sy, sx + sw, sy + sh], radius=10, fill=(30, 48, 78), outline=(80, 100, 140), width=2)
-    d.text((sx + 16, sy + 12), "面付プレビュー — 原反 600×2500mm", fill=(180, 195, 220), font=fonts["tiny"])
-
-    # white sheet
-    sheet = [sx + 40, sy + 48, sx + sw - 40, sy + sh - 36]
-    d.rectangle(sheet, fill=WHITE, outline=(200, 205, 215), width=2)
-
-    # A4-ish parts grid (2 cols x 5 rows look)
-    margin = 18
-    gap = 10
-    cols, rows = 2, 5
-    inner_w = sheet[2] - sheet[0] - margin * 2
-    inner_h = sheet[3] - sheet[1] - margin * 2
-    pw = (inner_w - gap * (cols - 1)) // cols
-    ph = (inner_h - gap * (rows - 1)) // rows
-    colors = [(70, 130, 200), (90, 150, 210), (60, 120, 190), (100, 160, 220)]
-    for r in range(rows):
-        for c in range(cols):
-            x1 = sheet[0] + margin + c * (pw + gap)
-            y1 = sheet[1] + margin + r * (ph + gap)
-            d.rounded_rectangle([x1, y1, x1 + pw, y1 + ph], radius=3, fill=colors[(r + c) % 4], outline=NAVY)
-            d.text((x1 + 8, y1 + 6), f"A4-{r * cols + c + 1}", fill=WHITE, font=fonts["tiny"])
-
-    # result chip
-    d.rounded_rectangle([36, 420, 330, 490], radius=8, fill=(40, 60, 110))
-    d.text((52, 435), "単品面付  /  トンボ付き", fill=(220, 230, 245), font=fonts["body"])
-    d.text((52, 460), "収率・ドブ・原反を可視化", fill=AMBER, font=fonts["tiny"])
+    draw_centered_title(d, fonts, "面付シミュレーター", "JFX200 / 収率・トンボ可視化", "シミュレーター", y=200)
     return img
 
 
-# ── PMAN task: manager panel look ────────────────────────────────
-def cover_pman(fonts) -> Image.Image:
-    img = Image.new("RGB", (W, H), (245, 247, 250))
+def cover_photo_cut(fonts) -> Image.Image:
+    img = make_bg()
     d = ImageDraw.Draw(img)
 
-    draw_pill(d, 36, 28, "Production Workflow", fonts["pill"])
-    d.text((36, 70), "MIS 部署別", fill=NAVY, font=fonts["title"])
-    d.text((36, 112), "タスク管理", fill=NAVY, font=fonts["title_sm"])
-
-    # Phone / panel mock matching demo colors
-    px, py = 420, 40
-    d.rounded_rectangle([px, py, px + 500, py + 470], radius=18, fill=WHITE, outline=BORDER, width=2)
-    d.rectangle([px, py, px + 500, py + 56], fill=(21, 101, 192))
-    d.text((px + 20, py + 16), "管理者パネル", fill=WHITE, font=fonts["body"])
-    d.rounded_rectangle([px + 360, py + 14, px + 470, py + 40], radius=10, fill=(46, 125, 50))
-    d.text((px + 378, py + 18), "オペレーター", fill=WHITE, font=fonts["tiny"])
-
-    tasks = [
-        ("B2024-0055", "至急", (198, 40, 40), (255, 245, 245), "印刷課｜表紙 1C+1C", "750", "割当済"),
-        ("B2024-0061", "飛び込み", (230, 81, 0), (255, 248, 240), "制作課｜レイアウト調整", "620", "未着手"),
-        ("B2024-0048", "通常", (46, 125, 50), (245, 255, 245), "製本課｜無線綴じ", "450", "作業中"),
-        ("B2024-0070", "通常", (84, 110, 122), (248, 250, 252), "印刷課｜色校正再出力", "310", "完了"),
-    ]
-    y = py + 72
-    for tid, tag, bar, bg, title, score, status in tasks:
-        d.rounded_rectangle([px + 16, y, px + 484, y + 78], radius=8, fill=bg, outline=BORDER)
-        d.rectangle([px + 16, y, px + 22, y + 78], fill=bar)
-        d.text((px + 36, y + 10), tid, fill=MUTED, font=fonts["tiny"])
-        tag_w = 12 * len(tag) + 20
-        d.rounded_rectangle([px + 130, y + 8, px + 130 + tag_w, y + 28], radius=8, fill=bar)
-        d.text((px + 138, y + 10), tag, fill=WHITE, font=fonts["tiny"])
-        d.text((px + 36, y + 34), title, fill=NAVY, font=fonts["body"])
-        d.ellipse([px + 400, y + 18, px + 460, y + 58], fill=(21, 101, 192) if tag != "至急" else (198, 40, 40))
-        sw = d.textbbox((0, 0), f"P:{score}", font=fonts["tiny"])
-        d.text((px + 430 - (sw[2] - sw[0]) // 2, y + 30), f"P:{score}", fill=WHITE, font=fonts["tiny"])
-        d.text((px + 36, y + 56), status, fill=MUTED, font=fonts["tiny"])
-        y += 90
-
-    return img
-
-
-# ── Word → InDesign pipeline ─────────────────────────────────────
-def cover_word(fonts) -> Image.Image:
-    desk = ROOT / "assets" / "hero" / "desk.png"
-    if desk.exists():
-        base = darken(fit_cover(Image.open(desk)), 0.45)
+    # Sample thumb on left
+    sample = ROOT / "assets" / "demo" / "sample-scan.jpg"
+    if not sample.exists():
+        sample = ROOT / "photoshop_sab" / "cut_sample.jpg"
+    if sample.exists():
+        thumb = ImageOps.fit(Image.open(sample).convert("RGB"), (220, 280), Image.Resampling.LANCZOS)
+        # dark frame
+        d.rounded_rectangle([36, 100, 276, 420], radius=10, fill=(18, 34, 64), outline=(70, 120, 190), width=2)
+        img.paste(thumb, (46, 120))
+        # green/red frame overlays on thumb
+        od = ImageDraw.Draw(img)
+        od.rectangle([56, 140, 150, 210], outline=(220, 70, 70), width=2)
+        od.rectangle([60, 144, 146, 206], outline=(50, 200, 90), width=2)
+        od.ellipse([64, 148, 82, 166], fill=(50, 200, 90))
+        od.text((68, 150), "1", fill=WHITE, font=fonts["tiny"])
     else:
-        base = Image.new("RGB", (W, H), LIGHT)
+        panel(d, [40, 100, 280, 420])
 
-    base = frosted_panel(base, [28, 28, 520, 200], opacity=215)
-    d = ImageDraw.Draw(base)
-    draw_pill(d, 48, 44, "Data Conversion", fonts["pill"], fill=WHITE, color=NAVY)
-    draw_title_block(d, ["Word → InDesign", "組版パイプライン"], fonts, x=48, y=82)
+    # Right: detection list
+    panel(d, [680, 100, 920, 420], fill=(16, 32, 62), outline=(70, 120, 190))
+    d.text((700, 118), "検出結果", fill=CYAN, font=fonts["label"])
+    for i in range(1, 7):
+        y = 150 + (i - 1) * 40
+        d.ellipse([710, y + 4, 730, y + 24], fill=(50, 180, 90))
+        d.text((714, y + 6), str(i), fill=WHITE, font=fonts["tiny"])
+        d.text((742, y + 6), f"写真_{i:04d}.jpg", fill=MUTED, font=fonts["ui"])
 
-    # Tagged text card
-    d.rounded_rectangle([48, 240, 470, 500], radius=10, fill=(18, 28, 48), outline=(70, 90, 130))
-    d.text((64, 256), "tagged.txt", fill=AMBER, font=fonts["tiny"])
+    draw_centered_title(d, fonts, "写真切り出しツール", "黒台紙スキャン → 自動検出・切出し", "ツール", y=200)
+    return img
+
+
+def cover_word(fonts) -> Image.Image:
+    img = make_bg()
+    d = ImageDraw.Draw(img)
+
+    # Left: tagged.txt
+    panel(d, [40, 90, 300, 430], fill=(14, 28, 54), outline=(70, 120, 190))
+    d.rectangle([40, 90, 300, 122], fill=(30, 55, 100))
+    d.text((56, 98), "tagged.txt", fill=AMBER, font=fonts["ui"])
     lines = [
         "<h1>特集タイトル</h1>",
         "<biu>見出し</biu>",
-        "本文…<ruby>漢字|かんじ</ruby>",
-        "<table>セルA|セルB</table>",
-        "→ InDesign Place + タグ処理",
+        "<ruby>漢字|かんじ</ruby>",
+        "<table>A|B</table>",
+        "本文テキスト…",
     ]
-    y = 290
+    y = 145
     for line in lines:
-        d.text((64, y), line, fill=(200, 215, 235), font=fonts["body"])
-        y += 28
+        d.text((56, y), line, fill=MUTED, font=fonts["tiny"])
+        y += 36
 
-    # Arrow + InDesign card
-    d.polygon([(500, 360), (540, 340), (540, 350), (580, 350), (580, 370), (540, 370), (540, 380)], fill=AMBER)
-    d.rounded_rectangle([600, 240, 920, 500], radius=10, fill=WHITE, outline=BORDER)
-    d.rectangle([600, 240, 920, 280], fill=(156, 39, 176))
-    d.text((620, 252), "InDesign ページ", fill=WHITE, font=fonts["body"])
-    for i, w in enumerate([260, 220, 280, 180, 240]):
-        d.rectangle([620, 300 + i * 32, 620 + w, 318 + i * 32], fill=(232, 237, 245))
-    d.rounded_rectangle([620, 460, 760, 486], radius=4, fill=NAVY)
-    d.text((640, 464), "スタイル適用済", fill=WHITE, font=fonts["tiny"])
-    return base
+    # Arrow
+    d.polygon([(340, 250), (390, 230), (390, 242), (430, 242), (430, 258), (390, 258), (390, 270)], fill=AMBER)
 
+    # Right: InDesign page
+    panel(d, [660, 90, 920, 430], fill=(245, 246, 250), outline=(160, 100, 200), width=2)
+    d.rectangle([660, 90, 920, 122], fill=(140, 50, 180))
+    d.text((678, 98), "InDesign ページ", fill=WHITE, font=fonts["ui"])
+    for i, wlen in enumerate([200, 170, 220, 140, 190, 160]):
+        d.rectangle([680, 150 + i * 38, 680 + wlen, 168 + i * 38], fill=(220, 225, 235))
+    d.rounded_rectangle([680, 380, 820, 408], radius=4, fill=(27, 50, 100))
+    d.text((700, 386), "スタイル適用済", fill=WHITE, font=fonts["tiny"])
 
-# ── MIS × Google Workspace DX ────────────────────────────────────
-def cover_mis_dx(fonts) -> Image.Image:
-    img = Image.new("RGB", (W, H), (250, 251, 253))
-    d = ImageDraw.Draw(img)
-
-    # subtle grid
-    for x in range(0, W, 40):
-        d.line([(x, 0), (x, H)], fill=(238, 241, 246))
-    for y in range(0, H, 40):
-        d.line([(0, y), (W, y)], fill=(238, 241, 246))
-
-    draw_pill(d, 40, 28, "DX Proposal", fonts["pill"])
-    d.text((40, 72), "MIS × Google Workspace", fill=NAVY, font=fonts["title"])
-    d.text((40, 118), "連結 DX 提案", fill=NAVY, font=fonts["title_sm"])
-
-    # Architecture nodes
-    nodes = [
-        (80, 220, 260, 320, "MIS / 生産管理", (21, 101, 192)),
-        (360, 200, 600, 340, "GAS + Sheets\nリアルタイム連携", (46, 125, 50)),
-        (700, 220, 900, 320, "現場パネル\nタスク可視化", AMBER),
-    ]
-    # connectors
-    d.line([(260, 270), (360, 270)], fill=NAVY, width=3)
-    d.line([(600, 270), (700, 270)], fill=NAVY, width=3)
-    for x1, y1, x2, y2, label, color in nodes:
-        d.rounded_rectangle([x1, y1, x2, y2], radius=12, fill=WHITE, outline=color, width=3)
-        d.rectangle([x1, y1, x2, y1 + 10], fill=color)
-        lines = label.split("\n")
-        ty = y1 + 40
-        for line in lines:
-            bbox = d.textbbox((0, 0), line, font=fonts["body"])
-            tw = bbox[2] - bbox[0]
-            d.text(((x1 + x2 - tw) // 2, ty), line, fill=NAVY, font=fonts["body"])
-            ty += 28
-
-    d.rounded_rectangle([40, 400, 520, 500], radius=10, fill=NAVY)
-    d.text((60, 425), "Smart Factory ロードマップ", fill=WHITE, font=fonts["body"])
-    d.text((60, 458), "入稿〜印刷工程を Workspace でつなぐ提案書", fill=(200, 210, 230), font=fonts["tiny"])
+    draw_centered_title(d, fonts, "組版パイプライン", "Word → タグTXT → InDesign", "パイプライン", y=200)
+    # smaller top label via subtitle only — add Word→InDesign above
+    tw = d.textbbox((0, 0), "Word → InDesign", font=fonts["sub"])
+    d.text(((W - (tw[2] - tw[0])) // 2, 168), "Word → InDesign", fill=CYAN, font=fonts["sub"])
     return img
 
 
-# ── DX consulting roadmap ────────────────────────────────────────
-def cover_consulting(fonts) -> Image.Image:
-    desk = ROOT / "assets" / "hero" / "desk.png"
-    if desk.exists():
-        base = darken(fit_cover(Image.open(desk)), 0.5)
-    else:
-        base = Image.new("RGB", (W, H), NAVY_DEEP)
+def cover_pman(fonts) -> Image.Image:
+    img = make_bg()
+    d = ImageDraw.Draw(img)
 
-    base = frosted_panel(base, [28, 28, 520, 170], opacity=210)
-    d = ImageDraw.Draw(base)
-    draw_pill(d, 48, 44, "DX Support", fonts["pill"], fill=WHITE, color=NAVY)
-    draw_title_block(d, ["DX化ヒアリング", "ロードマップ策定"], fonts, x=48, y=82)
+    # Phone-like panel center-right
+    panel(d, [620, 50, 920, 490], fill=(248, 249, 252), outline=(100, 140, 200), width=2)
+    d.rectangle([620, 50, 920, 100], fill=(21, 101, 192))
+    d.text((640, 66), "管理者パネル", fill=WHITE, font=fonts["ui"])
+    d.rounded_rectangle([800, 62, 900, 88], radius=10, fill=(46, 125, 50))
+    d.text((812, 66), "オペレーター", fill=WHITE, font=fonts["tiny"])
+
+    tasks = [
+        ((198, 40, 40), "至急", "印刷課｜表紙", "P:750"),
+        ((230, 81, 0), "飛び込み", "制作課｜レイアウト", "P:620"),
+        ((46, 125, 50), "通常", "製本課｜無線綴じ", "P:450"),
+        ((84, 110, 122), "通常", "印刷課｜色校正", "P:310"),
+    ]
+    y = 118
+    for bar, tag, title, pts in tasks:
+        d.rounded_rectangle([638, y, 902, y + 78], radius=8, fill=(255, 255, 255), outline=(220, 225, 230))
+        d.rectangle([638, y, 646, y + 78], fill=bar)
+        d.rounded_rectangle([656, y + 10, 656 + 12 * len(tag) + 16, y + 30], radius=8, fill=bar)
+        d.text((664, y + 12), tag, fill=WHITE, font=fonts["tiny"])
+        d.text((656, y + 38), title, fill=(30, 50, 90), font=fonts["ui"])
+        d.ellipse([840, y + 18, 890, y + 68], fill=bar if tag == "至急" else (21, 101, 192))
+        bw = d.textbbox((0, 0), pts, font=fonts["tiny"])
+        d.text((865 - (bw[2] - bw[0]) // 2, y + 34), pts, fill=WHITE, font=fonts["tiny"])
+        y += 90
+
+    # Left accent icon panel
+    panel(d, [40, 140, 260, 400], fill=(16, 32, 62), outline=(70, 120, 190))
+    d.text((70, 170), "MIS", fill=CYAN, font=fonts["title_sm"])
+    d.text((70, 230), "部署別タスク", fill=WHITE, font=fonts["ui"])
+    d.text((70, 260), "リアルタイム進捗", fill=MUTED, font=fonts["tiny"])
+    d.rounded_rectangle([70, 320, 230, 360], radius=6, fill=AMBER)
+    d.text((88, 332), "至急 / 飛び込み対応", fill=NAVY, font=fonts["tiny"])
+
+    draw_centered_title(d, fonts, "タスク管理", "MIS 部署別 / 管理者・オペレーター", None, y=40)
+    return img
+
+
+def cover_mis_dx(fonts) -> Image.Image:
+    img = make_bg()
+    d = ImageDraw.Draw(img)
+
+    nodes = [
+        (60, 160, 260, 300, "MIS", "生産管理", (40, 120, 220)),
+        (350, 140, 610, 320, "GAS + Sheets", "リアルタイム連携", (50, 160, 100)),
+        (700, 160, 900, 300, "現場パネル", "タスク可視化", AMBER),
+    ]
+    d.line([(260, 230), (350, 230)], fill=CYAN, width=3)
+    d.line([(610, 230), (700, 230)], fill=CYAN, width=3)
+    for x1, y1, x2, y2, t1, t2, color in nodes:
+        panel(d, [x1, y1, x2, y2], fill=(16, 32, 62), outline=color, width=3)
+        d.rectangle([x1, y1, x2, y1 + 8], fill=color)
+        tw = d.textbbox((0, 0), t1, font=fonts["ui"])
+        d.text(((x1 + x2 - (tw[2] - tw[0])) // 2, y1 + 50), t1, fill=WHITE, font=fonts["ui"])
+        tw2 = d.textbbox((0, 0), t2, font=fonts["tiny"])
+        d.text(((x1 + x2 - (tw2[2] - tw2[0])) // 2, y1 + 85), t2, fill=MUTED, font=fonts["tiny"])
+
+    draw_centered_title(d, fonts, "連結 DX 提案", "MIS × Google Workspace / Smart Factory", "DX", y=360)
+    return img
+
+
+def cover_consulting(fonts) -> Image.Image:
+    img = make_bg()
+    d = ImageDraw.Draw(img)
 
     steps = [
         ("01", "Discovery", "現場課題の可視化"),
         ("02", "Design", "安全・可逆な設計"),
-        ("03", "Build", "Python / GAS 実装"),
+        ("03", "Build", "Python / GAS"),
         ("04", "Operate", "定着と改善"),
     ]
-    x = 48
-    for num, en, ja in steps:
-        d.rounded_rectangle([x, 280, x + 200, 480], radius=12, fill=(22, 40, 72), outline=(80, 100, 140))
-        d.text((x + 20, 300), num, fill=AMBER, font=fonts["title"])
-        d.text((x + 20, 360), en, fill=WHITE, font=fonts["body"])
-        d.text((x + 20, 400), ja, fill=(180, 195, 220), font=fonts["tiny"])
-        if x < 700:
-            d.polygon([(x + 208, 370), (x + 228, 360), (x + 228, 380)], fill=AMBER)
+    x = 50
+    for i, (num, en, ja) in enumerate(steps):
+        panel(d, [x, 120, x + 190, 340], fill=(16, 32, 62), outline=(70, 120, 190))
+        d.text((x + 24, 145), num, fill=AMBER, font=fonts["title_sm"])
+        d.text((x + 24, 220), en, fill=WHITE, font=fonts["ui"])
+        d.text((x + 24, 260), ja, fill=MUTED, font=fonts["tiny"])
+        if i < 3:
+            d.polygon([(x + 198, 220), (x + 218, 210), (x + 218, 230)], fill=AMBER)
         x += 230
-    return base
+
+    draw_centered_title(d, fonts, "DX化ヒアリング", "ロードマップ策定 / 無料相談", "ヒアリング", y=380)
+    return img
 
 
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     fonts = load_fonts()
     jobs = [
-        ("photo-cut-demo.jpg", cover_photo_cut),
         ("color-correct-demo.jpg", cover_color_correct),
         ("imposition-demo.jpg", cover_imposition),
-        ("pman-task-demo.jpg", cover_pman),
+        ("photo-cut-demo.jpg", cover_photo_cut),
         ("word-tag-extractor.jpg", cover_word),
+        ("pman-task-demo.jpg", cover_pman),
         ("MISGoogle WorkspaceDX.jpg", cover_mis_dx),
         ("dx-consulting.jpg", cover_consulting),
     ]
@@ -384,7 +316,7 @@ def main() -> None:
         img = fn(fonts)
         out = OUT_DIR / name
         img.save(out, "JPEG", quality=92, optimize=True)
-        print(f"saved {out} ({out.stat().st_size} bytes)")
+        print(f"saved {out.name} ({out.stat().st_size} bytes)")
 
 
 if __name__ == "__main__":
